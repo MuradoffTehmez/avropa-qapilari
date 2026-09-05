@@ -8,7 +8,7 @@ function seg(key: SegmentKey, locale: Locale): string {
 }
 
 /**
- * Lokalizə olunmuş URL-lər (PRD §24).
+ * Lokalizə olunmuş URL-lər.
  * Fayl sistemi AZ seqmentlərini istifadə edir; EN/RU seqmentləri
  * next.config.ts-dəki rewrite-lar vasitəsilə həmin route-lara yönlənir.
  */

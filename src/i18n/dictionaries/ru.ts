@@ -2,7 +2,7 @@ import type { DeepPartial } from "@/i18n/merge";
 import type { Dictionary } from "@/i18n/dictionaries/az";
 
 /**
- * PRD §175 — EN/RU tam məzmun Phase 2 işidir.
+ * EN/RU tam məzmun Phase 2 işidir.
  * Burada UI chrome tərcümə olunub; qalan açarlar AZ-a fallback edir.
  */
 export const ru: DeepPartial<Dictionary> = {
@@ -97,7 +97,6 @@ export const ru: DeepPartial<Dictionary> = {
     loading: "Загрузка…",
     empty: "Нет данных",
     results: "результатов",
-    demoNotice: "Демо-данные",
   },
 
   home: {
@@ -152,7 +151,5 @@ export const ru: DeepPartial<Dictionary> = {
     cookies: "Политика cookie",
     followUs: "Мы в соцсетях",
     rights: "Все права защищены.",
-    demoDisclaimer:
-      "Это демо-сайт. Название бренда, логотип и контент — временные.",
   },
 };

@@ -6,7 +6,7 @@ import { useHydrated, useStoredValue, writeStoredValue } from "@/lib/hooks";
 
 const KEY = "ep-cookie-consent-v1";
 
-/** PRD §173 — kuki razılığı. Analitik/marketinq yalnız razılıqdan sonra. */
+/** kuki razılığı. Analitik/marketinq yalnız razılıqdan sonra. */
 export function CookieBar({ dict }: { dict: Dictionary }) {
   const hydrated = useHydrated();
   const consent = useStoredValue(KEY);

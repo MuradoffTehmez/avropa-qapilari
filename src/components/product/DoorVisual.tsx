@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import type { SurfaceStyle } from "@/types";
 
 /**
- * DOOR VISUAL — PRD §50 "layer-based rendering".
+ * DOOR VISUAL "layer-based rendering".
  *
  * Real məhsul fotoları hazır olmadığı üçün qapı proqram şəkildə SVG
  * qatlarından qurulur: base → panel → şüşə → dəstək → kilid → aksesuar.

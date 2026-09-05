@@ -83,7 +83,7 @@ export function CatalogView({
               <button
                 type="button"
                 onClick={() => setFilters(emptyFilters)}
-                className="text-xs text-brass-600 underline-offset-2 hover:underline"
+                className="text-xs text-gold-600 underline-offset-2 hover:underline"
               >
                 {dict.catalog.clearAll}
               </button>
@@ -167,7 +167,7 @@ export function CatalogView({
             <button
               type="button"
               onClick={() => setFilters(emptyFilters)}
-              className="text-[12px] text-brass-600 underline underline-offset-2"
+              className="text-[12px] text-gold-600 underline underline-offset-2"
             >
               {dict.catalog.clearAll}
             </button>
@@ -209,7 +209,7 @@ export function CatalogView({
         )}
       </div>
 
-      {/* Mobile drawer — PRD §114 ayrıca mobil pattern */}
+      {/* Mobile drawer ayrıca mobil pattern */}
       <Drawer
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}

@@ -1,33 +1,36 @@
 /**
- * DEMO BRAND CONFIGURATION
- * ------------------------
- * Rəsmi ad və loqo hazır olmadığı üçün müvəqqəti (demo) dəyərlər istifadə olunur.
- * Real brend məlumatı gələndə YALNIZ bu faylı dəyişmək kifayətdir.
+ * EuroPorta — brend konfiqurasiyası.
+ * Şirkət əlaqə məlumatları təsdiqlənənə qədər boş saxlanılır;
+ * boş sahələr UI-də avtomatik gizlədilir.
  */
 export const brand = {
-  /** Demo ad — dəyişdirilməlidir */
   name: "EuroPorta",
-  legalName: "EuroPorta MMC",
-  tagline: "Avropa qapıları",
-  /** Demo domen */
+  legalName: "EuroPorta",
+  slogan: "Girişin yeni standartı",
+  tagline: "Doors · Sales · Installation · Repair",
+
   domain: "europorta.az",
   siteUrl: "https://europorta.az",
-  isDemo: true,
 
+  /** Boş sahələr göstərilmir — məlumat gələndə doldurun. */
   contact: {
-    phone: "+994 12 000 00 00",
-    phoneHref: "+994120000000",
-    whatsapp: "+994500000000",
-    email: "info@europorta.az",
-    address: "Bakı, Xətai rayonu, Nizami küç. 1",
-    workingHours: "B.e — Şənbə, 09:00 – 19:00",
+    phone: "",
+    phoneHref: "",
+    whatsapp: "",
+    email: "",
+    address: "",
+    workingHours: "",
   },
 
   social: {
-    instagram: "https://instagram.com/",
-    facebook: "https://facebook.com/",
-    tiktok: "https://tiktok.com/",
+    instagram: "",
+    facebook: "",
+    tiktok: "",
   },
 } as const;
 
 export type Brand = typeof brand;
+
+/** Əlaqə blokunda göstəriləcək sahə varmı? */
+export const hasContact = Object.values(brand.contact).some((v) => v !== "");
+export const hasSocial = Object.values(brand.social).some((v) => v !== "");

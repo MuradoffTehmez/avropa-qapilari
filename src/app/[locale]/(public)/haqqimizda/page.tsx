@@ -79,7 +79,7 @@ export default async function AboutPage({
               { icon: Users, title: "Ömürlük dəstək", text: "Zəmanət bitəndən sonra da servis." },
             ].map(({ icon: Icon, title, text }) => (
               <div key={title} className="border border-line bg-paper p-5">
-                <Icon size={20} className="text-brass-500" />
+                <Icon size={20} className="text-gold-500" />
                 <h3 className="mt-4 text-[15px] font-medium text-ink">{title}</h3>
                 <p className="mt-1.5 text-[13px] leading-relaxed text-stone">{text}</p>
               </div>
@@ -131,12 +131,6 @@ export default async function AboutPage({
 
       <Section>
         <div className="container-page">
-          <Notice title="Demo qeyd">
-            {brand.name} adı, loqosu və bu səhifədəki rəqəmlər demo məqsədilə istifadə olunub.
-            Rəsmi brend məlumatı təsdiqləndikdən sonra{" "}
-            <code className="rounded-[2px] bg-sand px-1 py-0.5 text-[12px]">src/config/brand.ts</code>{" "}
-            faylından bir dəfəyə dəyişdiriləcək.
-          </Notice>
 
           <div className="mt-8 flex flex-wrap gap-2">
             <ButtonLink href={r.contact}>{dict.nav.contact}</ButtonLink>

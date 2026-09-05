@@ -1,5 +1,3 @@
-import { MobileNav } from "@/components/layout/MobileNav";
-import { DemoNav } from "@/components/layout/DemoNav";
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { notFound } from "next/navigation";
@@ -10,6 +8,7 @@ import type { Locale } from "@/types";
 import { brand } from "@/config/brand";
 import { ToastHost } from "@/components/ui/overlays";
 import { CookieBar } from "@/components/layout/CookieBar";
+import { MobileNav } from "@/components/layout/MobileNav";
 
 const inter = Inter({
   subsets: ["latin", "latin-ext", "cyrillic"],
@@ -20,7 +19,8 @@ const inter = Inter({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#1a1917",
+  viewportFit: "cover",
+  themeColor: "#0b1d34",
 };
 
 export function generateStaticParams() {
@@ -42,6 +42,7 @@ export async function generateMetadata({
       template: `%s · ${brand.name}`,
     },
     description: dict.meta.description,
+    applicationName: brand.name,
     alternates: {
       canonical: `/${locale}`,
       languages: Object.fromEntries(locales.map((l) => [l, `/${l}`])),
@@ -52,6 +53,11 @@ export async function generateMetadata({
       title: `${brand.name} — ${dict.meta.titleSuffix}`,
       description: dict.meta.description,
       locale,
+      images: [{ url: "/brand/europorta-full.png", width: 900, height: 714, alt: brand.name }],
+    },
+    icons: {
+      icon: "/brand/europorta-mark.png",
+      apple: "/brand/europorta-mark.png",
     },
     robots: { index: true, follow: true },
   };
@@ -79,7 +85,6 @@ export default async function LocaleLayout({
         >
           Əsas məzmuna keç
         </a>
-        <DemoNav locale={locale} />
         {children}
         <MobileNav locale={typedLocale} />
         <ToastHost />

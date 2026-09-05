@@ -57,7 +57,7 @@ export default async function BrandsPage({
                   <span className="text-[13px] text-graphite">
                     {count} model · {b.founded}-ci ildən
                   </span>
-                  <ArrowRight size={15} className="text-brass-600" />
+                  <ArrowRight size={15} className="text-gold-600" />
                 </div>
               </Link>
             );

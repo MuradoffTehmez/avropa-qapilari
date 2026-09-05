@@ -3,7 +3,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-/** PRD §45 — favorilər: anonim local, login sonrası server ilə merge. */
+/** favorilər: anonim local, login sonrası server ilə merge. */
 interface FavoritesState {
   ids: string[];
   toggle: (id: string) => void;
@@ -26,7 +26,7 @@ export const useFavorites = create<FavoritesState>()(
   ),
 );
 
-/** PRD §46 — müqayisə, maksimum 4 məhsul. */
+/** müqayisə, maksimum 4 məhsul. */
 export const COMPARE_LIMIT = 4;
 
 interface CompareState {

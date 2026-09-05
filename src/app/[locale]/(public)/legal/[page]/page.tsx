@@ -231,10 +231,6 @@ export default async function LegalPageView({
               </section>
             ))}
 
-            <Notice tone="warning">
-              Bu mətnlər demo məqsədilə hazırlanıb və hüquqi məsləhət deyil. Rəsmi sənədlər
-              hüquqşünas tərəfindən təsdiqlənməlidir.
-            </Notice>
           </article>
         </div>
       </Section>

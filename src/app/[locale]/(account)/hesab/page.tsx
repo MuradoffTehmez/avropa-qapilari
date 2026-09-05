@@ -63,7 +63,7 @@ export default async function AccountDashboardPage({
             const tech = technicians.find((t) => t.id === a.technicianId);
             return (
               <Card key={a.id} className="p-4">
-                <p className="text-[11px] uppercase tracking-[0.14em] text-brass-600">
+                <p className="text-[11px] uppercase tracking-[0.14em] text-gold-600">
                   {a.type === "REPAIR"
                     ? dict.services.repair
                     : a.type === "MEASUREMENT"
@@ -185,12 +185,12 @@ function SectionHead({
   return (
     <div className="mb-4 flex items-center justify-between">
       <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight text-ink">
-        <Icon size={17} className="text-brass-500" />
+        <Icon size={17} className="text-gold-500" />
         {title}
       </h2>
       <Link
         href={href}
-        className="flex items-center gap-1 text-[13px] font-medium text-brass-600 underline-offset-4 hover:underline"
+        className="flex items-center gap-1 text-[13px] font-medium text-gold-600 underline-offset-4 hover:underline"
       >
         {label} <ArrowRight size={13} />
       </Link>

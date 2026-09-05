@@ -25,7 +25,7 @@ export default async function FaqPage({
 
   const groups = Array.from(new Set(faq.map((f) => f.group)));
 
-  /** PRD §108 — FAQPage structured data */
+  /** FAQPage structured data */
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",

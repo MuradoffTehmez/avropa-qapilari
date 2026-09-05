@@ -50,7 +50,7 @@ export function ProductCard({
   const badges = (
     <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-col items-start gap-1.5">
       {product.isNew && <Badge tone="dark">Yeni</Badge>}
-      {product.onSale && <Badge tone="brass">Endirim</Badge>}
+      {product.onSale && <Badge tone="gold">Endirim</Badge>}
       {product.isBestseller && !product.isNew && <Badge tone="outline">Bestseller</Badge>}
     </div>
   );
@@ -64,10 +64,10 @@ export function ProductCard({
         aria-pressed={isFav}
         className={cn(
           "flex h-8 w-8 items-center justify-center rounded-full border bg-paper/90 backdrop-blur transition-colors",
-          isFav ? "border-brass-400 text-brass-500" : "border-line text-stone hover:text-ink",
+          isFav ? "border-gold-400 text-gold-500" : "border-line text-stone hover:text-ink",
         )}
       >
-        <Heart size={15} className={cn(isFav && "fill-brass-500")} />
+        <Heart size={15} className={cn(isFav && "fill-gold-500")} />
       </button>
       <button
         type="button"
@@ -123,7 +123,7 @@ export function ProductCard({
                 {formatPriceFrom(product.basePrice)}
               </p>
             </div>
-            <span className="hidden text-[13px] font-medium text-brass-600 underline-offset-4 group-hover:underline sm:inline">
+            <span className="hidden text-[13px] font-medium text-gold-600 underline-offset-4 group-hover:underline sm:inline">
               Ətraflı
             </span>
           </div>

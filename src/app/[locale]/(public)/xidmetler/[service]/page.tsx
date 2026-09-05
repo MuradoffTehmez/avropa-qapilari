@@ -199,7 +199,7 @@ export default async function ServiceDetailPage({
             <ul className="space-y-2.5">
               {item.includes.map((inc) => (
                 <li key={inc} className="flex items-start gap-2.5 text-[14.5px] text-graphite">
-                  <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-brass-500" />
+                  <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-gold-500" />
                   {inc}
                 </li>
               ))}

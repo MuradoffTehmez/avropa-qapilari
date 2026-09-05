@@ -271,7 +271,7 @@ function HeaderIcon({
     >
       {children}
       {count !== undefined && count > 0 && (
-        <span className="absolute right-1 top-1 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-brass-500 px-1 text-[10px] font-semibold tabular-nums text-paper">
+        <span className="absolute right-1 top-1 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-gold-500 px-1 text-[10px] font-semibold tabular-nums text-paper">
           {count}
         </span>
       )}

@@ -86,10 +86,6 @@ export function ContactForm({ dict }: { dict: Dictionary }) {
         {dict.actions.submit}
       </Button>
 
-      <Notice className="mt-5">
-        Forma backend mərhələsində Cloudflare Turnstile ilə qorunacaq və mesaj Queue vasitəsilə
-        emal olunacaq (PRD §19, §17).
-      </Notice>
     </form>
   );
 }

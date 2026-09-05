@@ -1,6 +1,6 @@
 import type { DoorMaterial, Product, SecurityClass, SurfaceStyle } from "@/types";
 
-/** PRD §38 — filter sistemi, §39 — sort. */
+/** Kataloq filtrləri və sıralama. */
 
 export type SortKey = "popular" | "newest" | "priceAsc" | "priceDesc" | "rating" | "discount";
 

@@ -84,7 +84,7 @@ export default async function ContactPage({
                   }}
                 />
                 <div className="relative flex flex-col items-center">
-                  <MapPin size={26} className="text-brass-600" />
+                  <MapPin size={26} className="text-gold-600" />
                   <p className="mt-2 text-[13px] font-medium text-graphite">Showroom</p>
                   <p className="text-xs text-stone">Xəritə inteqrasiyası sonrakı mərhələdə</p>
                 </div>
@@ -110,7 +110,7 @@ function ContactRow({
 }) {
   return (
     <div className="flex items-start gap-3">
-      <Icon size={17} className="mt-0.5 shrink-0 text-brass-500" />
+      <Icon size={17} className="mt-0.5 shrink-0 text-gold-500" />
       <div>
         <p className="text-[11px] uppercase tracking-[0.14em] text-stone">{label}</p>
         <p className="mt-0.5 text-[14.5px] text-ink">{children}</p>

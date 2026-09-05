@@ -1,7 +1,7 @@
 import { DoorVisual } from "./DoorVisual";
 import type { SurfaceStyle } from "@/types";
 
-/** Architectural demo illustration; not a photograph of a completed installation. */
+/** Arxitektural səhnə illüstrasiyası. */
 export function DoorScene({ color = "#383e42", variant = 0, title = "Qapı dizaynı" }: { color?: string; variant?: number; title?: string }) {
   const styles: SurfaceStyle[] = ["MODERN", "CLASSIC", "MINIMAL", "LOFT", "NEOCLASSIC", "MODERN"];
   return <div role="img" aria-label={title} className="relative h-full min-h-0 w-full overflow-hidden" style={{ background: variant % 2 ? "#ddd5c7" : "#e8e4dc" }}>

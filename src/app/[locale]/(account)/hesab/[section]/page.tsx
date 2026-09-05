@@ -1,6 +1,6 @@
 import { NotificationSettings } from "@/components/account/NotificationSettings";
 import { LocalManager } from "@/components/admin/LocalManager";
-import { DemoActivity } from "@/components/account/DemoActivity";
+import { ActivityFeed } from "@/components/account/ActivityFeed";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -62,7 +62,7 @@ export default async function AccountSectionPage({
   /* ------------------------------------------------------------ ORDERS */
   if (section === "orders") {
     return (
-      <div className="space-y-4"><DemoActivity section={section} locale={locale} />
+      <div className="space-y-4"><ActivityFeed section={section} locale={locale} />
         <h2 className="text-xl font-semibold tracking-tight text-ink">{dict.account.orders}</h2>
 
         {orders.map((o) => (
@@ -107,7 +107,7 @@ export default async function AccountSectionPage({
                 ))}
               </div>
 
-              {/* PRD §64 — order timeline */}
+              {/* order timeline */}
               <div className="border-t border-line pt-4 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
                 <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-stone">
                   Sifariş vəziyyəti
@@ -137,7 +137,7 @@ export default async function AccountSectionPage({
                   <p className="text-[12px] text-stone">{formatDate(q.createdAt)}</p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Badge tone={q.status === "SENT" ? "brass" : "info"}>{q.status}</Badge>
+                  <Badge tone={q.status === "SENT" ? "gold" : "info"}>{q.status}</Badge>
                   {q.amount && (
                     <span className="text-[15px] font-semibold tabular-nums text-ink">
                       {formatPrice(q.amount)}
@@ -155,7 +155,7 @@ export default async function AccountSectionPage({
   /* ---------------------------------------------------- CONFIGURATIONS */
   if (section === "configurations") {
     return (
-      <div className="space-y-4"><DemoActivity section={section} locale={locale} />
+      <div className="space-y-4"><ActivityFeed section={section} locale={locale} />
         <h2 className="text-xl font-semibold tracking-tight text-ink">
           {dict.account.configurations}
         </h2>
@@ -189,7 +189,7 @@ export default async function AccountSectionPage({
   /* ----------------------------------------------------------- REPAIRS */
   if (section === "repairs") {
     return (
-      <div className="space-y-4"><DemoActivity section={section} locale={locale} />
+      <div className="space-y-4"><ActivityFeed section={section} locale={locale} />
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold tracking-tight text-ink">{dict.account.repairs}</h2>
           <ButtonLink href={r.repair} size="sm">
@@ -236,7 +236,7 @@ export default async function AccountSectionPage({
               <p className="text-[12px] text-stone">{m.address}</p>
             </div>
             <div className="text-right">
-              <Badge tone={m.status === "COMPLETED" ? "success" : "brass"}>{m.status}</Badge>
+              <Badge tone={m.status === "COMPLETED" ? "success" : "gold"}>{m.status}</Badge>
               <p className="mt-1 text-[12px] text-stone">{formatDate(m.preferredDate)}</p>
             </div>
           </Card>
@@ -248,7 +248,7 @@ export default async function AccountSectionPage({
   /* ------------------------------------------------------ APPOINTMENTS */
   if (section === "appointments") {
     return (
-      <div className="space-y-4"><DemoActivity section={section} locale={locale} />
+      <div className="space-y-4"><ActivityFeed section={section} locale={locale} />
         <h2 className="text-xl font-semibold tracking-tight text-ink">
           {dict.account.appointments}
         </h2>
@@ -275,7 +275,7 @@ export default async function AccountSectionPage({
                 </div>
               </div>
               <div className="text-right">
-                <Badge tone={a.status === "CONFIRMED" ? "success" : "brass"}>{a.status}</Badge>
+                <Badge tone={a.status === "CONFIRMED" ? "success" : "gold"}>{a.status}</Badge>
                 <p className="mt-1 font-mono text-[11px] text-mist">{a.reference}</p>
               </div>
             </Card>
@@ -288,7 +288,7 @@ export default async function AccountSectionPage({
   /* -------------------------------------------------------- WARRANTIES */
   if (section === "warranties") {
     return (
-      <div className="space-y-4"><DemoActivity section={section} locale={locale} />
+      <div className="space-y-4"><ActivityFeed section={section} locale={locale} />
         <h2 className="text-xl font-semibold tracking-tight text-ink">
           {dict.account.warranties}
         </h2>
@@ -330,7 +330,7 @@ export default async function AccountSectionPage({
   /* --------------------------------------------------------- ADDRESSES */
   if (section === "addresses") {
     return (
-      <div className="space-y-4"><DemoActivity section={section} locale={locale} />
+      <div className="space-y-4"><ActivityFeed section={section} locale={locale} />
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold tracking-tight text-ink">
             {dict.account.addresses}
@@ -343,7 +343,7 @@ export default async function AccountSectionPage({
             <Card key={a.id} className="p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-2.5">
-                  <MapPin size={16} className="mt-0.5 shrink-0 text-brass-500" />
+                  <MapPin size={16} className="mt-0.5 shrink-0 text-gold-500" />
                   <div>
                     <p className="text-[15px] font-medium text-ink">{a.label}</p>
                     <p className="mt-1 text-[13px] leading-relaxed text-stone">

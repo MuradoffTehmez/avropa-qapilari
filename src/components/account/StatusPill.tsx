@@ -1,7 +1,7 @@
 import type { OrderStatus, RepairStatus } from "@/types";
 import { Badge } from "@/components/ui/primitives";
 
-type Tone = "neutral" | "dark" | "brass" | "success" | "warning" | "danger" | "info" | "outline";
+type Tone = "neutral" | "dark" | "gold" | "success" | "warning" | "danger" | "info" | "outline";
 
 const orderTone: Record<OrderStatus, Tone> = {
   DRAFT: "neutral",
@@ -9,11 +9,11 @@ const orderTone: Record<OrderStatus, Tone> = {
   PAID: "info",
   CONFIRMED: "info",
   PROCESSING: "info",
-  MANUFACTURING: "brass",
-  READY: "brass",
+  MANUFACTURING: "gold",
+  READY: "gold",
   SHIPPED: "info",
   DELIVERED: "success",
-  INSTALLATION_SCHEDULED: "brass",
+  INSTALLATION_SCHEDULED: "gold",
   INSTALLED: "success",
   COMPLETED: "success",
   CANCELLED: "danger",
@@ -25,10 +25,10 @@ const repairTone: Record<RepairStatus, Tone> = {
   REVIEWING: "info",
   QUOTE_REQUIRED: "warning",
   WAITING_CUSTOMER: "warning",
-  SCHEDULED: "brass",
-  TECHNICIAN_ASSIGNED: "brass",
-  ON_THE_WAY: "brass",
-  IN_PROGRESS: "brass",
+  SCHEDULED: "gold",
+  TECHNICIAN_ASSIGNED: "gold",
+  ON_THE_WAY: "gold",
+  IN_PROGRESS: "gold",
   WAITING_FOR_PART: "warning",
   COMPLETED: "success",
   CANCELLED: "danger",

@@ -1,6 +1,6 @@
 "use client";
 import { LocalManager } from "@/components/admin/LocalManager";
-import { DemoActivity } from "@/components/account/DemoActivity";
+import { ActivityFeed } from "@/components/account/ActivityFeed";
 import { notFound } from "next/navigation";
 
 
@@ -18,7 +18,7 @@ import { optionGroups } from "@/mock/options";
 import { reviews, technicians } from "@/mock/content";
 import {
   appointments,
-  demoUser,
+  accountUser,
   measurements,
   orders,
   quotes,
@@ -61,7 +61,7 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   /* ---------------------------------------------------------- PRODUCTS */
   if (section === "products") {
     return (
-      <><DemoActivity section={section} locale={locale} manage />
+      <><ActivityFeed section={section} locale={locale} manage />
         <AdminPageHeader
           title={dict.admin.products}
           description={`${products.length} model · ${categories.length} kateqoriya`}
@@ -134,7 +134,7 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   /* -------------------------------------------------------- CATEGORIES */
   if (section === "categories") {
     return (
-      <><DemoActivity section={section} locale={locale} manage />
+      <><ActivityFeed section={section} locale={locale} manage />
         <AdminPageHeader title={dict.admin.categories} action={addButton("Yeni kateqoriya")} />
         <DataTable
           title={dict.admin.categories}
@@ -159,7 +159,7 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   /* ------------------------------------------------------------ BRANDS */
   if (section === "brands") {
     return (
-      <><DemoActivity section={section} locale={locale} manage />
+      <><ActivityFeed section={section} locale={locale} manage />
         <AdminPageHeader title={dict.admin.brands} action={addButton("Yeni brend")} />
         <DataTable
           title={dict.admin.brands}
@@ -185,10 +185,10 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   if (section === "configurator") {
     const groups = Object.values(optionGroups).filter((g) => g.values.length > 0);
     return (
-      <><DemoActivity section={section} locale={locale} manage />
+      <><ActivityFeed section={section} locale={locale} manage />
         <AdminPageHeader
           title={dict.admin.configurator}
-          description="Option qrupları və dəyərləri (PRD §96, §97)"
+          description="Option qrupları və dəyərləri"
           action={addButton("Yeni option")}
         />
         <div className="space-y-4">
@@ -247,7 +247,7 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   /* ------------------------------------------------------------ ORDERS */
   if (section === "orders") {
     return (
-      <><DemoActivity section={section} locale={locale} manage />
+      <><ActivityFeed section={section} locale={locale} manage />
         <AdminPageHeader title={dict.admin.orders} description={`${orders.length} sifariş`} />
         <DataTable
           title={dict.admin.orders}
@@ -285,8 +285,8 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   /* ------------------------------------------------------------ QUOTES */
   if (section === "quotes") {
     return (
-      <><DemoActivity section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.quotes} description="Qiymət təklifi sorğuları (PRD §66)" />
+      <><ActivityFeed section={section} locale={locale} manage />
+        <AdminPageHeader title={dict.admin.quotes} description="Qiymət təklifi sorğuları" />
         <DataTable
           title={dict.admin.quotes}
           minWidth={720}
@@ -296,7 +296,7 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
             { key: "date", header: "Tarix", render: (q) => formatDate(q.createdAt) },
             { key: "customer", header: "Müştəri", render: (q) => q.customerName },
             { key: "subject", header: "Mövzu", render: (q) => <span className="text-ink">{q.subject}</span> },
-            { key: "status", header: "Status", render: (q) => <Badge tone="brass">{q.status}</Badge> },
+            { key: "status", header: "Status", render: (q) => <Badge tone="gold">{q.status}</Badge> },
             {
               key: "amount",
               header: "Məbləğ",
@@ -312,8 +312,8 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   /* ----------------------------------------------------------- REPAIRS */
   if (section === "repairs") {
     return (
-      <><DemoActivity section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.repairs} description="Təmir müraciətləri (PRD §69–§77)" />
+      <><ActivityFeed section={section} locale={locale} manage />
+        <AdminPageHeader title={dict.admin.repairs} description="Təmir müraciətləri" />
         <DataTable
           title={dict.admin.repairs}
           minWidth={900}
@@ -343,8 +343,8 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   /* ------------------------------------------------------ MEASUREMENTS */
   if (section === "measurements") {
     return (
-      <><DemoActivity section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.measurements} description="Ölçü sifarişləri (PRD §67, §68)" />
+      <><ActivityFeed section={section} locale={locale} manage />
+        <AdminPageHeader title={dict.admin.measurements} description="Ölçü sifarişləri" />
         <DataTable
           title={dict.admin.measurements}
           minWidth={800}
@@ -356,7 +356,7 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
             { key: "address", header: "Ünvan", render: (m) => <span className="text-stone">{m.address}</span> },
             { key: "date", header: "Tarix", render: (m) => formatDate(m.preferredDate) },
             { key: "tech", header: "Usta", render: (m) => m.technician ?? "—" },
-            { key: "status", header: "Status", render: (m) => <Badge tone="brass">{m.status}</Badge> },
+            { key: "status", header: "Status", render: (m) => <Badge tone="gold">{m.status}</Badge> },
           ]}
         />
       </>
@@ -366,10 +366,10 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   /* ------------------------------------------------------ APPOINTMENTS */
   if (section === "appointments") {
     return (
-      <><DemoActivity section={section} locale={locale} manage />
+      <><ActivityFeed section={section} locale={locale} manage />
         <AdminPageHeader
           title={dict.admin.appointments}
-          description="Görüş cədvəli — usta üzrə overlap serverdə bloklanır (PRD §79)"
+          description="Görüş cədvəli — usta üzrə overlap serverdə bloklanır"
         />
         <DataTable
           title={dict.admin.appointments}
@@ -386,7 +386,7 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
             },
             { key: "address", header: "Ünvan", render: (a) => <span className="text-stone">{a.address}</span> },
             { key: "ref", header: "İstinad", render: (a) => <code className="text-[12px] text-graphite">{a.reference}</code> },
-            { key: "status", header: "Status", render: (a) => <Badge tone="brass">{a.status}</Badge> },
+            { key: "status", header: "Status", render: (a) => <Badge tone="gold">{a.status}</Badge> },
           ]}
         />
       </>
@@ -396,7 +396,7 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   /* ------------------------------------------------------- TECHNICIANS */
   if (section === "technicians") {
     return (
-      <><DemoActivity section={section} locale={locale} manage />
+      <><ActivityFeed section={section} locale={locale} manage />
         <AdminPageHeader title={dict.admin.technicians} action={addButton("Yeni usta")} />
         <DataTable
           title={dict.admin.technicians}
@@ -413,7 +413,7 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
               key: "status",
               header: "Status",
               render: (t) => (
-                <Badge tone={t.status === "AVAILABLE" ? "success" : t.status === "ON_JOB" ? "brass" : "neutral"}>
+                <Badge tone={t.status === "AVAILABLE" ? "success" : t.status === "ON_JOB" ? "gold" : "neutral"}>
                   {t.status}
                 </Badge>
               ),
@@ -441,8 +441,8 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
     ];
 
     return (
-      <><DemoActivity section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.roles} description="RBAC — resource.action formatı (PRD §93, §94)" />
+      <><ActivityFeed section={section} locale={locale} manage />
+        <AdminPageHeader title={dict.admin.roles} description="RBAC — resource.action formatı" />
 
         <div className="space-y-4">
           <DataTable
@@ -479,14 +479,14 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   /* --------------------------------------------------------- CUSTOMERS */
   if (section === "customers") {
     const customers = [
-      { name: `${demoUser.name} ${demoUser.surname}`, email: demoUser.email, phone: demoUser.phone, orders: 3, total: 5180, since: demoUser.memberSince },
+      { name: `${accountUser.name} ${accountUser.surname}`, email: accountUser.email, phone: accountUser.phone, orders: 3, total: 5180, since: accountUser.memberSince },
       { name: "Nigar Abbasova", email: "nigar@example.com", phone: "+994 55 111 11 11", orders: 1, total: 1860, since: "2026-03-14" },
       { name: "Kamran Səfərov", email: "kamran@example.com", phone: "+994 70 222 22 22", orders: 2, total: 4720, since: "2025-08-02" },
       { name: "Elvin Məmmədov", email: "elvin@example.com", phone: "+994 50 333 33 33", orders: 1, total: 2340, since: "2026-06-30" },
     ];
 
     return (
-      <><DemoActivity section={section} locale={locale} manage />
+      <><ActivityFeed section={section} locale={locale} manage />
         <AdminPageHeader title={dict.admin.customers} description={`${customers.length} müştəri`} />
         <DataTable
           title={dict.admin.customers}
@@ -520,8 +520,8 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
     }));
 
     return (
-      <><DemoActivity section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.inventory} description="Stok, rezervasiya və minimum həddlər (PRD §98–§101)" />
+      <><ActivityFeed section={section} locale={locale} manage />
+        <AdminPageHeader title={dict.admin.inventory} description="Stok, rezervasiya və minimum həddlər" />
         <DataTable
           title={dict.admin.stock}
           minWidth={780}
@@ -567,8 +567,8 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   /* ---------------------------------------------------------- WARRANTY */
   if (section === "warranty") {
     return (
-      <><DemoActivity section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.warranty} description="Serial nömrəyə bağlı zəmanətlər (PRD §81, §82)" />
+      <><ActivityFeed section={section} locale={locale} manage />
+        <AdminPageHeader title={dict.admin.warranty} description="Serial nömrəyə bağlı zəmanətlər" />
         <DataTable
           title={dict.admin.warranty}
           minWidth={860}
@@ -594,8 +594,8 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   /* ----------------------------------------------------------- REVIEWS */
   if (section === "reviews") {
     return (
-      <><DemoActivity section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.reviews} description="Moderasiya növbəsi (PRD §103)" />
+      <><ActivityFeed section={section} locale={locale} manage />
+        <AdminPageHeader title={dict.admin.reviews} description="Moderasiya növbəsi" />
         <DataTable
           title={dict.admin.reviews}
           minWidth={860}
@@ -628,7 +628,7 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
     ];
 
     return (
-      <><DemoActivity section={section} locale={locale} manage />
+      <><ActivityFeed section={section} locale={locale} manage />
         <AdminPageHeader title={dict.admin.content} action={addButton("Yeni səhifə")} />
         <DataTable
           title={dict.admin.pages}
@@ -652,9 +652,9 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   /* --------------------------------------------------------------- SEO */
   if (section === "seo") {
     return (
-      <><DemoActivity section={section} locale={locale} manage />
+      <><ActivityFeed section={section} locale={locale} manage />
         <LocalManager section="seo" label="SEO məlumatı əlavə et" />
-        <AdminPageHeader title={dict.admin.seo} description="Metadata, sitemap və structured data (PRD §107–§111)" />
+        <AdminPageHeader title={dict.admin.seo} description="Metadata, sitemap və structured data" />
         <div className="grid gap-4 lg:grid-cols-2">
           <Card className="p-5">
             <h2 className="mb-4 text-[13px] font-semibold text-ink">Texniki SEO vəziyyəti</h2>
@@ -670,7 +670,7 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
           </Card>
 
           <Card className="p-5">
-            <h2 className="mb-4 text-[13px] font-semibold text-ink">Performans hədəfləri (PRD §112)</h2>
+            <h2 className="mb-4 text-[13px] font-semibold text-ink">Performans hədəfləri</h2>
             <dl>
               <DataRow label="LCP" value="≤ 2.5 s" />
               <DataRow label="INP" value="≤ 200 ms" />
@@ -697,8 +697,8 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
     ];
 
     return (
-      <><DemoActivity section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.analytics} description="Konversiya hunisi (PRD §126, §127)" />
+      <><ActivityFeed section={section} locale={locale} manage />
+        <AdminPageHeader title={dict.admin.analytics} description="Konversiya hunisi" />
         <DataTable
           title="Konversiya hunisi — son 30 gün"
           minWidth={560}
@@ -713,7 +713,7 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
               render: (f) => (
                 <span className="block h-2 w-full max-w-[160px] bg-sand">
                   <span
-                    className="block h-full bg-brass-400"
+                    className="block h-full bg-gold-400"
                     style={{ width: f.rate }}
                   />
                 </span>
@@ -736,8 +736,8 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
     ];
 
     return (
-      <><DemoActivity section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.auditLogs} description="Kritik əməliyyatların izi (PRD §128)" />
+      <><ActivityFeed section={section} locale={locale} manage />
+        <AdminPageHeader title={dict.admin.auditLogs} description="Kritik əməliyyatların izi" />
         <DataTable
           title={dict.admin.auditLogs}
           minWidth={780}
@@ -757,14 +757,14 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   /* ---------------------------------------------------------- SETTINGS */
   if (section === "settings") {
     return (
-      <><DemoActivity section={section} locale={locale} manage />
+      <><ActivityFeed section={section} locale={locale} manage />
         <LocalManager section="settings" label="Parametrləri redaktə et" />
         <AdminPageHeader title={dict.admin.settings} description="Platforma konfiqurasiyası" />
         <div className="grid gap-4 lg:grid-cols-2">
           <Card className="p-5">
             <h2 className="mb-4 text-[13px] font-semibold text-ink">Ümumi</h2>
             <dl>
-              <DataRow label="Sayt adı" value="EuroPorta (demo)" />
+              <DataRow label="Sayt adı" value="EuroPorta" />
               <DataRow label="Valyuta" value="AZN" />
               <DataRow label="Default dil" value="Azərbaycan" />
               <DataRow label="Dəstəklənən dillər" value="AZ / EN / RU" />
@@ -785,9 +785,6 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
           </Card>
         </div>
 
-        <Notice tone="warning" className="mt-4">
-          {dict.admin.readOnlyNotice}
-        </Notice>
       </>
     );
   }

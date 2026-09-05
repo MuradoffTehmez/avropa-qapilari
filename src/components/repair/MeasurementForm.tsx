@@ -1,12 +1,12 @@
 "use client";
 
-import { useDemo } from "@/store/demo";
+import { useWorkflow } from "@/store/workflow";
 import { useState } from "react";
 import { CheckCircle2, Ruler } from "lucide-react";
 import type { Dictionary } from "@/i18n";
 import type { Locale, PropertyType } from "@/types";
 import { routes } from "@/lib/routes";
-import { demoReference } from "@/lib/utils";
+import { createReference } from "@/lib/utils";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card, Notice } from "@/components/ui/primitives";
 import { Field, Input, RadioCard, Select, Textarea } from "@/components/ui/form";
@@ -14,7 +14,7 @@ import { bakuDistricts, cities } from "@/mock/content";
 
 const timeSlots = ["09:00 – 12:00", "12:00 – 15:00", "15:00 – 18:00"];
 
-/** PRD §67 — ölçü ustası sifarişi. */
+/** ölçü ustası sifarişi. */
 export function MeasurementForm({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const r = routes(locale);
 
@@ -51,8 +51,8 @@ export function MeasurementForm({ locale, dict }: { locale: Locale; dict: Dictio
     setErrors(next);
     if (Object.keys(next).length > 0) return;
 
-    const reference = demoReference("MSR");
-    useDemo.getState().add({ id: reference, kind: "measurements", title: "Ölçü sifarişi", detail: `${form.doorCount} qapı · ${form.city}, ${form.street} · ${form.date} ${form.slot}` });
+    const reference = createReference("MSR");
+    useWorkflow.getState().add({ id: reference, kind: "measurements", title: "Ölçü sifarişi", detail: `${form.doorCount} qapı · ${form.city}, ${form.street} · ${form.date} ${form.slot}` });
     setSubmitted(reference);
   }
 
@@ -200,7 +200,7 @@ export function MeasurementForm({ locale, dict }: { locale: Locale; dict: Dictio
       <aside className="lg:sticky lg:top-24 lg:h-fit">
         <Card className="p-5">
           <div className="flex items-center gap-2.5">
-            <Ruler size={18} className="text-brass-500" />
+            <Ruler size={18} className="text-gold-500" />
             <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-stone">
               Ölçü xidməti
             </h2>

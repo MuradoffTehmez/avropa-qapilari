@@ -72,9 +72,9 @@ export function ProductActions({
             toggleFav(product.id);
             toast(isFav ? "Favorilərdən çıxarıldı" : "Favorilərə əlavə edildi");
           }}
-          className={cn("flex-1 border border-line", isFav && "text-brass-600")}
+          className={cn("flex-1 border border-line", isFav && "text-gold-600")}
         >
-          <Heart size={15} className={cn(isFav && "fill-brass-500 text-brass-500")} />
+          <Heart size={15} className={cn(isFav && "fill-gold-500 text-gold-500")} />
           {dict.actions.favorites}
         </Button>
 

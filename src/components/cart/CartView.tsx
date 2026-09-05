@@ -89,7 +89,7 @@ export function CartView({ locale, dict }: { locale: Locale; dict: Dictionary })
                 </button>
               </div>
 
-              {/* PRD §65 — konfiqurasiya snapshot-u */}
+              {/* konfiqurasiya snapshot-u */}
               <ul className="mt-2.5 flex flex-wrap gap-x-4 gap-y-0.5 text-[12px] text-graphite">
                 {item.snapshot.lines.map((line) => (
                   <li key={line.group}>

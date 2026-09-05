@@ -5,12 +5,12 @@ import { cn } from "@/lib/utils";
 
 /* ------------------------------- Badge --------------------------------- */
 
-type BadgeTone = "neutral" | "dark" | "brass" | "success" | "warning" | "danger" | "info" | "outline";
+type BadgeTone = "neutral" | "dark" | "gold" | "success" | "warning" | "danger" | "info" | "outline";
 
 const badgeTones: Record<BadgeTone, string> = {
   neutral: "bg-sand text-graphite",
   dark: "bg-ink text-paper",
-  brass: "bg-brass-100 text-brass-700",
+  gold: "bg-gold-100 text-gold-700",
   success: "bg-[#e8f2ec] text-success",
   warning: "bg-[#faf1de] text-warning",
   danger: "bg-[#f7e9e8] text-danger",
@@ -93,7 +93,7 @@ export function SectionHeading({
           <p
             className={cn(
               "mb-3 text-[11px] font-semibold uppercase tracking-[0.22em]",
-              invert ? "text-brass-300" : "text-brass-600",
+              invert ? "text-gold-300" : "text-gold-600",
             )}
           >
             {eyebrow}
@@ -155,7 +155,7 @@ export function Rating({
 }) {
   return (
     <span className={cn("inline-flex items-center gap-1.5 text-[13px]", className)}>
-      <Star size={size} className="fill-brass-400 text-brass-400" aria-hidden />
+      <Star size={size} className="fill-gold-400 text-gold-400" aria-hidden />
       <span className="font-medium text-ink">{value.toFixed(1)}</span>
       {count !== undefined && <span className="text-stone">({count})</span>}
     </span>

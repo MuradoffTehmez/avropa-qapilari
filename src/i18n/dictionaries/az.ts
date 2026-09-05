@@ -93,7 +93,6 @@ export const az = {
     loading: "Yüklənir…",
     empty: "Məlumat yoxdur",
     results: "nəticə",
-    demoNotice: "Demo məlumat",
   },
 
   home: {
@@ -304,7 +303,7 @@ export const az = {
     paymentCash: "Çatdırılma zamanı nağd",
     paymentTransfer: "Bank köçürməsi",
     paymentNote:
-      "Ödəniş provayderi backend mərhələsində qoşulacaq. Bu demo-da real ödəniş aparılmır.",
+      "Ödəniş sifariş təsdiqləndikdən sonra rəsmiləşdirilir.",
     orderSummary: "Sifariş xülasəsi",
     placeOrder: "Sifarişi təsdiqlə",
     successTitle: "Sifarişiniz qəbul edildi",
@@ -397,7 +396,6 @@ export const az = {
     warranties: "Zəmanətlər",
     notifications: "Bildirişlər",
     logout: "Çıxış",
-    demoUser: "Demo istifadəçi",
     noOrders: "Hələ sifarişiniz yoxdur",
     noRepairs: "Təmir müraciətiniz yoxdur",
     noWarranties: "Zəmanət qeydiniz yoxdur",
@@ -529,8 +527,6 @@ export const az = {
     topLocks: "Populyar kilidlər",
     recentOrders: "Son sifarişlər",
     recentRepairs: "Son təmir müraciətləri",
-    readOnlyNotice:
-      "Admin paneli demo rejimindədir — məlumatlar mock data-dan gəlir, dəyişikliklər saxlanılmır.",
   },
 
   footer: {
@@ -547,8 +543,6 @@ export const az = {
     returns: "Geri qaytarma",
     followUs: "Bizi izləyin",
     rights: "Bütün hüquqlar qorunur.",
-    demoDisclaimer:
-      "Bu sayt demo məqsədilə hazırlanıb. Brend adı, loqo və məzmun müvəqqətidir.",
   },
 
   cookie: {

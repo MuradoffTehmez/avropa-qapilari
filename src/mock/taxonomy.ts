@@ -1,6 +1,7 @@
 import type { Brand, Category } from "@/types";
+import { products } from "@/mock/products";
 
-/** DEMO DATA — backend hazır olduqda D1/Prisma-dan gələcək. */
+/** TEST DATA — backend qoşulanda D1/Prisma-dan gələcək. */
 
 export const categories: Category[] = [
   {
@@ -10,7 +11,7 @@ export const categories: Category[] = [
     shortName: "Giriş",
     description:
       "Mənzil və ev girişləri üçün çoxqatlı metal konstruksiya, RC2–RC4 təhlükəsizlik sinfi və yüksək səs izolyasiyası.",
-    productCount: 42,
+    productCount: 0,
     featured: true,
     accent: "#3f3b36",
   },
@@ -21,7 +22,7 @@ export const categories: Category[] = [
     shortName: "Villa",
     description:
       "Böyük ölçülü, termo-izolyasiyalı və hava şəraitinə davamlı xarici giriş qapıları.",
-    productCount: 27,
+    productCount: 0,
     featured: true,
     accent: "#4d4237",
   },
@@ -32,7 +33,7 @@ export const categories: Category[] = [
     shortName: "Otaq",
     description:
       "İnteryer üçün massiv ağac, MDF və şüşəli həllər — minimalist və klassik xətlərdə.",
-    productCount: 58,
+    productCount: 0,
     featured: true,
     accent: "#6b6156",
   },
@@ -43,7 +44,7 @@ export const categories: Category[] = [
     shortName: "Təhlükəsizlik",
     description:
       "RC4–RC5 sinifli, çoxnöqtəli kilid sistemli və sertifikatlı zirehli qapılar.",
-    productCount: 19,
+    productCount: 0,
     featured: true,
     accent: "#2f2e2b",
   },
@@ -54,7 +55,7 @@ export const categories: Category[] = [
     shortName: "Smart",
     description:
       "Barmaq izi, kod, kart və mobil tətbiq ilə idarə olunan elektron kilid sistemləri.",
-    productCount: 16,
+    productCount: 0,
     featured: true,
     accent: "#35403f",
   },
@@ -65,7 +66,7 @@ export const categories: Category[] = [
     shortName: "Şüşəli",
     description:
       "Tempered və lakobel şüşə panelli, işıq keçirən interyer və ofis həlləri.",
-    productCount: 23,
+    productCount: 0,
     featured: true,
     accent: "#5a6467",
   },
@@ -75,7 +76,7 @@ export const categories: Category[] = [
     name: "Metal qapılar",
     shortName: "Metal",
     description: "Texniki otaqlar, anbar və giriş blokları üçün funksional metal qapılar.",
-    productCount: 14,
+    productCount: 0,
     featured: false,
     accent: "#4a4844",
   },
@@ -85,7 +86,7 @@ export const categories: Category[] = [
     name: "Yanğın qapıları",
     shortName: "Yanğın",
     description: "EI30–EI90 sertifikatlı, yanğına davamlı təhlükəsizlik qapıları.",
-    productCount: 9,
+    productCount: 0,
     featured: false,
     accent: "#5c3f38",
   },
@@ -100,7 +101,7 @@ export const brands: Brand[] = [
     founded: 1978,
     description:
       "İtalyan dizayn məktəbinin premium giriş qapıları. Çoxqatlı konstruksiya və əl işi finiş.",
-    productCount: 34,
+    productCount: 0,
   },
   {
     id: "br-2",
@@ -110,7 +111,7 @@ export const brands: Brand[] = [
     founded: 1965,
     description:
       "Alman mühəndisliyi: yüksək termo göstəricilər, RC4 sertifikatı və 10 il zəmanət.",
-    productCount: 28,
+    productCount: 0,
   },
   {
     id: "br-3",
@@ -119,7 +120,7 @@ export const brands: Brand[] = [
     country: "Avstriya",
     founded: 1991,
     description: "Neoklassik interyer qapıları və massiv ağac emalında ixtisaslaşma.",
-    productCount: 22,
+    productCount: 0,
   },
   {
     id: "br-4",
@@ -128,7 +129,7 @@ export const brands: Brand[] = [
     country: "İspaniya",
     founded: 2003,
     description: "Müasir minimalizm, gizli menteşələr və tam hündürlüklü panellər.",
-    productCount: 19,
+    productCount: 0,
   },
   {
     id: "br-5",
@@ -137,7 +138,7 @@ export const brands: Brand[] = [
     country: "Polşa",
     founded: 1998,
     description: "Qiymət/keyfiyyət balansı ilə seçilən Avropa istehsalı giriş qapıları.",
-    productCount: 26,
+    productCount: 0,
   },
   {
     id: "br-6",
@@ -146,7 +147,7 @@ export const brands: Brand[] = [
     country: "Çexiya",
     founded: 2010,
     description: "Şüşə və alüminium konstruksiyalar, ofis və loft interyerləri üçün.",
-    productCount: 17,
+    productCount: 0,
   },
 ];
 
@@ -158,6 +159,14 @@ export const collections = [
   "Belveder Prime",
   "Lumia Glass",
 ] as const;
+
+/** Sayğaclar məhsul siyahısından hesablanır — əl ilə saxlanılmır. */
+for (const c of categories) {
+  c.productCount = products.filter((p) => p.categorySlug === c.slug).length;
+}
+for (const b of brands) {
+  b.productCount = products.filter((p) => p.brandSlug === b.slug).length;
+}
 
 export function getCategory(slug: string): Category | undefined {
   return categories.find((c) => c.slug === slug);

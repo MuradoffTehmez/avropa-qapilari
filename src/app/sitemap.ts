@@ -5,7 +5,7 @@ import { products } from "@/mock/products";
 import { brands, categories } from "@/mock/taxonomy";
 import { blogPosts } from "@/mock/content";
 
-/** PRD §109 — sitemap. */
+/** sitemap. */
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = brand.siteUrl;
   const now = new Date();

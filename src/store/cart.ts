@@ -5,7 +5,7 @@ import { persist } from "zustand/middleware";
 import type { CartItem } from "@/types";
 
 /**
- * PRD §58, §59 — anonim istifadəçi üçün local persistence.
+ * anonim istifadəçi üçün local persistence.
  * Backend qoşulanda login zamanı server cart ilə merge ediləcək.
  */
 interface CartState {

@@ -10,7 +10,7 @@ import { orders, repairRequests, appointments, measurements } from "@/mock/accou
 import { products } from "@/mock/products";
 import { optionGroups } from "@/mock/options";
 
-/** PRD §92 — admin dashboard KPI. */
+/** admin dashboard KPI. */
 export default async function AdminDashboardPage({
   params,
 }: {
@@ -30,7 +30,7 @@ export default async function AdminDashboardPage({
   const operational = [
     { label: dict.admin.kpi.pendingOrders, value: 6, tone: "warning" as const },
     { label: dict.admin.kpi.newRepairs, value: 3, tone: "info" as const },
-    { label: dict.admin.kpi.activeRepairs, value: 8, tone: "brass" as const },
+    { label: dict.admin.kpi.activeRepairs, value: 8, tone: "gold" as const },
     { label: dict.admin.kpi.pendingInstallations, value: 4, tone: "info" as const },
     { label: dict.admin.kpi.appointmentsToday, value: appointments.length, tone: "success" as const },
     { label: dict.admin.kpi.lowStock, value: 5, tone: "danger" as const },
@@ -49,7 +49,6 @@ export default async function AdminDashboardPage({
         </p>
       </div>
 
-      <Notice tone="warning">{dict.admin.readOnlyNotice}</Notice>
 
       {/* KPI */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -92,7 +91,7 @@ export default async function AdminDashboardPage({
             <h2 className="text-[13px] font-semibold text-ink">{dict.admin.recentOrders}</h2>
             <Link
               href={`/${locale}/admin/orders`}
-              className="flex items-center gap-1 text-[12px] font-medium text-brass-600 hover:underline"
+              className="flex items-center gap-1 text-[12px] font-medium text-gold-600 hover:underline"
             >
               {dict.actions.viewAll} <ArrowUpRight size={13} />
             </Link>
@@ -131,7 +130,7 @@ export default async function AdminDashboardPage({
             <h2 className="text-[13px] font-semibold text-ink">{dict.admin.recentRepairs}</h2>
             <Link
               href={`/${locale}/admin/repairs`}
-              className="flex items-center gap-1 text-[12px] font-medium text-brass-600 hover:underline"
+              className="flex items-center gap-1 text-[12px] font-medium text-gold-600 hover:underline"
             >
               {dict.actions.viewAll} <ArrowUpRight size={13} />
             </Link>

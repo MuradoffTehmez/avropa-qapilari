@@ -6,18 +6,18 @@ import { Button } from "@/components/ui/Button";
 import { Card, Notice } from "@/components/ui/primitives";
 import { Checkbox, Field, Input, Select } from "@/components/ui/form";
 import { toast } from "@/components/ui/overlays";
-import { demoUser } from "@/mock/account";
+import { accountUser } from "@/mock/account";
 import { localeNames, locales } from "@/i18n/config";
 
-/** PRD §86 — müştəri profili. */
+/** müştəri profili. */
 export function ProfileForm({ dict }: { dict: Dictionary }) {
   const [form, setForm] = useState({
-    name: demoUser.name,
-    surname: demoUser.surname,
-    email: demoUser.email,
-    phone: demoUser.phone,
-    language: demoUser.language,
-    marketingConsent: demoUser.marketingConsent,
+    name: accountUser.name,
+    surname: accountUser.surname,
+    email: accountUser.email,
+    phone: accountUser.phone,
+    language: accountUser.language,
+    marketingConsent: accountUser.marketingConsent,
   });
 
   function set<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
@@ -32,7 +32,7 @@ export function ProfileForm({ dict }: { dict: Dictionary }) {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            toast("Profil yadda saxlanıldı (demo)");
+            toast("Profil yadda saxlanıldı");
           }}
         >
           <div className="grid gap-4 sm:grid-cols-2">
@@ -96,10 +96,6 @@ export function ProfileForm({ dict }: { dict: Dictionary }) {
             </Button>
           </div>
         </div>
-        <Notice tone="warning" className="mt-5">
-          Şifrə hashing, sessiya rotasiyası və login audit backend mərhələsində qurulacaq
-          (PRD §89).
-        </Notice>
       </Card>
     </div>
   );

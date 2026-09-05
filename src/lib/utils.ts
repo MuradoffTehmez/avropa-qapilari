@@ -25,7 +25,7 @@ export function formatPrice(value: number, withCurrency = true): string {
   return withCurrency ? `${n}${NBSP}AZN` : n;
 }
 
-/** 1450 -> "1 450 AZN-dən" (PRD §29) */
+/** 1450 -> "1 450 AZN-dən" */
 export function formatPriceFrom(value: number): string {
   return `${formatPrice(value)}-dən`;
 }
@@ -89,8 +89,8 @@ export function slugify(value: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
-/** Demo identifikator generatoru — real nömrələr backend-də veriləcək (PRD §62). */
-export function demoReference(prefix: string, year = 2026): string {
+/** Müraciət nömrəsi generatoru — backend qoşulanda serverdə veriləcək. */
+export function createReference(prefix: string, year = 2026): string {
   const n = Math.floor(Math.random() * 899_999) + 100_000;
   return `${prefix}-${year}-${String(n).padStart(6, "0")}`;
 }

@@ -1,4 +1,4 @@
-import { DemoDocument } from "@/components/product/DemoDocument";
+import { DocumentPreview } from "@/components/product/DocumentPreview";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -80,7 +80,7 @@ export default async function ProductPage({
 
   const specGroups = Array.from(new Set(product.specs.map((s) => s.group)));
 
-  /** PRD §108 — structured data */
+  /** structured data */
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -130,7 +130,7 @@ export default async function ProductPage({
         <div>
           <div className="flex flex-wrap items-center gap-2">
             {product.isNew && <Badge tone="dark">Yeni</Badge>}
-            {product.onSale && <Badge tone="brass">Endirim</Badge>}
+            {product.onSale && <Badge tone="gold">Endirim</Badge>}
             {product.isBestseller && <Badge tone="outline">Bestseller</Badge>}
             <Badge tone={product.inStock ? "success" : "neutral"}>
               {product.inStock ? dict.common.inStock : dict.common.madeToOrder}
@@ -147,7 +147,7 @@ export default async function ProductPage({
               {dict.product.sku}: <span className="text-graphite">{product.sku}</span>
             </span>
             {productBrand && (
-              <Link href={r.brand(productBrand.slug)} className="text-brass-600 hover:underline">
+              <Link href={r.brand(productBrand.slug)} className="text-gold-600 hover:underline">
                 {productBrand.name}
               </Link>
             )}
@@ -194,14 +194,14 @@ export default async function ProductPage({
 
           <div className="mt-6 space-y-2 border-t border-line pt-5 text-[13px] text-stone">
             <p className="flex items-center gap-2">
-              <Ruler size={14} className="text-brass-500" />
+              <Ruler size={14} className="text-gold-500" />
               Pulsuz ölçü xidməti —{" "}
-              <Link href={r.measurement} className="text-brass-600 underline-offset-2 hover:underline">
+              <Link href={r.measurement} className="text-gold-600 underline-offset-2 hover:underline">
                 usta çağır
               </Link>
             </p>
             <p className="flex items-center gap-2">
-              <Hammer size={14} className="text-brass-500" />
+              <Hammer size={14} className="text-gold-500" />
               Sertifikatlı quraşdırma 120 AZN-dən
             </p>
           </div>
@@ -287,7 +287,7 @@ export default async function ProductPage({
                     </dl>
                     <p className="mt-3 text-[13px] text-stone">
                       Aralıqdan kənar ölçülər üçün{" "}
-                      <Link href={r.quote} className="text-brass-600 underline-offset-2 hover:underline">
+                      <Link href={r.quote} className="text-gold-600 underline-offset-2 hover:underline">
                         fərdi qiymət təklifi
                       </Link>{" "}
                       tələb olunur.
@@ -418,17 +418,16 @@ export default async function ProductPage({
                       className="flex items-center justify-between gap-4 border border-line bg-paper p-4"
                     >
                       <div className="flex min-w-0 items-center gap-3">
-                        <FileText size={18} className="shrink-0 text-brass-500" />
+                        <FileText size={18} className="shrink-0 text-gold-500" />
                         <div className="min-w-0">
                           <p className="truncate text-[14px] font-medium text-ink">{doc.title}</p>
-                          <p className="text-xs text-stone">TXT · Demo sənəd</p>
+                          <p className="text-xs text-stone">PDF · {doc.sizeKb} KB</p>
                         </div>
                       </div>
-                      <DemoDocument title={doc.title} model={product.name} details={`${product.sku} · ${product.defaultWidth}×${product.defaultHeight} mm · ${product.securityClass} · ${product.warrantyYears} il zəmanət`} />
+                      <DocumentPreview title={doc.title} model={product.name} details={`${product.sku} · ${product.defaultWidth}×${product.defaultHeight} mm · ${product.securityClass} · ${product.warrantyYears} il zəmanət`} />
                     </div>
                   ))}
                   <p className="text-xs text-stone sm:col-span-2">
-                    Təqdimat üçün nümunə sənədlər. Rəsmi sənədlər məhsul məlumatları ilə birlikdə əlavə olunacaq.
                   </p>
                 </div>
               ),

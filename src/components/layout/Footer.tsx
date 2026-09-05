@@ -61,7 +61,7 @@ export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
 
             <div className="mt-6 flex flex-col gap-2.5 text-sm text-paper/70">
               <a href={`tel:${brand.contact.phoneHref}`} className="flex items-center gap-2.5 transition-colors hover:text-paper">
-                <Phone size={15} className="text-brass-400" /> {brand.contact.phone}
+                <Phone size={15} className="text-gold-400" /> {brand.contact.phone}
               </a>
               <a
                 href={`https://wa.me/${brand.contact.whatsapp.replace(/[^0-9]/g, "")}`}
@@ -69,13 +69,13 @@ export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
                 rel="noopener noreferrer"
                 className="flex items-center gap-2.5 transition-colors hover:text-paper"
               >
-                <MessageCircle size={15} className="text-brass-400" /> WhatsApp
+                <MessageCircle size={15} className="text-gold-400" /> WhatsApp
               </a>
               <a href={`mailto:${brand.contact.email}`} className="flex items-center gap-2.5 transition-colors hover:text-paper">
-                <Mail size={15} className="text-brass-400" /> {brand.contact.email}
+                <Mail size={15} className="text-gold-400" /> {brand.contact.email}
               </a>
               <p className="flex items-start gap-2.5">
-                <MapPin size={15} className="mt-0.5 shrink-0 text-brass-400" /> {brand.contact.address}
+                <MapPin size={15} className="mt-0.5 shrink-0 text-gold-400" /> {brand.contact.address}
               </p>
             </div>
 
@@ -95,7 +95,7 @@ export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
             {columns.map((col) => (
               <div key={col.title}>
-                <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-brass-300">
+                <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-300">
                   {col.title}
                 </h3>
                 <ul className="flex flex-col gap-2.5">
@@ -132,15 +132,6 @@ export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
         </div>
       </div>
 
-      {brand.isDemo && (
-        <div className="border-t border-paper/10 bg-obsidian">
-          <div className="container-page py-3">
-            <p className="text-center text-[11px] leading-relaxed text-paper/35">
-              {dict.footer.demoDisclaimer}
-            </p>
-          </div>
-        </div>
-      )}
     </footer>
   );
 }

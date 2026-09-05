@@ -1,6 +1,6 @@
 "use client";
 
-import { useDemo } from "@/store/demo";
+import { useWorkflow } from "@/store/workflow";
 import Link from "next/link";
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, CheckCircle2, ShoppingBag } from "lucide-react";
@@ -8,7 +8,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, ShoppingBag } from "lucide-react";
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/types";
 import { routes } from "@/lib/routes";
-import { demoReference, formatPrice } from "@/lib/utils";
+import { createReference, formatPrice } from "@/lib/utils";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card, EmptyState, Notice, Skeleton } from "@/components/ui/primitives";
 import { Stepper } from "@/components/ui/disclosure";
@@ -168,8 +168,8 @@ export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionar
     if (!validate(current)) return;
 
     if (current === "confirmation") {
-      const number = demoReference("ORD");
-      useDemo.getState().add({ id: number, kind: "orders", title: "Qapı sifarişi", total, detail: items.map((i) => `${i.productName} · ${i.quantity} ədəd · ${i.snapshot.width}×${i.snapshot.height} mm`).join("\n") });
+      const number = createReference("ORD");
+      useWorkflow.getState().add({ id: number, kind: "orders", title: "Qapı sifarişi", total, detail: items.map((i) => `${i.productName} · ${i.quantity} ədəd · ${i.snapshot.width}×${i.snapshot.height} mm`).join("\n") });
       clear();
       setPlacedOrder(number);
       return;
@@ -297,8 +297,7 @@ export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionar
               ))}
             </div>
             <Notice>
-              Quraşdırma seçilərsə, sifariş çatdıqdan sonra ayrıca quraşdırma görüşü yaradılır
-              (PRD §80).
+              Quraşdırma seçilərsə, sifariş çatdıqdan sonra ayrıca quraşdırma görüşü yaradılır.
             </Notice>
           </div>
         )}

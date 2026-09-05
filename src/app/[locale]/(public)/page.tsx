@@ -50,20 +50,20 @@ export default async function HomePage({
         />
         <div className="container-page relative grid gap-12 py-16 lg:grid-cols-[1.15fr_1fr] lg:items-center lg:gap-8 lg:py-24">
           <div className="hero-copy animate-fade-up">
-            <p className="mb-5 text-[11px] font-semibold uppercase tracking-[0.28em] text-brass-300">
+            <p className="mb-5 text-[11px] font-semibold uppercase tracking-[0.28em] text-gold-300">
               {dict.home.heroEyebrow}
             </p>
             <h1 className="text-balance-heading text-[2.15rem] font-semibold leading-[1.08] tracking-tight sm:text-5xl lg:text-[3.9rem]">
               {dict.home.heroTitleTop}
               <br />
-              <span className="text-brass-300">{dict.home.heroTitleBottom}</span>
+              <span className="text-gold-300">{dict.home.heroTitleBottom}</span>
             </h1>
             <p className="mt-6 max-w-lg text-[15px] leading-relaxed text-paper/65 sm:text-base">
               {dict.home.heroText}
             </p>
 
             <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <ButtonLink href={r.doors} variant="brass" size="lg">
+              <ButtonLink href={r.doors} variant="gold" size="lg">
                 {dict.actions.selectDoor}
                 <ArrowRight size={17} />
               </ButtonLink>
@@ -93,15 +93,15 @@ export default async function HomePage({
 
           <div className="hero-visual relative mx-auto w-full max-w-md lg:max-w-none">
             <div className="relative aspect-4/5 overflow-hidden rounded-sm">
-              <Image src="/images/villa-demo.png" alt="Antrasit qapılı müasir villa girişi — demo vizual" fill priority sizes="(max-width:1024px) 100vw, 50vw" className="object-cover" />
-              <span className="absolute right-3 top-3 bg-ink/70 px-2 py-1 text-xs text-white">Demo dizayn</span>
+              <Image src="/images/entrance-hero.webp" alt="Mat qara giriş qapısı, qızıl bar dəstək — villa girişi" fill priority sizes="(max-width:1024px) 100vw, 50vw" className="object-cover" />
+              
             </div>
             <div className="absolute -left-2 bottom-6 border border-paper/15 bg-obsidian/80 px-4 py-3 backdrop-blur sm:left-0">
               <p className="text-[10px] uppercase tracking-[0.16em] text-paper/45">Konfiqurasiya</p>
               <p className="mt-1 text-sm font-medium text-paper">
                 1000 × 2100 · Antrasit ağac
               </p>
-              <p className="text-sm font-semibold text-brass-300">2 890 AZN</p>
+              <p className="text-sm font-semibold text-gold-300">2 890 AZN</p>
             </div>
           </div>
         </div>
@@ -143,7 +143,7 @@ export default async function HomePage({
       <Section tone="bone" className="border-y border-line">
         <div className="container-page grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
           <div className="order-2 lg:order-1">
-            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-brass-600">
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-gold-600">
               Konfiqurator
             </p>
             <h2 className="text-balance-heading text-2xl font-semibold leading-tight tracking-tight text-ink sm:text-3xl lg:text-[2.5rem]">
@@ -227,7 +227,7 @@ export default async function HomePage({
                 href={href}
                 className="group flex flex-col border border-line bg-paper p-5 transition-colors hover:border-mist"
               >
-                <Icon size={22} className="text-brass-500" />
+                <Icon size={22} className="text-gold-500" />
                 <h3 className="mt-4 text-[15px] font-medium text-ink">{title}</h3>
                 <p className="mt-2 text-[13px] leading-relaxed text-stone">{text}</p>
                 <span className="mt-4 text-[13px] font-medium text-graphite underline-offset-4 group-hover:underline">
@@ -243,7 +243,7 @@ export default async function HomePage({
       <section className="bg-ink text-paper">
         <div className="container-page grid gap-8 py-14 lg:grid-cols-[1.4fr_1fr] lg:items-center lg:py-20">
           <div>
-            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-brass-300">
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-gold-300">
               24 saat içində usta
             </p>
             <h2 className="text-balance-heading text-2xl font-semibold leading-tight tracking-tight sm:text-3xl lg:text-[2.35rem]">
@@ -253,7 +253,7 @@ export default async function HomePage({
               {dict.home.repairText}
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <ButtonLink href={r.repair} variant="brass" size="lg">
+              <ButtonLink href={r.repair} variant="gold" size="lg">
                 {dict.actions.callTechnician} <ArrowRight size={17} />
               </ButtonLink>
               <ButtonLink

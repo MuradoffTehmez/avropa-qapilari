@@ -1,18 +1,18 @@
 "use client";
 
-import { useDemo } from "@/store/demo";
+import { useWorkflow } from "@/store/workflow";
 import { useState } from "react";
 import { CheckCircle2, FileText } from "lucide-react";
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/types";
 import { routes } from "@/lib/routes";
-import { demoReference } from "@/lib/utils";
+import { createReference } from "@/lib/utils";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card, Notice } from "@/components/ui/primitives";
 import { Field, Input, Select, Textarea } from "@/components/ui/form";
 import { products } from "@/mock/products";
 
-/** PRD §66 — Quote Request. */
+/** Quote Request. */
 export function QuoteForm({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const r = routes(locale);
   const [form, setForm] = useState({
@@ -42,8 +42,8 @@ export function QuoteForm({ locale, dict }: { locale: Locale; dict: Dictionary }
 
     setErrors(next);
     if (Object.keys(next).length > 0) return;
-    const reference = demoReference("QTE");
-    useDemo.getState().add({ id: reference, kind: "quotes", title: "Qiymət təklifi", detail: `${form.message} · ${form.quantity} ədəd · ${form.width} × ${form.height} mm` });
+    const reference = createReference("QTE");
+    useWorkflow.getState().add({ id: reference, kind: "quotes", title: "Qiymət təklifi", detail: `${form.message} · ${form.quantity} ədəd · ${form.width} × ${form.height} mm` });
     setSubmitted(reference);
   }
 
@@ -146,7 +146,7 @@ export function QuoteForm({ locale, dict }: { locale: Locale; dict: Dictionary }
       <aside className="lg:sticky lg:top-24 lg:h-fit">
         <Card className="p-5">
           <div className="flex items-center gap-2.5">
-            <FileText size={18} className="text-brass-500" />
+            <FileText size={18} className="text-gold-500" />
             <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-stone">
               Nə vaxt lazımdır?
             </h2>
@@ -157,9 +157,6 @@ export function QuoteForm({ locale, dict }: { locale: Locale; dict: Dictionary }
             <li>Qeyri-standart rəng, şpon və ya vitraj.</li>
             <li>Kommersiya obyektləri və layihə təchizatı.</li>
           </ul>
-          <Notice className="mt-5">
-            Təklif hazır olduqda bir kliklə sifarişə çevrilə bilər (PRD §66).
-          </Notice>
         </Card>
       </aside>
     </form>

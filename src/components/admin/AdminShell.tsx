@@ -30,7 +30,7 @@ import { brand } from "@/config/brand";
 import { LogoMark } from "@/components/layout/Logo";
 import { useLockBodyScroll } from "@/lib/hooks";
 
-/** PRD §91 — admin sidebar strukturu. */
+/** admin sidebar strukturu. */
 export function AdminShell({
   locale,
   dict,
@@ -112,7 +112,7 @@ export function AdminShell({
       <div className="flex h-14 shrink-0 items-center gap-2.5 border-b border-paper/10 px-5">
         <LogoMark tone="paper" size={22} />
         <span className="text-[13px] font-semibold tracking-tight text-paper">{brand.name}</span>
-        <span className="ml-auto text-[10px] font-medium uppercase tracking-[0.14em] text-brass-300">
+        <span className="ml-auto text-[10px] font-medium uppercase tracking-[0.14em] text-gold-300">
           Admin
         </span>
       </div>
@@ -223,7 +223,7 @@ export function AdminShell({
               className="relative flex h-9 w-9 items-center justify-center text-graphite hover:text-ink"
             >
               <Bell size={17} />
-              <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-brass-500" />
+              <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-gold-500" />
             </button>
             <div className="flex items-center gap-2.5 border-l border-line pl-3">
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-sand text-[11px] font-semibold text-graphite">
@@ -231,7 +231,7 @@ export function AdminShell({
               </span>
               <div className="hidden sm:block">
                 <p className="text-[13px] font-medium leading-tight text-ink">Super Admin</p>
-                <p className="text-[11px] leading-tight text-stone">demo@{brand.domain}</p>
+                <p className="text-[11px] leading-tight text-stone">admin@{brand.domain}</p>
               </div>
             </div>
           </div>

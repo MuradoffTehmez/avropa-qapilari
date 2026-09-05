@@ -49,7 +49,7 @@ export default async function BlogPostPage({
               { label: post.title },
             ]}
           />
-          <Badge tone="brass" className="mt-4">
+          <Badge tone="gold" className="mt-4">
             {post.category}
           </Badge>
           <h1 className="mt-3 max-w-3xl text-balance-heading text-2xl font-semibold leading-tight tracking-tight text-ink sm:text-3xl lg:text-[2.4rem]">
@@ -65,11 +65,6 @@ export default async function BlogPostPage({
         <div className="container-page">
           <article className="max-w-2xl space-y-5 text-[16px] leading-[1.75] text-graphite">
             <p className="text-[18px] leading-relaxed text-ink">{post.excerpt}</p>
-            <p>
-              Bu yazının tam mətni kontent mərhələsində CMS-ə köçürüləcək (PRD §105, §106). Hazırda
-              struktur, tipoqrafiya və oxunaqlılıq üçün nümunə mətn göstərilir.
-            </p>
-
             <h2 className="pt-4 text-xl font-semibold tracking-tight text-ink">Nə üçün vacibdir</h2>
             <p>
               Qapı seçimində qərar adətən üç parametr ətrafında formalaşır: təhlükəsizlik, izolyasiya

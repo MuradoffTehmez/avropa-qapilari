@@ -1,12 +1,52 @@
 "use client";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, DoorOpen, SlidersHorizontal, Wrench, User } from "lucide-react";
+import { DoorOpen, Home, SlidersHorizontal, User, Wrench } from "lucide-react";
 import type { Locale } from "@/types";
 import { routes } from "@/lib/routes";
-export function MobileNav({locale}:{locale:Locale}) {
- const path=usePathname();const r=routes(locale);
- if (/\/admin|\/konfiqurator\/|\/configurator\/|\/konfigurator\/|\/sifaris|\/checkout|\/oformlenie/.test(path)) return null;
- const items=[{href:r.home,label:"Ana səhifə",icon:Home},{href:r.doors,label:"Kataloq",icon:DoorOpen},{href:r.configurator,label:"Qapını yarat",icon:SlidersHorizontal},{href:r.repair,label:"Servis",icon:Wrench},{href:r.account,label:"Hesab",icon:User}];
- return <nav aria-label="Mobil naviqasiya" className="mobile-bottom-nav fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t bg-paper/95 backdrop-blur lg:hidden">{items.map(({href,label,icon:Icon})=><Link key={href} href={href} aria-current={path===href?"page":undefined} className={`flex min-h-16 flex-col items-center justify-center gap-1 px-1 text-[10px] ${path===href?"font-semibold text-brass-700":"text-graphite"}`}><Icon size={20}/>{label}</Link>)}</nav>;
+import { cn } from "@/lib/utils";
+
+/** Telefon və planşetdə alt naviqasiya paneli. */
+export function MobileNav({ locale }: { locale: Locale }) {
+  const path = usePathname();
+  const r = routes(locale);
+
+  // Konfiqurator, checkout və admin öz alt panellərinə malikdir
+  const hidden =
+    /\/admin|\/(konfiqurator|configurator|konfigurator)\/|\/(sifaris|checkout|oformlenie)/.test(path);
+  if (hidden) return null;
+
+  const items = [
+    { href: r.home, label: "Ana səhifə", icon: Home },
+    { href: r.doors, label: "Kataloq", icon: DoorOpen },
+    { href: r.configurator, label: "Qapını yarat", icon: SlidersHorizontal },
+    { href: r.repair, label: "Servis", icon: Wrench },
+    { href: r.account, label: "Hesab", icon: User },
+  ];
+
+  return (
+    <nav
+      aria-label="Mobil naviqasiya"
+      className="mobile-bottom-nav safe-bottom fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-line bg-paper/95 backdrop-blur-md lg:hidden"
+    >
+      {items.map(({ href, label, icon: Icon }) => {
+        const active = path === href || (href !== r.home && path.startsWith(`${href}/`));
+        return (
+          <Link
+            key={href}
+            href={href}
+            aria-current={active ? "page" : undefined}
+            className={cn(
+              "flex min-h-15 flex-col items-center justify-center gap-1 px-1 py-2 text-center text-[10px] leading-tight transition-colors",
+              active ? "font-semibold text-gold-600" : "text-graphite",
+            )}
+          >
+            <Icon size={19} strokeWidth={active ? 2.2 : 1.8} />
+            <span className="truncate">{label}</span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
 }

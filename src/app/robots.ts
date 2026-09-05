@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { brand } from "@/config/brand";
 
-/** PRD §110 — robots.txt. */
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [

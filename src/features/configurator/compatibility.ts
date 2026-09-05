@@ -1,7 +1,7 @@
 import type { ConfigurationSelection, OptionValue } from "@/types";
 
 /**
- * COMPATIBILITY ENGINE — PRD §97.
+ * COMPATIBILITY ENGINE.
  * `requires`: dəyər yalnız sadalanan option-lardan biri seçilibsə mümkündür.
  * `excludes`: dəyər seçilibsə, sadalanan option-lar bloklanır.
  */

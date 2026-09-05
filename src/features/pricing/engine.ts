@@ -9,9 +9,9 @@ import type {
 import { findOptionValue, optionGroups } from "@/mock/options";
 
 /**
- * PRICING ENGINE — PRD §53, §54, §55.
+ * PRICING ENGINE.
  *
- * DİQQƏT: PRD §130 (price security) tələb edir ki, yekun qiymət SERVER-də
+ * DİQQƏT: (price security) tələb edir ki, yekun qiymət SERVER-də
  * hesablansın. Bu modul UI-də anlıq göstərmə üçündür və backend qoşulduqda
  * eyni qayda dəsti server-side pricing service-ə köçürüləcək; client nəticəsi
  * yalnız optimistik göstərici kimi qalacaq.
@@ -118,7 +118,7 @@ export function calculatePrice(
 
   const subtotal = lines.reduce((sum, l) => sum + l.amount, 0);
 
-  // Demo endirim: kampaniyalı məhsullarda köhnə/yeni qiymət fərqi nisbətində.
+  // Kampaniyalı məhsullarda köhnə/yeni qiymət fərqi nisbətində endirim.
   const discount =
     product.oldPrice && product.oldPrice > product.basePrice
       ? Math.round(subtotal * 0.05)

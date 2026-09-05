@@ -1,6 +1,6 @@
 "use client";
 
-import { useDemo } from "@/store/demo";
+import { useWorkflow } from "@/store/workflow";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, Link2, RotateCcw, Save } from "lucide-react";
@@ -194,7 +194,7 @@ export function Configurator({
         <div className="configurator-price sticky bottom-0 z-30 border-t border-line bg-paper/97 backdrop-blur">
           <div className="px-4 py-3 sm:px-6 lg:px-8">
             <details className="group mb-3 hidden lg:block">
-              <summary className="cursor-pointer list-none text-[12px] font-medium text-brass-600 underline-offset-2 hover:underline">
+              <summary className="cursor-pointer list-none text-[12px] font-medium text-gold-600 underline-offset-2 hover:underline">
                 Qiymət hesablaması ({price.lines.length} sətir)
               </summary>
               <dl className="mt-3 max-h-44 space-y-1 overflow-y-auto border-t border-line pt-3 text-[13px]">
@@ -597,7 +597,7 @@ function SummaryStep({
   const [configId] = useState(() => `CFG-26-${uid().toUpperCase()}`);
 
   function save() {
-    useDemo.getState().save({ id: configId, productSlug: product.slug, productName: product.name, selection, total: calculatePrice(product, selection).total, date: new Date().toISOString() });
+    useWorkflow.getState().save({ id: configId, productSlug: product.slug, productName: product.name, selection, total: calculatePrice(product, selection).total, date: new Date().toISOString() });
     toast(dict.configurator.configurationSaved);
   }
 

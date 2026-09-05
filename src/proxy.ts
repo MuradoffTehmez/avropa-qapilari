@@ -4,7 +4,7 @@ import { defaultLocale, locales } from "@/i18n/config";
 const PUBLIC_FILE = /\.(.*)$/;
 
 /**
- * PRD §24 — locale-prefixed routing.
+ * locale-prefixed routing.
  * Prefiksi olmayan bütün URL-lər default locale-a yönlənir.
  */
 export function proxy(request: NextRequest) {

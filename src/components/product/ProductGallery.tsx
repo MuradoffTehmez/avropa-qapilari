@@ -5,7 +5,7 @@ import type { Product } from "@/types";
 import { cn } from "@/lib/utils";
 import { DoorVisual } from "@/components/product/DoorVisual";
 
-/** PRD §41 — məhsul qalereyası. Fotolar gələnə qədər rəng variantları göstərilir. */
+/** Məhsul qalereyası — rəng variantları. */
 export function ProductGallery({ product }: { product: Product }) {
   const views: { hex: string; label: string; glass: "NONE" | "SATIN" }[] = product.panelHexes.map(
     (hex, i) => ({

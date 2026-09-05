@@ -20,7 +20,7 @@ export function isLocale(value: string): value is Locale {
 }
 
 /**
- * PRD §24 — lokalizə olunmuş URL seqmentləri.
+ * lokalizə olunmuş URL seqmentləri.
  * DB translation gələnə qədər statik map.
  */
 export const routeSegments = {

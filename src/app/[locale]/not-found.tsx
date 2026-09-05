@@ -6,7 +6,7 @@ export default function NotFound() {
 
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center px-6 text-center">
-      <p className="font-mono text-[13px] uppercase tracking-[0.24em] text-brass-600">404</p>
+      <p className="font-mono text-[13px] uppercase tracking-[0.24em] text-gold-600">404</p>
       <h1 className="mt-4 text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
         {dict.errors.notFound}
       </h1>

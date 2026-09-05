@@ -97,13 +97,13 @@ export default async function ServicesPage({
         <div className="container-page grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
           {services.map(({ icon: Icon, title, text, cta, ctaHref, price }) => (
             <div key={title} className="flex flex-col border border-line bg-paper p-6">
-              <Icon size={24} className="text-brass-500" />
+              <Icon size={24} className="text-gold-500" />
               <h2 className="mt-5 text-lg font-medium text-ink">{title}</h2>
               <p className="mt-2 flex-1 text-[14px] leading-relaxed text-stone">{text}</p>
               <p className="mt-4 text-[13px] font-medium text-graphite">{price}</p>
               <Link
                 href={ctaHref}
-                className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-medium text-brass-600 underline-offset-4 hover:underline"
+                className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-medium text-gold-600 underline-offset-4 hover:underline"
               >
                 {cta} <ArrowRight size={14} />
               </Link>
@@ -123,7 +123,7 @@ export default async function ServicesPage({
             />
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
-            <ButtonLink href={r.measurement} variant="brass" size="lg">
+            <ButtonLink href={r.measurement} variant="gold" size="lg">
               {dict.actions.bookMeasurement}
             </ButtonLink>
             <ButtonLink

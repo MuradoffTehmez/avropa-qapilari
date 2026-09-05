@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 };
 
 /**
- * PRD §83 — QR ilə açılan public qapı səhifəsi.
+ * QR ilə açılan public qapı səhifəsi.
  * Public görünüşdə şəxsi məlumat GÖSTƏRİLMİR; tam tarixçə yalnız
  * authenticated usta/admin üçün açılır.
  */
@@ -49,7 +49,7 @@ export default async function DoorPassportPage({
           />
           <div className="mt-4 flex items-start gap-4">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center border border-line bg-paper">
-              <QrCode size={26} className="text-brass-500" />
+              <QrCode size={26} className="text-gold-500" />
             </div>
             <div>
               <h1 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
@@ -101,7 +101,7 @@ export default async function DoorPassportPage({
               </dl>
             </Card>
 
-            {/* Private history — locked (PRD §83) */}
+            {/* Private history — locked */}
             <Card className="relative overflow-hidden">
               <div className="border-b border-line px-5 py-3.5">
                 <h2 className="flex items-center gap-2 text-[13px] font-semibold text-ink">
@@ -143,7 +143,7 @@ export default async function DoorPassportPage({
 
             <Card className="p-5">
               <h2 className="mb-4 flex items-center gap-2 text-[13px] font-semibold text-ink">
-                <ShieldCheck size={15} className="text-brass-500" />
+                <ShieldCheck size={15} className="text-gold-500" />
                 Bu qapı üçün nə edə bilərsiniz
               </h2>
               <div className="space-y-2">

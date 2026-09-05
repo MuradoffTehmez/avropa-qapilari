@@ -1,6 +1,6 @@
 "use client";
 
-import { useDemo } from "@/store/demo";
+import { useWorkflow } from "@/store/workflow";
 import { useState } from "react";
 import {
   ArrowLeft,
@@ -14,7 +14,7 @@ import {
 import type { Dictionary } from "@/i18n";
 import type { Locale, RepairCategoryKey } from "@/types";
 import { routes } from "@/lib/routes";
-import { cn, demoReference } from "@/lib/utils";
+import { cn, createReference } from "@/lib/utils";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card, Notice } from "@/components/ui/primitives";
 import { Stepper } from "@/components/ui/disclosure";
@@ -119,8 +119,8 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
     if (!validate(id)) return;
 
     if (id === "confirm") {
-      const reference = demoReference("REP");
-    useDemo.getState().add({ id: reference, kind: "repairs", title: "Qapı təmiri", detail: `${form.description} · ${form.city}, ${form.street} ${form.building} · ${form.date} ${form.slot}` });
+      const reference = createReference("REP");
+    useWorkflow.getState().add({ id: reference, kind: "repairs", title: "Qapı təmiri", detail: `${form.description} · ${form.city}, ${form.street} ${form.building} · ${form.date} ${form.slot}` });
     setSubmitted(reference);
       return;
     }
@@ -281,10 +281,6 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
               </ul>
             )}
 
-            <Notice className="mt-4">
-              Fayllar backend mərhələsində private R2 bucket-a signed URL ilə yüklənəcək; MIME və
-              ölçü yoxlaması serverdə aparılacaq (PRD §72, §131).
-            </Notice>
           </div>
         )}
 
@@ -342,7 +338,7 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
             </div>
             <Notice className="mt-4">
               Dəqiq vaxt operator tərəfindən təsdiqlənir. Usta təyinatı və vaxt konflikti serverdə
-              yoxlanılır (PRD §79).
+              yoxlanılır.
             </Notice>
           </div>
         )}
@@ -387,10 +383,6 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
               <Row label="Əlaqə" value={`${form.name} · ${form.phone}`} />
             </Card>
 
-            <Notice tone="warning" className="mt-4">
-              Bu demo-da forma serverə göndərilmir. Backend mərhələsində müraciət D1-ə yazılacaq,
-              Turnstile ilə qorunacaq və bildiriş Queue-ya düşəcək (PRD §19, §121).
-            </Notice>
           </div>
         )}
 
@@ -410,7 +402,7 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
       <aside className="lg:sticky lg:top-24 lg:h-fit">
         <Card className="p-5">
           <div className="flex items-center gap-2.5">
-            <DoorOpen size={18} className="text-brass-500" />
+            <DoorOpen size={18} className="text-gold-500" />
             <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-stone">
               Müraciət
             </h2>

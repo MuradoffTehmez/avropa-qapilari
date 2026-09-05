@@ -1,7 +1,7 @@
 import type { OptionGroup, OptionGroupKey, OptionValue } from "@/types";
 
 /**
- * DEMO OPTION SYSTEM — PRD §51, §52, §97.
+ * OPTION SYSTEM.
  * Variant explosion yoxdur: bir məhsul + konfiqurasiya olunan option-lar.
  */
 

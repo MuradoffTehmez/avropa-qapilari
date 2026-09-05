@@ -88,7 +88,7 @@ export default async function ConfiguratorIndexPage({
                     <span className="text-sm font-semibold text-ink">
                       {formatPriceFrom(p.basePrice)}
                     </span>
-                    <span className="flex items-center gap-1 text-[12px] font-medium text-brass-600">
+                    <span className="flex items-center gap-1 text-[12px] font-medium text-gold-600">
                       {dict.actions.configure} <ArrowRight size={13} />
                     </span>
                   </div>

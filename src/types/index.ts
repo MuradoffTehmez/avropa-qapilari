@@ -1,11 +1,11 @@
 /* =========================================================================
-   Domain tipləri — PRD §138–§158 data modelinə uyğun frontend proyeksiyası.
+   Domain tipləri–§158 data modelinə uyğun frontend proyeksiyası.
    Backend hazır olduqda bu tiplər API kontraktına map ediləcək.
    ========================================================================= */
 
 export type Locale = "az" | "en" | "ru";
 
-/** AZN. Demo üçün sadələşdirilib (minor unit deyil). */
+/** AZN (minor unit deyil). */
 export type Money = number;
 
 /* ------------------------------- Catalog ------------------------------- */
@@ -130,7 +130,7 @@ export interface OptionValue {
   priceDelta: Money;
   hex?: string;
   swatch?: string;
-  /** Uyğunluq: yalnız bu option id-lərindən biri seçilibsə mümkündür (PRD §97) */
+  /** Uyğunluq: yalnız bu option id-lərindən biri seçilibsə mümkündür */
   requires?: string[];
   /** Bu dəyər seçilərsə qadağan olunan option id-ləri */
   excludes?: string[];
@@ -184,7 +184,7 @@ export interface CartItem {
   quantity: number;
   unitPrice: Money;
   includedServices?: number;
-  /** PRD §65 — order snapshot */
+  /** order snapshot */
   snapshot: {
     width: number;
     height: number;
@@ -351,7 +351,7 @@ export interface DoorAsset {
   installedAt: string;
   warrantyStatus: "ACTIVE" | "EXPIRED";
   warrantyEnd: string;
-  /** Public QR-də göstərilmir (PRD §83) */
+  /** Public QR-də göstərilmir */
   privateHistory: DoorAssetEvent[];
 }
 

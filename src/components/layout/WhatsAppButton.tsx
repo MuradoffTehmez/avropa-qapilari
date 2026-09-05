@@ -1,7 +1,7 @@
 import { MessageCircle } from "lucide-react";
 import { brand } from "@/config/brand";
 
-/** PRD §125 — WhatsApp əlaqə kanalı. */
+/** WhatsApp əlaqə kanalı. */
 export function WhatsAppButton() {
   const number = brand.contact.whatsapp.replace(/[^0-9]/g, "");
 

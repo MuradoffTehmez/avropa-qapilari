@@ -14,7 +14,7 @@ import { useHydrated } from "@/lib/hooks";
 import { materialLabels, products, styleLabels } from "@/mock/products";
 import { getBrand } from "@/mock/taxonomy";
 
-/** PRD §46 — maksimum 4 məhsul müqayisəsi. */
+/** maksimum 4 məhsul müqayisəsi. */
 export function CompareView({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const r = routes(locale);
   const hydrated = useHydrated();

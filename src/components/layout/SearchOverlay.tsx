@@ -12,10 +12,7 @@ import { products } from "@/mock/products";
 import { brands, categories } from "@/mock/taxonomy";
 import { DoorVisual } from "@/components/product/DoorVisual";
 
-/**
- * PRD §40 — search + autocomplete.
- * MVP-də client-side filtrasiya; backend-də D1 FTS5 (PRD §119) əvəz edəcək.
- */
+/** Axtarış və avtotamamlama. */
 export function SearchOverlay({
   open,
   onClose,

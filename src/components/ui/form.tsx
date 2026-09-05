@@ -6,7 +6,7 @@ import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const control =
-  "w-full rounded-[3px] border border-line bg-paper px-3.5 text-sm text-ink transition-colors placeholder:text-mist hover:border-mist focus:border-ink focus:outline-none focus-visible:outline-2 focus-visible:outline-brass-500 focus-visible:outline-offset-1";
+  "w-full rounded-[3px] border border-line bg-paper px-3.5 text-sm text-ink transition-colors placeholder:text-mist hover:border-mist focus:border-ink focus:outline-none focus-visible:outline-2 focus-visible:outline-gold-500 focus-visible:outline-offset-1";
 
 export function Field({
   label,
@@ -83,7 +83,7 @@ export function Checkbox({
         <input
           id={id}
           type="checkbox"
-          className="peer h-[18px] w-[18px] appearance-none rounded-[2px] border border-mist bg-paper transition-colors checked:border-ink checked:bg-ink focus-visible:outline-2 focus-visible:outline-brass-500 focus-visible:outline-offset-1"
+          className="peer h-[18px] w-[18px] appearance-none rounded-[2px] border border-mist bg-paper transition-colors checked:border-ink checked:bg-ink focus-visible:outline-2 focus-visible:outline-gold-500 focus-visible:outline-offset-1"
           {...props}
         />
         <Check
@@ -153,7 +153,7 @@ export function RadioCard({
         <span className="flex flex-wrap items-center gap-2">
           <span className="text-sm font-medium text-ink">{label}</span>
           {badge && (
-            <span className="rounded-[2px] bg-brass-100 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wider text-brass-700">
+            <span className="rounded-[2px] bg-gold-100 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wider text-gold-700">
               {badge}
             </span>
           )}

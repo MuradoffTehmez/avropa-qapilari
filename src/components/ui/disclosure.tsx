@@ -118,7 +118,7 @@ export function Stepper({
               className={cn(
                 "flex items-center gap-2 border-b-2 px-3 py-2.5 text-[13px] transition-colors",
                 state === "current" && "border-ink text-ink",
-                state === "done" && "border-brass-400 text-graphite hover:text-ink",
+                state === "done" && "border-gold-400 text-graphite hover:text-ink",
                 state === "pending" && "border-line text-mist",
                 !clickable && "cursor-default",
               )}
@@ -127,7 +127,7 @@ export function Stepper({
                 className={cn(
                   "flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold",
                   state === "current" && "bg-ink text-paper",
-                  state === "done" && "bg-brass-400 text-paper",
+                  state === "done" && "bg-gold-400 text-paper",
                   state === "pending" && "border border-line text-mist",
                 )}
               >
@@ -160,14 +160,14 @@ export function Timeline({
               aria-hidden
               className={cn(
                 "absolute left-[9px] top-5 h-full w-px",
-                item.state === "done" ? "bg-brass-400" : "bg-line",
+                item.state === "done" ? "bg-gold-400" : "bg-line",
               )}
             />
           )}
           <span
             className={cn(
               "relative z-10 mt-0.5 flex h-[19px] w-[19px] shrink-0 items-center justify-center rounded-full border-2 bg-paper",
-              item.state === "done" && "border-brass-400 bg-brass-400",
+              item.state === "done" && "border-gold-400 bg-gold-400",
               item.state === "current" && "border-ink",
               item.state === "pending" && "border-line",
             )}
