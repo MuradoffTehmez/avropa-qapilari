@@ -1,0 +1,249 @@
+import Link from "next/link";
+import { ArrowUpRight, TrendingDown, TrendingUp } from "lucide-react";
+
+import { getDictionary, isLocale } from "@/i18n";
+import type { Locale } from "@/types";
+import { formatDate, formatDateLong, formatPrice } from "@/lib/utils";
+import { Card, Notice } from "@/components/ui/primitives";
+import { OrderStatusPill, RepairStatusPill } from "@/components/account/StatusPill";
+import { orders, repairRequests, appointments, measurements } from "@/mock/account";
+import { products } from "@/mock/products";
+import { optionGroups } from "@/mock/options";
+
+/** PRD §92 — admin dashboard KPI. */
+export default async function AdminDashboardPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale: raw } = await params;
+  const locale = (isLocale(raw) ? raw : "az") as Locale;
+  const dict = getDictionary(locale);
+
+  const kpis = [
+    { label: dict.admin.kpi.todayRevenue, value: formatPrice(4820), delta: 12.4 },
+    { label: dict.admin.kpi.monthRevenue, value: formatPrice(126400), delta: 8.1 },
+    { label: dict.admin.kpi.orders, value: "38", delta: 5.2 },
+    { label: dict.admin.kpi.aov, value: formatPrice(3326), delta: -2.7 },
+  ];
+
+  const operational = [
+    { label: dict.admin.kpi.pendingOrders, value: 6, tone: "warning" as const },
+    { label: dict.admin.kpi.newRepairs, value: 3, tone: "info" as const },
+    { label: dict.admin.kpi.activeRepairs, value: 8, tone: "brass" as const },
+    { label: dict.admin.kpi.pendingInstallations, value: 4, tone: "info" as const },
+    { label: dict.admin.kpi.appointmentsToday, value: appointments.length, tone: "success" as const },
+    { label: dict.admin.kpi.lowStock, value: 5, tone: "danger" as const },
+  ];
+
+  const topDoors = products.slice(0, 5);
+  const topColors = optionGroups.OUTSIDE_COLOR.values.slice(0, 5);
+  const topLocks = optionGroups.LOCK.values;
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight text-ink">{dict.admin.dashboard}</h1>
+        <p className="mt-1 text-[13px] text-stone">
+          {formatDateLong(new Date().toISOString())}
+        </p>
+      </div>
+
+      <Notice tone="warning">{dict.admin.readOnlyNotice}</Notice>
+
+      {/* KPI */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {kpis.map((k) => (
+          <Card key={k.label} className="p-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-stone">
+              {k.label}
+            </p>
+            <p className="mt-2 text-[1.75rem] font-semibold tracking-tight tabular-nums text-ink">
+              {k.value}
+            </p>
+            <p
+              className={
+                k.delta >= 0
+                  ? "mt-1.5 flex items-center gap-1 text-[12px] font-medium text-success"
+                  : "mt-1.5 flex items-center gap-1 text-[12px] font-medium text-danger"
+              }
+            >
+              {k.delta >= 0 ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
+              {Math.abs(k.delta)}% keçən aya nisbətən
+            </p>
+          </Card>
+        ))}
+      </div>
+
+      {/* Operational */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        {operational.map((o) => (
+          <Card key={o.label} className="p-4">
+            <p className="text-[2rem] font-semibold leading-none tabular-nums text-ink">{o.value}</p>
+            <p className="mt-2 text-[12px] leading-snug text-stone">{o.label}</p>
+          </Card>
+        ))}
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+        {/* Son sifarişlər */}
+        <Card>
+          <div className="flex items-center justify-between border-b border-line px-5 py-3.5">
+            <h2 className="text-[13px] font-semibold text-ink">{dict.admin.recentOrders}</h2>
+            <Link
+              href={`/${locale}/admin/orders`}
+              className="flex items-center gap-1 text-[12px] font-medium text-brass-600 hover:underline"
+            >
+              {dict.actions.viewAll} <ArrowUpRight size={13} />
+            </Link>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[520px] text-[13px]">
+              <thead>
+                <tr className="border-b border-line bg-bone/60 text-left text-[11px] uppercase tracking-[0.1em] text-stone">
+                  <th className="px-5 py-2.5 font-medium">Nömrə</th>
+                  <th className="px-5 py-2.5 font-medium">Müştəri</th>
+                  <th className="px-5 py-2.5 font-medium">Status</th>
+                  <th className="px-5 py-2.5 text-right font-medium">Məbləğ</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orders.map((o) => (
+                  <tr key={o.id} className="border-b border-line last:border-b-0">
+                    <td className="px-5 py-3 font-mono text-[12px] text-graphite">{o.number}</td>
+                    <td className="px-5 py-3 text-ink">{o.customerName}</td>
+                    <td className="px-5 py-3">
+                      <OrderStatusPill status={o.status} label={dict.orderStatus[o.status]} />
+                    </td>
+                    <td className="px-5 py-3 text-right font-medium tabular-nums text-ink">
+                      {formatPrice(o.total)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+
+        {/* Son təmirlər */}
+        <Card>
+          <div className="flex items-center justify-between border-b border-line px-5 py-3.5">
+            <h2 className="text-[13px] font-semibold text-ink">{dict.admin.recentRepairs}</h2>
+            <Link
+              href={`/${locale}/admin/repairs`}
+              className="flex items-center gap-1 text-[12px] font-medium text-brass-600 hover:underline"
+            >
+              {dict.actions.viewAll} <ArrowUpRight size={13} />
+            </Link>
+          </div>
+          <ul className="divide-y divide-line">
+            {repairRequests.map((rp) => (
+              <li key={rp.id} className="px-5 py-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-mono text-[12px] text-graphite">{rp.number}</p>
+                    <p className="mt-0.5 text-[13.5px] text-ink">
+                      {dict.repair.categories[rp.category]}
+                    </p>
+                    <p className="text-[12px] text-stone">{formatDate(rp.createdAt)}</p>
+                  </div>
+                  <RepairStatusPill status={rp.status} label={dict.repairStatus[rp.status]} />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      </div>
+
+      {/* Top listlər */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        <TopList
+          title={dict.admin.topDoors}
+          items={topDoors.map((p, i) => ({
+            label: p.name,
+            value: `${48 - i * 7} satış`,
+          }))}
+        />
+        <TopList
+          title={dict.admin.topColors}
+          items={topColors.map((c, i) => ({
+            label: c.label,
+            value: `${34 - i * 5}%`,
+            hex: c.hex,
+          }))}
+        />
+        <TopList
+          title={dict.admin.topLocks}
+          items={topLocks.map((l, i) => ({
+            label: l.label,
+            value: `${42 - i * 11}%`,
+          }))}
+        />
+      </div>
+
+      {/* Ölçü sifarişləri */}
+      <Card>
+        <div className="border-b border-line px-5 py-3.5">
+          <h2 className="text-[13px] font-semibold text-ink">{dict.admin.measurements}</h2>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[560px] text-[13px]">
+            <thead>
+              <tr className="border-b border-line bg-bone/60 text-left text-[11px] uppercase tracking-[0.1em] text-stone">
+                <th className="px-5 py-2.5 font-medium">Nömrə</th>
+                <th className="px-5 py-2.5 font-medium">Obyekt</th>
+                <th className="px-5 py-2.5 font-medium">Qapı</th>
+                <th className="px-5 py-2.5 font-medium">Usta</th>
+                <th className="px-5 py-2.5 font-medium">Tarix</th>
+              </tr>
+            </thead>
+            <tbody>
+              {measurements.map((m) => (
+                <tr key={m.id} className="border-b border-line last:border-b-0">
+                  <td className="px-5 py-3 font-mono text-[12px] text-graphite">{m.number}</td>
+                  <td className="px-5 py-3 text-ink">{dict.measurement.property[m.propertyType]}</td>
+                  <td className="px-5 py-3 tabular-nums text-graphite">{m.doorCount}</td>
+                  <td className="px-5 py-3 text-graphite">{m.technician ?? "—"}</td>
+                  <td className="px-5 py-3 text-graphite">{formatDate(m.preferredDate)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function TopList({
+  title,
+  items,
+}: {
+  title: string;
+  items: { label: string; value: string; hex?: string }[];
+}) {
+  return (
+    <Card>
+      <div className="border-b border-line px-5 py-3.5">
+        <h2 className="text-[13px] font-semibold text-ink">{title}</h2>
+      </div>
+      <ul className="divide-y divide-line">
+        {items.map((item, i) => (
+          <li key={item.label} className="flex items-center justify-between gap-3 px-5 py-2.5">
+            <span className="flex min-w-0 items-center gap-2.5">
+              <span className="w-4 shrink-0 text-[12px] tabular-nums text-mist">{i + 1}</span>
+              {item.hex && (
+                <span
+                  className="h-4 w-4 shrink-0 rounded-[2px] border border-line"
+                  style={{ background: item.hex }}
+                />
+              )}
+              <span className="truncate text-[13px] text-ink">{item.label}</span>
+            </span>
+            <span className="shrink-0 text-[12px] tabular-nums text-stone">{item.value}</span>
+          </li>
+        ))}
+      </ul>
+    </Card>
+  );
+}
