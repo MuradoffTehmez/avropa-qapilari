@@ -82,7 +82,7 @@ export default async function HomePage({
               </ButtonLink>
             </div>
 
-            <div className="mt-12 grid grid-cols-3 gap-6 border-t border-paper/12 pt-8">
+            <div className="mt-12 grid grid-cols-3 items-stretch gap-6 border-t border-paper/12 pt-8">
               <Stat invert label={dict.home.heroStatDoors} value="4 200+" />
               <Stat invert label={dict.home.heroStatYears} value="18" />
               <Stat invert label={dict.home.heroStatBrands} value="12" />

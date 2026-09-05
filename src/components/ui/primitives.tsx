@@ -293,10 +293,10 @@ export function Stat({
   className?: string;
 }) {
   return (
-    <div className={cn(className)}>
+    <div className={cn("flex h-full flex-col justify-end", className)}>
       <p
         className={cn(
-          "text-[11px] font-semibold uppercase tracking-[0.16em]",
+          "text-[11px] font-semibold uppercase leading-tight tracking-[0.16em]",
           invert ? "text-paper/45" : "text-stone",
         )}
       >
