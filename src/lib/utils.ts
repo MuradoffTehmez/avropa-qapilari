@@ -5,15 +5,24 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-const azn = new Intl.NumberFormat("az-AZ", {
-  maximumFractionDigits: 0,
-  minimumFractionDigits: 0,
-});
+/**
+ * Rəqəm formatlaması Intl-siz aparılır: Node və brauzerin ICU verilənləri
+ * fərqli boşluq simvolu verə bilir və bu, hydration mismatch yaradır.
+ */
+const NBSP = " ";
+
+export function formatNumber(value: number): string {
+  const rounded = Math.round(value);
+  const sign = rounded < 0 ? "-" : "";
+  const digits = Math.abs(rounded).toString();
+  const grouped = digits.replace(/\B(?=(\d{3})+(?!\d))/g, NBSP);
+  return sign + grouped;
+}
 
 /** 1450 -> "1 450 AZN" */
 export function formatPrice(value: number, withCurrency = true): string {
-  const n = azn.format(Math.round(value)).replace(/ /g, " ");
-  return withCurrency ? `${n} AZN` : n;
+  const n = formatNumber(value);
+  return withCurrency ? `${n}${NBSP}AZN` : n;
 }
 
 /** 1450 -> "1 450 AZN-dən" (PRD §29) */
@@ -21,25 +30,44 @@ export function formatPriceFrom(value: number): string {
   return `${formatPrice(value)}-dən`;
 }
 
-export function formatDate(iso: string, locale = "az-AZ"): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  return new Intl.DateTimeFormat(locale, {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(d);
+const monthsShort = [
+  "yan", "fev", "mar", "apr", "may", "iyn",
+  "iyl", "avq", "sen", "okt", "noy", "dek",
+];
+
+const monthsLong = [
+  "yanvar", "fevral", "mart", "aprel", "may", "iyun",
+  "iyul", "avqust", "sentyabr", "oktyabr", "noyabr", "dekabr",
+];
+
+function pad(n: number): string {
+  return n < 10 ? `0${n}` : String(n);
 }
 
-export function formatDateTime(iso: string, locale = "az-AZ"): string {
+/** 2026-06-04 -> "04 iyn 2026" */
+export function formatDate(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
-  return new Intl.DateTimeFormat(locale, {
-    day: "2-digit",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(d);
+  return `${pad(d.getDate())} ${monthsShort[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+/** 2026-06-04 -> "4 iyun 2026" */
+export function formatDateLong(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return `${d.getDate()} ${monthsLong[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+/** 2026-06-04T09:30 -> "04 iyn, 09:30" */
+export function formatDateTime(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return `${pad(d.getDate())} ${monthsShort[d.getMonth()]}, ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+export function monthShort(iso: string): string {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? "" : monthsShort[d.getMonth()];
 }
 
 export function formatDimensions(width: number, height: number): string {

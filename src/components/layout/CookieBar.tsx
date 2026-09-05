@@ -1,33 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import type { Dictionary } from "@/i18n";
 import { Button } from "@/components/ui/Button";
+import { useHydrated, useStoredValue, writeStoredValue } from "@/lib/hooks";
 
 const KEY = "ep-cookie-consent-v1";
 
 /** PRD §173 — kuki razılığı. Analitik/marketinq yalnız razılıqdan sonra. */
 export function CookieBar({ dict }: { dict: Dictionary }) {
-  const [visible, setVisible] = useState(false);
+  const hydrated = useHydrated();
+  const consent = useStoredValue(KEY);
 
-  useEffect(() => {
-    try {
-      if (!localStorage.getItem(KEY)) setVisible(true);
-    } catch {
-      /* private mode — banner göstərmirik */
-    }
-  }, []);
-
-  function decide(value: "all" | "necessary") {
-    try {
-      localStorage.setItem(KEY, value);
-    } catch {
-      /* ignore */
-    }
-    setVisible(false);
-  }
-
-  if (!visible) return null;
+  if (!hydrated || consent) return null;
 
   return (
     <div
@@ -41,10 +25,14 @@ export function CookieBar({ dict }: { dict: Dictionary }) {
           {dict.cookie.text}
         </p>
         <div className="flex shrink-0 gap-2">
-          <Button variant="secondary" size="sm" onClick={() => decide("necessary")}>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => writeStoredValue(KEY, "necessary")}
+          >
             {dict.cookie.necessaryOnly}
           </Button>
-          <Button size="sm" onClick={() => decide("all")}>
+          <Button size="sm" onClick={() => writeStoredValue(KEY, "all")}>
             {dict.cookie.acceptAll}
           </Button>
         </div>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Heart,
   Menu,
@@ -22,7 +22,7 @@ import { locales, localeShort } from "@/i18n/config";
 import { Logo } from "@/components/layout/Logo";
 import { useCart, cartCount } from "@/store/cart";
 import { useCompare, useFavorites } from "@/store/lists";
-import { useHydrated, useLockBodyScroll } from "@/lib/hooks";
+import { useHydrated, useLockBodyScroll, useScrolledPast } from "@/lib/hooks";
 import { SearchOverlay } from "@/components/layout/SearchOverlay";
 import { categories } from "@/mock/taxonomy";
 
@@ -31,7 +31,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const scrolled = useScrolledPast(8);
   const hydrated = useHydrated();
 
   const items = useCart((s) => s.items);
@@ -39,15 +39,6 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const compare = useCompare((s) => s.ids);
 
   useLockBodyScroll(mobileOpen);
-
-  useEffect(() => setMobileOpen(false), [pathname]);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   const nav = [
     { label: dict.nav.doors, href: r.doors },
@@ -189,6 +180,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
                   <Link
                     key={item.href}
                     href={item.href}
+                    onClick={() => setMobileOpen(false)}
                     className="border-b border-line px-3 py-3.5 text-[15px] font-medium text-ink last:border-b-0"
                   >
                     {item.label}
@@ -202,7 +194,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
                 </p>
                 <div className="flex flex-col gap-2">
                   {categories.filter((c) => c.featured).map((c) => (
-                    <Link key={c.slug} href={r.category(c.slug)} className="text-sm text-graphite">
+                    <Link key={c.slug} href={r.category(c.slug)} onClick={() => setMobileOpen(false)} className="text-sm text-graphite">
                       {c.name}
                     </Link>
                   ))}

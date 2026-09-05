@@ -1,0 +1,73 @@
+import type { Metadata } from "next";
+import { getDictionary, isLocale } from "@/i18n";
+import type { Locale } from "@/types";
+import { routes } from "@/lib/routes";
+import { Badge, Breadcrumbs, Section } from "@/components/ui/primitives";
+import { DoorVisual } from "@/components/product/DoorVisual";
+import { projects } from "@/mock/content";
+
+export const metadata: Metadata = {
+  title: "Layihələr",
+  description: "Villa, mənzil, ofis və kommersiya obyektlərində quraşdırdığımız qapılar.",
+};
+
+export default async function ProjectsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale: raw } = await params;
+  const locale = (isLocale(raw) ? raw : "az") as Locale;
+  const dict = getDictionary(locale);
+  const r = routes(locale);
+
+  return (
+    <>
+      <div className="border-b border-line bg-bone">
+        <div className="container-page py-8 sm:py-10">
+          <Breadcrumbs items={[{ label: "Ana səhifə", href: r.home }, { label: dict.nav.projects }]} />
+          <h1 className="mt-4 text-2xl font-semibold tracking-tight text-ink sm:text-3xl lg:text-[2.35rem]">
+            {dict.nav.projects}
+          </h1>
+          <p className="mt-2 max-w-xl text-[15px] text-stone">{dict.home.projectsText}</p>
+        </div>
+      </div>
+
+      <Section>
+        <div className="container-page grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {projects.map((p) => (
+            <article key={p.id} className="border border-line bg-paper">
+              <div className="relative aspect-4/3 overflow-hidden bg-bone">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="h-[85%] w-[45%]">
+                    <DoorVisual panelHex={p.accent} style="CLASSIC" handle="BRASS" ambient={false} />
+                  </div>
+                </div>
+                <Badge tone="dark" className="absolute left-3 top-3">
+                  {p.category}
+                </Badge>
+                <span className="absolute bottom-3 right-3 rounded-[2px] bg-paper/85 px-2 py-1 text-[11px] font-medium text-graphite backdrop-blur">
+                  {p.year}
+                </span>
+              </div>
+              <div className="p-5">
+                <h2 className="text-[16px] font-medium text-ink">{p.title}</h2>
+                <p className="mt-1 text-[13px] text-stone">{p.location}</p>
+                <dl className="mt-4 border-t border-line pt-3 text-[13px]">
+                  <div className="flex justify-between py-1">
+                    <dt className="text-stone">Model</dt>
+                    <dd className="font-medium text-ink">{p.doorModel}</dd>
+                  </div>
+                  <div className="flex justify-between py-1">
+                    <dt className="text-stone">Rəng</dt>
+                    <dd className="font-medium text-ink">{p.color}</dd>
+                  </div>
+                </dl>
+              </div>
+            </article>
+          ))}
+        </div>
+      </Section>
+    </>
+  );
+}
