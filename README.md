@@ -134,6 +134,12 @@ src/
 
 ---
 
+## Sənədlər
+
+Tam məhsul tələbləri sənədi: [`docs/PRD.md`](docs/PRD.md)
+
+---
+
 ## PRD ilə uyğunluq
 
 Frontend mərhələsində icra olunan əsas bölmələr:

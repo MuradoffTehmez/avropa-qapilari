@@ -43,6 +43,3 @@ next-env.d.ts
 # Project
 .vscode/
 *.local
-
-# Daxili sənədlər — public repoya düşməsin (istəsəniz bu sətri silin)
-/Avropa Qapıları Satış və Təmir Platforması — Tam PRD.md
