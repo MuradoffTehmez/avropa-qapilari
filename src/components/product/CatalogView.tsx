@@ -95,13 +95,13 @@ export function CatalogView({
 
       <div className="min-w-0">
         {/* Toolbar */}
-        <div className="catalog-toolbar mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-x-3 gap-y-2.5 border-b border-line pb-4">
           <p className="text-[13px] text-stone">
             <span className="font-semibold tabular-nums text-ink">{result.length}</span>{" "}
             {dict.common.results}
           </p>
 
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
             <Button
               variant="secondary"
               size="sm"
@@ -121,7 +121,7 @@ export function CatalogView({
               value={sort}
               onChange={(e) => setSort(e.target.value as SortKey)}
               aria-label={dict.actions.sort}
-              className="h-9 w-auto min-w-44 text-[13px]"
+              className="h-9 min-w-0 flex-1 text-[13px] sm:w-auto sm:max-w-52 sm:flex-none"
             >
               <option value="popular">{dict.sort.popular}</option>
               <option value="newest">{dict.sort.newest}</option>

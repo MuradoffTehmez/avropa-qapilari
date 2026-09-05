@@ -55,7 +55,7 @@ export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
       <div className="container-page py-12 lg:py-16">
         <div className="grid gap-10 lg:grid-cols-[1.2fr_3fr] lg:gap-14">
           <div>
-            <Logo tone="paper" />
+            <Logo tone="paper" tagline={dict.meta.slogan} />
             <p className="mt-5 max-w-xs text-[14px] leading-relaxed text-paper/55">
               {dict.meta.description}
             </p>

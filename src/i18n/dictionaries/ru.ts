@@ -3,6 +3,7 @@ import type { Dictionary } from "@/i18n/dictionaries/az";
 export const ru: Dictionary = {
   meta: {
     titleSuffix: "Европейские двери",
+    slogan: "Новый стандарт входа",
     description:
       "Входные, виллные и межкомнатные двери из Европы. Онлайн-конфигуратор, замер, монтаж, ремонт и гарантия.",
   },

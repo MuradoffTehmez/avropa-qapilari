@@ -1,6 +1,7 @@
 export const az = {
   meta: {
     titleSuffix: "Avropa qapıları",
+    slogan: "Girişin yeni standartı",
     description:
       "Avropa istehsalı giriş, villa və interyer qapıları. Onlayn konfiqurator, ölçü ustası, quraşdırma, təmir və zəmanət.",
   },

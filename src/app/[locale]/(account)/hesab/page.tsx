@@ -35,7 +35,7 @@ export default async function AccountDashboardPage({
 
   return (
     <div className="space-y-8">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <Card className="p-5">
           <Stat label={dict.account.orders} value={orders.length} hint={`${activeOrders.length} aktiv`} />
         </Card>
@@ -58,7 +58,7 @@ export default async function AccountDashboardPage({
           href={r.accountSection("appointments")}
           label={dict.actions.viewAll}
         />
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {appointments.map((a) => {
             const tech = technicians.find((t) => t.id === a.technicianId);
             return (

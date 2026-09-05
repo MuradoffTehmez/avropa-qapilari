@@ -39,6 +39,9 @@ const localizedSegments: { from: string; to: string; locale: "en" | "ru" }[] = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
+  // Dev göstəricisi mobil düymələri örtür
+  devIndicators: false,
+
   // Layihə kökünü açıq göstəririk (yuxarı qovluqdakı lockfile ilə qarışmasın)
   turbopack: { root: import.meta.dirname },
 

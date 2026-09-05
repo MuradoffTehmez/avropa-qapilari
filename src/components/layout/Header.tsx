@@ -65,7 +65,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
       <div className="hidden border-b border-line bg-bone lg:block">
         <div className="container-page flex h-9 items-center justify-between text-[12px] text-stone">
           <p className="truncate">
-            {brand.slogan}
+            {dict.meta.slogan}
             {brand.contact.workingHours ? ` · ${brand.contact.workingHours}` : ""}
           </p>
           <div className="flex items-center gap-4">
@@ -114,7 +114,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
               <Logo compact showTagline={false} />
             </span>
             <span className="hidden sm:block">
-              <Logo />
+              <Logo tagline={dict.meta.slogan} />
             </span>
           </Link>
 
@@ -189,7 +189,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
           />
           <div className="absolute inset-y-0 left-0 flex w-[88%] max-w-sm flex-col bg-paper">
             <div className="flex h-16 shrink-0 items-center justify-between border-b border-line px-4">
-              <Logo compact />
+              <Logo compact tagline={dict.meta.slogan} />
               <button
                 type="button"
                 onClick={close}

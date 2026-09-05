@@ -3,6 +3,7 @@ import type { Dictionary } from "@/i18n/dictionaries/az";
 export const en: Dictionary = {
   meta: {
     titleSuffix: "European doors",
+    slogan: "The new standard for entrances",
     description:
       "European entrance, villa and interior doors. Online configurator, on-site measurement, installation, repair and warranty.",
   },

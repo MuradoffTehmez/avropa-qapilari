@@ -5,6 +5,7 @@ import { persist } from "zustand/middleware";
 import { useHydrated } from "@/lib/hooks";
 import { Modal, toast } from "@/components/ui/overlays";
 import { Button } from "@/components/ui/Button";
+import { Download, Search } from "lucide-react";
 import { Card } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
 
@@ -48,13 +49,48 @@ export function DataTable<T>({
   const editable = !/audit|əməliyyatların|konversiya|permission|icazə|RBAC/i.test(title);
   return (
     <Card>
-      <div className="flex flex-wrap items-center gap-3 border-b p-3"><input value={query} onChange={(e) => { setQuery(e.target.value); setPage(0); }} aria-label={`${title} axtarışı`} placeholder="Cədvəldə axtar…" className="min-w-0 flex-1 border px-3 py-2 text-sm" /><Button size="sm" variant="ghost" onClick={() => { const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=`${title.toLowerCase().replace(/[^a-z0-9]+/g,"-")}.json`; a.click(); URL.revokeObjectURL(url); }}>İxrac et</Button></div>
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-3.5">
-        <div>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3.5 sm:px-5">
+        <div className="min-w-0">
           <h2 className="text-[13px] font-semibold text-ink">{title}</h2>
           {description && <p className="mt-0.5 text-[12px] text-stone">{description}</p>}
         </div>
         {actions}
+      </div>
+
+      <div className="flex items-center gap-2 border-b border-line px-4 py-3 sm:px-5">
+        <div className="relative min-w-0 flex-1">
+          <Search
+            size={14}
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-mist"
+          />
+          <input
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setPage(0);
+            }}
+            aria-label={`${title} axtarışı`}
+            placeholder="Cədvəldə axtar…"
+            className="h-9 w-full rounded-[3px] border border-line bg-bone pl-8 pr-3 text-[13px] text-ink outline-none placeholder:text-mist focus:border-ink"
+          />
+        </div>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="shrink-0"
+          onClick={() => {
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+          }}
+        >
+          <Download size={14} />
+          <span className="hidden sm:inline">İxrac</span>
+        </Button>
       </div>
 
       {filtered.length === 0 ? (

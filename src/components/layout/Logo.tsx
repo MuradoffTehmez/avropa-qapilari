@@ -97,11 +97,14 @@ export function Logo({
   tone = "ink",
   compact = false,
   showTagline = true,
+  tagline,
 }: {
   className?: string;
   tone?: "ink" | "paper";
   compact?: boolean;
   showTagline?: boolean;
+  /** Dilə uyğun slogan; verilməzsə brend sloganı istifadə olunur. */
+  tagline?: string;
 }) {
   return (
     <span className={cn("flex items-center gap-2 sm:gap-2.5", className)}>
@@ -115,7 +118,7 @@ export function Logo({
               tone === "paper" ? "text-paper/45" : "text-stone",
             )}
           >
-            {brand.slogan}
+            {tagline ?? brand.slogan}
           </span>
         )}
       </span>
