@@ -12,6 +12,7 @@ import { EmptyState } from "@/components/ui/primitives";
 import { ProductCard } from "@/components/product/ProductCard";
 import { brands, categories, collections } from "@/mock/taxonomy";
 import { materialLabels, styleLabels } from "@/mock/products";
+import { categoryName, countryName, materialName, styleName } from "@/lib/i18n-format";
 import {
   applyFilters,
   countActive,
@@ -163,7 +164,7 @@ export function CatalogView({
         {/* Active chips */}
         {activeCount > 0 && (
           <div className="mb-5 flex flex-wrap gap-2">
-            <ActiveChips filters={filters} patch={patch} />
+            <ActiveChips filters={filters} patch={patch} dict={dict} />
             <button
               type="button"
               onClick={() => setFilters(emptyFilters)}
@@ -194,7 +195,7 @@ export function CatalogView({
               )}
             >
               {result.slice(0, visible).map((p) => (
-                <ProductCard key={p.id} product={p} locale={locale} view={view} />
+                <ProductCard key={p.id} product={p} locale={locale} dict={dict} view={view} />
               ))}
             </div>
 
@@ -282,7 +283,7 @@ function FilterPanel({
           {categories.map((c) => (
             <Checkbox
               key={c.id}
-              label={`${c.name} (${c.productCount})`}
+              label={`${categoryName(c, dict)} (${c.productCount})`}
               checked={filters.categories.includes(c.slug)}
               onChange={() => patch({ categories: toggleIn(filters.categories, c.slug) })}
             />
@@ -295,7 +296,7 @@ function FilterPanel({
           <Checkbox
             key={b.id}
             label={b.name}
-            description={b.country}
+            description={countryName(b, dict)}
             checked={filters.brands.includes(b.slug)}
             onChange={() => patch({ brands: toggleIn(filters.brands, b.slug) })}
           />
@@ -348,7 +349,7 @@ function FilterPanel({
         {(Object.keys(materialLabels) as DoorMaterial[]).map((m) => (
           <Checkbox
             key={m}
-            label={materialLabels[m]}
+            label={materialName(m, dict)}
             checked={filters.materials.includes(m)}
             onChange={() => patch({ materials: toggleIn(filters.materials, m) })}
           />
@@ -425,7 +426,7 @@ function FilterPanel({
         {(Object.keys(styleLabels) as SurfaceStyle[]).map((s) => (
           <Checkbox
             key={s}
-            label={styleLabels[s]}
+            label={styleName(s, dict)}
             checked={filters.styles.includes(s)}
             onChange={() => patch({ styles: toggleIn(filters.styles, s) })}
           />
@@ -511,28 +512,30 @@ function FilterPanel({
 function ActiveChips({
   filters,
   patch,
+  dict,
 }: {
   filters: CatalogFilters;
   patch: (next: Partial<CatalogFilters>) => void;
+  dict: Dictionary;
 }) {
   const chips: { label: string; clear: () => void }[] = [];
 
   for (const slug of filters.categories) {
     const c = categories.find((x) => x.slug === slug);
-    if (c) chips.push({ label: c.name, clear: () => patch({ categories: filters.categories.filter((x) => x !== slug) }) });
+    if (c) chips.push({ label: categoryName(c, dict), clear: () => patch({ categories: filters.categories.filter((x) => x !== slug) }) });
   }
   for (const slug of filters.brands) {
     const b = brands.find((x) => x.slug === slug);
     if (b) chips.push({ label: b.name, clear: () => patch({ brands: filters.brands.filter((x) => x !== slug) }) });
   }
   for (const m of filters.materials) {
-    chips.push({ label: materialLabels[m], clear: () => patch({ materials: filters.materials.filter((x) => x !== m) }) });
+    chips.push({ label: materialName(m, dict), clear: () => patch({ materials: filters.materials.filter((x) => x !== m) }) });
   }
   for (const sc of filters.securityClasses) {
     chips.push({ label: sc, clear: () => patch({ securityClasses: filters.securityClasses.filter((x) => x !== sc) }) });
   }
   for (const s of filters.styles) {
-    chips.push({ label: styleLabels[s], clear: () => patch({ styles: filters.styles.filter((x) => x !== s) }) });
+    chips.push({ label: styleName(s, dict), clear: () => patch({ styles: filters.styles.filter((x) => x !== s) }) });
   }
   if (filters.priceMin !== null || filters.priceMax !== null) {
     chips.push({

@@ -5,11 +5,11 @@ import { ArrowRight } from "lucide-react";
 import { getDictionary, isLocale } from "@/i18n";
 import type { Locale } from "@/types";
 import { routes } from "@/lib/routes";
-import { formatPriceFrom } from "@/lib/utils";
 import { Breadcrumbs, Section, SectionHeading } from "@/components/ui/primitives";
 import { DoorVisual } from "@/components/product/DoorVisual";
 import { products } from "@/mock/products";
 import { categories } from "@/mock/taxonomy";
+import { categoryName, priceFrom } from "@/lib/i18n-format";
 
 export const metadata: Metadata = {
   title: "Qapı konfiquratoru",
@@ -56,7 +56,7 @@ export default async function ConfiguratorIndexPage({
                 href={r.category(c.slug)}
                 className="border border-line px-3 py-1.5 text-[13px] text-graphite transition-colors hover:border-ink hover:text-ink"
               >
-                {c.name}
+                {categoryName(c, dict)}
               </Link>
             ))}
           </div>
@@ -86,7 +86,7 @@ export default async function ConfiguratorIndexPage({
                   <h3 className="mt-1 text-[15px] font-medium text-ink">{p.name}</h3>
                   <div className="mt-auto flex items-center justify-between pt-4">
                     <span className="text-sm font-semibold text-ink">
-                      {formatPriceFrom(p.basePrice)}
+                      {priceFrom(p.basePrice, locale, dict)}
                     </span>
                     <span className="flex items-center gap-1 text-[12px] font-medium text-gold-600">
                       {dict.actions.configure} <ArrowRight size={13} />

@@ -7,6 +7,7 @@ import { routes } from "@/lib/routes";
 import { brand, hasContact, hasSocial } from "@/config/brand";
 import { Logo } from "@/components/layout/Logo";
 import { categories } from "@/mock/taxonomy";
+import { categoryName } from "@/lib/i18n-format";
 
 export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const r = routes(locale);
@@ -16,7 +17,7 @@ export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const columns = [
     {
       title: dict.footer.products,
-      links: categories.slice(0, 6).map((c) => ({ label: c.name, href: r.category(c.slug) })),
+      links: categories.slice(0, 6).map((c) => ({ label: categoryName(c, dict), href: r.category(c.slug) })),
     },
     {
       title: dict.footer.services,

@@ -95,6 +95,12 @@ export const az = {
     loading: "Yüklənir…",
     empty: "Məlumat yoxdur",
     results: "nəticə",
+    popularSearches: "Populyar axtarışlar",
+    searchPlaceholder: "Model, artikul, kateqoriya, brend…",
+    noSearchResults: "üzrə nəticə tapılmadı.",
+    categoriesLabel: "Kateqoriyalar",
+    brandsLabel: "Brendlər",
+    productsLabel: "Məhsullar",
   },
 
   home: {
@@ -184,6 +190,42 @@ export const az = {
     onlySale: "Yalnız endirimlilər",
   },
 
+  taxonomy: {
+    categories: {
+      "giris-qapilari": "Giriş qapıları",
+      "villa-qapilari": "Villa qapıları",
+      "otaq-qapilari": "Otaq qapıları",
+      "tehlukesizlik-qapilari": "Təhlükəsizlik qapıları",
+      "smart-qapilar": "Smart qapılar",
+      "shuseli-qapilar": "Şüşəli qapılar",
+      "metal-qapilar": "Metal qapılar",
+      "yangin-qapilari": "Yanğın qapıları",
+    },
+    materials: {
+      STEEL: "Polad",
+      SOLID_WOOD: "Massiv ağac",
+      MDF: "MDF",
+      ALUMINIUM: "Alüminium",
+      COMPOSITE: "Kompozit",
+      GLASS: "Şüşə",
+    },
+    styles: {
+      MODERN: "Müasir",
+      CLASSIC: "Klassik",
+      MINIMAL: "Minimalist",
+      LOFT: "Loft",
+      NEOCLASSIC: "Neoklassik",
+    },
+    countries: {
+      "İtaliya": "İtaliya",
+      "Almaniya": "Almaniya",
+      "Avstriya": "Avstriya",
+      "İspaniya": "İspaniya",
+      "Polşa": "Polşa",
+      "Çexiya": "Çexiya",
+    },
+  },
+
   sort: {
     popular: "Ən populyar",
     newest: "Yeni",
@@ -222,6 +264,8 @@ export const az = {
     similar: "Oxşar qapılar",
     addedToFavorites: "Favorilərə əlavə edildi",
     addedToCompare: "Müqayisəyə əlavə edildi",
+    removedFromFavorites: "Favorilərdən çıxarıldı",
+    removedFromCompare: "Müqayisədən çıxarıldı",
     compareFull: "Müqayisədə maksimum 4 məhsul ola bilər",
   },
 

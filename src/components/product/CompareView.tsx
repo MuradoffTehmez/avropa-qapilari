@@ -5,14 +5,14 @@ import { Check, Minus, Scale, X } from "lucide-react";
 import type { Dictionary } from "@/i18n";
 import type { Locale, Product } from "@/types";
 import { routes } from "@/lib/routes";
-import { formatPriceFrom } from "@/lib/utils";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { EmptyState, Skeleton } from "@/components/ui/primitives";
 import { DoorVisual } from "@/components/product/DoorVisual";
 import { useCompare } from "@/store/lists";
 import { useHydrated } from "@/lib/hooks";
-import { materialLabels, products, styleLabels } from "@/mock/products";
+import { products } from "@/mock/products";
 import { getBrand } from "@/mock/taxonomy";
+import { materialName, priceFrom, styleName } from "@/lib/i18n-format";
 
 /** maksimum 4 məhsul müqayisəsi. */
 export function CompareView({ locale, dict }: { locale: Locale; dict: Dictionary }) {
@@ -46,15 +46,15 @@ export function CompareView({ locale, dict }: { locale: Locale; dict: Dictionary
   }
 
   const rows: { label: string; render: (p: Product) => React.ReactNode }[] = [
-    { label: dict.common.price, render: (p) => formatPriceFrom(p.basePrice) },
+    { label: dict.common.price, render: (p) => priceFrom(p.basePrice, locale, dict) },
     { label: dict.catalog.brand, render: (p) => getBrand(p.brandSlug)?.name ?? "—" },
-    { label: dict.catalog.material, render: (p) => materialLabels[p.material] },
+    { label: dict.catalog.material, render: (p) => materialName(p.material, dict) },
     { label: dict.catalog.securityClass, render: (p) => p.securityClass },
     { label: dict.catalog.soundInsulation, render: (p) => `${p.soundInsulationDb} dB` },
     { label: dict.catalog.thermal, render: (p) => `${p.thermalW} W/m²K` },
     { label: dict.catalog.fireRating, render: (p) => p.fireRating ?? <Minus size={14} className="mx-auto text-mist" /> },
     { label: dict.common.warranty, render: (p) => `${p.warrantyYears} il` },
-    { label: dict.catalog.style, render: (p) => styleLabels[p.style] },
+    { label: dict.catalog.style, render: (p) => styleName(p.style, dict) },
     { label: dict.catalog.smartLock, render: (p) => <Bool value={p.smartLockReady} /> },
     { label: dict.catalog.glass, render: (p) => <Bool value={p.hasGlass} /> },
     { label: dict.catalog.customSize, render: (p) => <Bool value={p.customSizeAvailable} /> },

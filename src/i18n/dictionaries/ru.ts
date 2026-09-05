@@ -97,6 +97,12 @@ export const ru: Dictionary = {
     loading: "Загрузка…",
     empty: "Нет данных",
     results: "результатов",
+    popularSearches: "Популярные запросы",
+    searchPlaceholder: "Модель, артикул, категория, бренд…",
+    noSearchResults: "— ничего не найдено.",
+    categoriesLabel: "Категории",
+    brandsLabel: "Бренды",
+    productsLabel: "Товары",
   },
 
   home: {
@@ -187,6 +193,42 @@ export const ru: Dictionary = {
     onlySale: "Только со скидкой",
   },
 
+  taxonomy: {
+    categories: {
+      "giris-qapilari": "Входные двери",
+      "villa-qapilari": "Двери для вилл",
+      "otaq-qapilari": "Межкомнатные двери",
+      "tehlukesizlik-qapilari": "Двери безопасности",
+      "smart-qapilar": "Смарт-двери",
+      "shuseli-qapilar": "Стеклянные двери",
+      "metal-qapilar": "Металлические двери",
+      "yangin-qapilari": "Противопожарные двери",
+    },
+    materials: {
+      STEEL: "Сталь",
+      SOLID_WOOD: "Массив дерева",
+      MDF: "МДФ",
+      ALUMINIUM: "Алюминий",
+      COMPOSITE: "Композит",
+      GLASS: "Стекло",
+    },
+    styles: {
+      MODERN: "Современный",
+      CLASSIC: "Классический",
+      MINIMAL: "Минимализм",
+      LOFT: "Лофт",
+      NEOCLASSIC: "Неоклассика",
+    },
+    countries: {
+      "İtaliya": "Италия",
+      "Almaniya": "Германия",
+      "Avstriya": "Австрия",
+      "İspaniya": "Испания",
+      "Polşa": "Польша",
+      "Çexiya": "Чехия",
+    },
+  },
+
   sort: {
     popular: "Самые популярные",
     newest: "Новинки",
@@ -225,6 +267,8 @@ export const ru: Dictionary = {
     similar: "Похожие двери",
     addedToFavorites: "Добавлено в избранное",
     addedToCompare: "Добавлено в сравнение",
+    removedFromFavorites: "Удалено из избранного",
+    removedFromCompare: "Удалено из сравнения",
     compareFull: "В сравнении может быть максимум 4 товара",
   },
 

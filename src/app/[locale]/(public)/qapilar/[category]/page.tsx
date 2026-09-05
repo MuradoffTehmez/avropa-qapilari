@@ -7,6 +7,7 @@ import { Breadcrumbs } from "@/components/ui/primitives";
 import { CatalogView } from "@/components/product/CatalogView";
 import { products } from "@/mock/products";
 import { categories, getCategory } from "@/mock/taxonomy";
+import { categoryName } from "@/lib/i18n-format";
 
 export function generateStaticParams() {
   return locales.flatMap((locale) =>
@@ -53,11 +54,11 @@ export default async function CategoryPage({
             items={[
               { label: dict.nav.home, href: r.home },
               { label: dict.catalog.title, href: r.doors },
-              { label: cat.name },
+              { label: categoryName(cat, dict) },
             ]}
           />
           <h1 className="mt-4 text-2xl font-semibold tracking-tight text-ink sm:text-3xl lg:text-[2.35rem]">
-            {cat.name}
+            {categoryName(cat, dict)}
           </h1>
           <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-stone">
             {cat.description}

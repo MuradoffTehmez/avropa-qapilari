@@ -28,6 +28,7 @@ import { useCart, cartCount } from "@/store/cart";
 import { useCompare, useFavorites } from "@/store/lists";
 import { useHydrated, useLockBodyScroll, useScrolledPast } from "@/lib/hooks";
 import { categories } from "@/mock/taxonomy";
+import { categoryName } from "@/lib/i18n-format";
 
 export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const r = routes(locale);
@@ -229,7 +230,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
                         onClick={close}
                         className="text-[14px] text-graphite"
                       >
-                        {c.name}
+                        {categoryName(c, dict)}
                       </Link>
                     ))}
                 </div>

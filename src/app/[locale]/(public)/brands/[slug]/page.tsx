@@ -8,6 +8,7 @@ import { Breadcrumbs, Section, Stat } from "@/components/ui/primitives";
 import { ProductCard } from "@/components/product/ProductCard";
 import { brands, getBrand } from "@/mock/taxonomy";
 import { products } from "@/mock/products";
+import { countryName } from "@/lib/i18n-format";
 
 export function generateStaticParams() {
   return locales.flatMap((locale) => brands.map((b) => ({ locale, slug: b.slug })));
@@ -59,7 +60,7 @@ export default async function BrandPage({
           <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-stone">{b.description}</p>
 
           <div className="mt-8 grid grid-cols-2 gap-6 border-t border-line pt-6 sm:grid-cols-4">
-            <Stat label="Ölkə" value={b.country} />
+            <Stat label="Ölkə" value={countryName(b, dict)} />
             <Stat label="Təsis" value={b.founded} />
             <Stat label="Model" value={list.length} />
             <Stat label="Orta reytinq" value={avgRating.toFixed(1)} hint={`${minPrice} AZN-dən`} />
@@ -74,7 +75,7 @@ export default async function BrandPage({
           </h2>
           <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
             {list.map((p) => (
-              <ProductCard key={p.id} product={p} locale={locale} />
+              <ProductCard key={p.id} product={p} locale={locale} dict={dict} />
             ))}
           </div>
         </div>

@@ -1,12 +1,7 @@
-# Avropa Qapıları — Satış və Təmir Platforması
+# EuroPorta — Girişin yeni standartı
 
 Avropa istehsalı qapıların onlayn satışı, konfiqurasiyası, quraşdırılması, təmiri və
 zəmanət idarəçiliyi üçün platforma. Bu repozitoriya **Mərhələ 1 — frontend** işidir.
-
-> **Demo brend qeydi.** Rəsmi ad və loqo hələ hazır olmadığı üçün müvəqqəti olaraq
-> **EuroPorta** adı və sadə SVG loqo istifadə olunub. Real brend məlumatı gələndə
-> yalnız [`src/config/brand.ts`](src/config/brand.ts) və
-> [`src/components/layout/Logo.tsx`](src/components/layout/Logo.tsx) dəyişdirilməlidir.
 
 ---
 
@@ -15,14 +10,32 @@ zəmanət idarəçiliyi üçün platforma. Bu repozitoriya **Mərhələ 1 — fr
 | | Vəziyyət |
 |---|---|
 | Frontend (Mərhələ 1) | ✅ Hazırdır |
-| Backend / API | ⛔ Hələ yazılmayıb (planlaşdırılıb) |
-| Məlumat mənbəyi | Mock data — `src/mock/` |
-| Formalar | Client-side validasiya işləyir, serverə göndərilmir |
-| Autentifikasiya | Yoxdur — hesab bölməsi demo istifadəçi ilə göstərilir |
-| Ödəniş | Yoxdur — provayder abstraksiyası PRD-də təsvir olunub |
+| Backend / API | ⛔ Hələ yazılmayıb |
+| Məlumat mənbəyi | Test datası — `src/mock/` |
+| Formalar | Client-side validasiya işləyir; müraciətlər brauzerdə saxlanılır |
+| Autentifikasiya | Yoxdur — `/giris` ekranı hazır, sessiya backend ilə qoşulacaq |
+| Ödəniş | Yoxdur — provayder abstraksiyası planlaşdırılıb |
+| Şirkət əlaqə məlumatları | Boş — `src/config/brand.ts` faylında doldurulmalıdır |
 
-Bütün mock məlumatlar bir yerdə saxlanılır ki, backend qoşulanda dəyişiklik
-yalnız data qatında olsun; komponentlərin API-si dəyişməyəcək.
+Test datası hər modeldən bir qeyddən ibarətdir (9 məhsul — hər kateqoriyadan biri).
+Təhvil zamanı `src/mock/` qovluğu repository qatı ilə əvəzlənəcək.
+
+---
+
+## Brend
+
+| | |
+|---|---|
+| Ad | EuroPorta |
+| Slogan | Girişin yeni standartı |
+| Rənglər | Navy `#0b1d34` · Qızıl `#ad7d38` (loqodan çıxarılıb) |
+| Loqo mənbəyi | `Logo/EuroPorta.png` |
+| Veb variantları | `public/brand/europorta-full.png`, `public/brand/europorta-mark.png` |
+| Vektor işarə | `src/components/layout/Logo.tsx` |
+
+Brend məlumatı bir yerdə saxlanılır: [`src/config/brand.ts`](src/config/brand.ts).
+Telefon, e-poçt, ünvan və sosial linklər boş qaldıqca UI-də avtomatik gizlədilir —
+doldurduğunuz anda header, footer və əlaqə səhifəsində görünəcək.
 
 ---
 
@@ -31,11 +44,8 @@ yalnız data qatında olsun; komponentlərin API-si dəyişməyəcək.
 - **Next.js 16** (App Router, Server Components default)
 - **React 19** + **TypeScript** (strict)
 - **Tailwind CSS v4** — CSS-first konfiqurasiya, `@theme` tokenləri
-- **Zustand** — səbət, favorilər və müqayisə üçün persist olunan client state
+- **Zustand** — səbət, favorilər, müqayisə və iş axını üçün persist olunan state
 - **lucide-react** — ikonlar
-- Şəkil əvəzinə **proqram SVG qapı renderi** (real fotolar gələnə qədər)
-
-Kod strukturu PRD §188-dəki repozitoriya sxeminə uyğun qurulub.
 
 ---
 
@@ -49,7 +59,7 @@ npm install
 npm run dev
 ```
 
-Sayt: <http://localhost:3000> → avtomatik olaraq `/az` ünvanına yönlənir.
+Sayt: <http://localhost:3000> → dil kukisi / brauzer dilinə görə yönlənir.
 
 ```bash
 npm run build
@@ -59,23 +69,38 @@ npm run build
 npm run lint
 ```
 
+```bash
+npm run typecheck
+```
+
+---
+
+## Dil dəstəyi
+
+Üç dil tam dəstəklənir: **AZ** (default), **EN**, **RU**.
+
+- Hər dilin öz tam sözlüyü var (`src/i18n/dictionaries/`), fallback yoxdur —
+  TypeScript üç faylın açar dəstinin eyni olmasını məcbur edir.
+- Kateqoriya, material, stil və ölkə adları da tərcümə olunur
+  (`dict.taxonomy`, `src/lib/i18n-format.ts`).
+- URL seqmentləri lokallaşdırılıb: `/az/qapilar`, `/en/doors`, `/ru/dveri`
+  (`next.config.ts` rewrite-ları).
+- Dil seçimi kukidə saxlanılır; ilk ziyarətdə `Accept-Language` nəzərə alınır.
+
 ---
 
 ## Səhifə xəritəsi
 
-Bütün URL-lər locale prefiksi ilə işləyir: `/az`, `/en`, `/ru`.
-EN/RU seqmentləri (`/en/doors`, `/ru/dveri`) `next.config.ts`-dəki rewrite-larla
-AZ route-larına yönlənir (PRD §24).
+Bütün URL-lər locale prefiksi ilə işləyir.
 
 ### Public
 
 | Ünvan | Təsvir |
 |---|---|
-| `/az` | Ana səhifə (PRD §25–§36 bölmə ardıcıllığı) |
-| `/az/qapilar` | Kataloq — tam filter sistemi, sort, grid/list, mobil drawer |
-| `/az/qapilar/[category]` | Kateqoriya səhifəsi |
+| `/az` | Ana səhifə |
+| `/az/qapilar` | Kataloq — filtrlər, sıralama, grid/list, mobil drawer |
+| `/az/qapilar/[category]` | Kateqoriya |
 | `/az/qapi/[slug]` | Məhsul detalı — qalereya, 11 tab, sənədlər, Product schema |
-| `/az/konfiqurator` | Model seçimi |
 | `/az/konfiqurator/[slug]` | **Qapı konfiquratoru** — canlı preview və qiymət |
 | `/az/sebet`, `/az/sifaris` | Səbət və 6 addımlı checkout |
 | `/az/temir` | 8 addımlı təmir sihirbazı |
@@ -83,9 +108,12 @@ AZ route-larına yönlənir (PRD §24).
 | `/az/quote` | Qiymət təklifi sorğusu |
 | `/az/xidmetler`, `/az/xidmetler/[service]` | Xidmətlər |
 | `/az/brands`, `/az/brands/[slug]` | Brendlər |
-| `/az/layiheler`, `/az/blog`, `/az/faq`, `/az/haqqimizda`, `/az/elaqe` | Kontent |
+| `/az/layiheler`, `/az/layiheler/[slug]` | Layihələr, əvvəl/sonra müqayisəsi |
+| `/az/blog`, `/az/faq`, `/az/haqqimizda`, `/az/elaqe` | Kontent |
 | `/az/favoritler`, `/az/muqayise` | Favorilər və müqayisə (maks. 4 məhsul) |
-| `/az/service/door/[serial]` | **QR qapı pasportu** — public görünüş |
+| `/az/giris` | Giriş / qeydiyyat / şifrə bərpası |
+| `/az/usta` | Usta kabineti |
+| `/az/service/door/[serial]` | QR qapı pasportu |
 | `/az/legal/[page]` | Hüquqi səhifələr |
 
 ### Hesab
@@ -95,10 +123,8 @@ AZ route-larına yönlənir (PRD §24).
 
 ### Admin
 
-`/az/admin` və alt bölmələr: `products`, `categories`, `brands`, `configurator`,
-`orders`, `quotes`, `discounts`, `repairs`, `measurements`, `appointments`,
-`technicians`, `roles`, `customers`, `inventory`, `warranty`, `reviews`,
-`content`, `seo`, `analytics`, `audit`, `settings`.
+`/az/admin` və 21 alt bölmə: kataloq, satış, xidmətlər, komanda, müştərilər,
+anbar, zəmanət, rəylər, kontent, SEO, analitika, audit, tənzimləmələr.
 
 ---
 
@@ -113,78 +139,37 @@ src/
     admin/         # idarəetmə paneli
   components/
     ui/            # dizayn sistemi primitivləri
-    layout/        # header, footer, axtarış, kuki
-    product/       # kart, qalereya, kataloq, müqayisə, DoorVisual
+    layout/        # header, footer, axtarış, dil seçici, mobil naviqasiya
+    product/       # kart, qalereya, kataloq, müqayisə, DoorVisual, DoorScene
     configurator/  # konfiqurator
     cart/          # səbət, checkout
     repair/        # təmir, ölçü, qiymət təklifi
-    account/       # kabinet naviqasiyası, status
-    admin/         # cədvəl və shell
+    account/       # kabinet, giriş, usta paneli, bildirişlər
+    admin/         # cədvəl, shell, bölmələr
   features/
-    catalog/       # filter və sort məntiqi
+    catalog/       # filter və sıralama məntiqi
     configurator/  # uyğunluq (compatibility) engine
     pricing/       # qiymət hesablama engine
-  i18n/            # AZ baza + EN/RU merge
-  mock/            # DEMO DATA — backend qoşulanda əvəzlənəcək
-  store/           # zustand (səbət, favorilər, müqayisə)
-  lib/             # routes, utils, hooks
+  i18n/            # AZ / EN / RU tam sözlüklər
+  mock/            # TEST DATASI — backend qoşulanda əvəzlənəcək
+  store/           # zustand (səbət, siyahılar, iş axını)
+  lib/             # routes, utils, hooks, i18n-format
   types/           # domain tipləri
-  config/brand.ts  # DEMO brend konfiqurasiyası
+  config/brand.ts  # brend konfiqurasiyası
 ```
 
 ---
 
-## Sənədlər
+## Responsive
 
-Tam məhsul tələbləri sənədi: [`docs/PRD.md`](docs/PRD.md)
+Yoxlanılmış ekran ölçüləri: **320, 360, 390, 768, 1024, 1280, 1440, 1920 px**.
+25 səhifədə üfüqi sürüşmə yoxdur.
 
----
-
-## PRD ilə uyğunluq
-
-Frontend mərhələsində icra olunan əsas bölmələr:
-
-- §23–§36 — informasiya arxitekturası və ana səhifə
-- §37–§46 — kataloq, filter, sort, axtarış, məhsul səhifəsi, favorilər, müqayisə
-- §47–§57 — konfiqurator, option sistemi, custom ölçü, konfiqurasiyanın saxlanması
-- §53–§55 — pricing engine (`src/features/pricing/engine.ts`)
-- §58–§65 — səbət, checkout, sifariş statusları və snapshot
-- §66–§68 — qiymət təklifi və ölçü sifarişi
-- §69–§73 — təmir sistemi və sihirbaz
-- §81–§85 — zəmanət, serial nömrə, QR pasport, servis tarixçəsi
-- §90–§97 — admin paneli, RBAC matrisi, konfiqurator idarəçiliyi
-- §107–§111 — SEO: metadata, structured data, sitemap, robots, canonical
-- §112–§118 — performans, mobile-first, dizayn sistemi, əlçatanlıq (WCAG 2.2 AA hədəfi)
-- §173 — kuki razılığı
-
-### Frontend-də *məqsədli şəkildə* edilməyənlər
-
-Bunlar server tələb edir və növbəti mərhələdəyə saxlanılıb:
-
-- Real qiymət hesablanması serverdə (PRD §130) — hazırkı engine yalnız UI göstəricisidir
-- D1 / Prisma, R2, Cloudflare Images, KV, Queues, Workflows
-- Autentifikasiya, sessiya, RBAC tətbiqi (§88, §89, §93)
-- Turnstile, WAF, rate limiting (§19, §20)
-- Ödəniş provayderi inteqrasiyası (§61)
-- Appointment konflikt yoxlaması serverdə (§79)
-- Fayl yükləmə təhlükəsizliyi və signed URL (§131)
-
----
-
-## Dizayn sistemi
-
-- Palitra: ağ / off-white / qrafit / tünd boz / qara + **fırçalanmış bürünc** aksent
-- Tipoqrafiya: Inter (`latin`, `latin-ext`, `cyrillic` — `ə ı İ ğ ş ç ö ü` tam dəstəklənir)
-- Radiuslar minimal (2–6px) — arxitektural görünüş
-- Breakpoint-lər PRD §115-ə uyğun: `< 640` / `640–1024` / `1024+` / `1440+`
-- Fokus halları, `prefers-reduced-motion`, aria etiketləri və skip-link daxildir
-
-### Qapı vizualı
-
-Real məhsul fotoları olmadığı üçün qapılar `DoorVisual` komponenti ilə SVG qatlarından
-qurulur: baza → panel naxışı → şüşə → dəstək → kilid → aksesuar. Bu, PRD §50-dəki
-layer-based rendering yanaşmasının eyni ilə həyata keçirilməsidir — fotolar R2-yə
-yüklənəndə komponentin daxili qatları `<image>` ilə əvəzlənəcək, xarici API dəyişməyəcək.
+- Mobil: alt naviqasiya paneli, tam ekran çekmecə, 44px toxunma hədəfləri,
+  `safe-area` dəstəyi, iOS-da fokus zamanı zoom olmur
+- Planşet: 3 sütunlu kataloq, yan panel yığılır
+- Desktop: 4 sütun, sabit filtr paneli, maksimum 90rem kontent eni
+- Admin cədvəlləri mobildə kart görünüşünə keçir
 
 ---
 
@@ -194,9 +179,11 @@ yüklənəndə komponentin daxili qatları `<image>` ilə əvəzlənəcək, xari
 2. `src/mock/` → repository/service qatına keçid
 3. Autentifikasiya və RBAC
 4. Server-side pricing və sifariş axını
-5. R2 + Cloudflare Images ilə real media
+5. R2 + Cloudflare Images ilə real məhsul fotoları
 6. Turnstile, rate limiting, audit log
-7. EN/RU məzmununun tamamlanması (i18n arxitekturası hazırdır)
+7. Ödəniş provayderi inteqrasiyası
+
+Tam məhsul tələbləri sənədi: [`docs/PRD.md`](docs/PRD.md)
 
 ---
 

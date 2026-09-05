@@ -6,11 +6,11 @@ import { Search, X } from "lucide-react";
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/types";
 import { routes } from "@/lib/routes";
-import { formatPriceFrom } from "@/lib/utils";
 import { useEscapeKey, useLockBodyScroll } from "@/lib/hooks";
 import { products } from "@/mock/products";
 import { brands, categories } from "@/mock/taxonomy";
 import { DoorVisual } from "@/components/product/DoorVisual";
+import { categoryName, priceFrom } from "@/lib/i18n-format";
 
 /** Axtarış və avtotamamlama. */
 export function SearchOverlay({
@@ -66,7 +66,7 @@ export function SearchOverlay({
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Model, artikul, kateqoriya, brend…"
+            placeholder={dict.common.searchPlaceholder}
             aria-label={dict.actions.search}
             className="h-full flex-1 bg-transparent text-[15px] text-ink outline-none placeholder:text-mist"
           />
@@ -79,7 +79,7 @@ export function SearchOverlay({
           {results === null && (
             <div className="p-5">
               <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-stone">
-                Populyar axtarışlar
+                {dict.common.popularSearches}
               </p>
               <div className="flex flex-wrap gap-2">
                 {["Milano", "Smart lock", "RC3", "Villa", "Şüşəli", "RAL 7016"].map((s) => (
@@ -98,14 +98,14 @@ export function SearchOverlay({
 
           {empty && (
             <p className="p-8 text-center text-sm text-stone">
-              &laquo;{query}&raquo; üzrə nəticə tapılmadı.
+              &laquo;{query}&raquo; {dict.common.noSearchResults}
             </p>
           )}
 
           {results && results.products.length > 0 && (
             <div className="border-b border-line p-3">
               <p className="px-2 pb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-stone">
-                Məhsullar
+                {dict.common.productsLabel}
               </p>
               {results.products.map((p) => (
                 <Link
@@ -120,7 +120,7 @@ export function SearchOverlay({
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-medium text-ink">{p.name}</span>
                     <span className="block text-xs text-stone">
-                      {p.sku} · {formatPriceFrom(p.basePrice)}
+                      {p.sku} · {priceFrom(p.basePrice, locale, dict)}
                     </span>
                   </span>
                 </Link>
@@ -133,12 +133,12 @@ export function SearchOverlay({
               {results.categories.length > 0 && (
                 <div>
                   <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-stone">
-                    Kateqoriyalar
+                    {dict.common.categoriesLabel}
                   </p>
                   <div className="flex flex-col gap-1.5">
                     {results.categories.map((c) => (
                       <Link key={c.id} href={r.category(c.slug)} onClick={onClose} className="text-sm text-graphite hover:text-ink">
-                        {c.name}
+                        {categoryName(c, dict)}
                       </Link>
                     ))}
                   </div>
@@ -147,7 +147,7 @@ export function SearchOverlay({
               {results.brands.length > 0 && (
                 <div>
                   <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-stone">
-                    Brendlər
+                    {dict.common.brandsLabel}
                   </p>
                   <div className="flex flex-col gap-1.5">
                     {results.brands.map((b) => (

@@ -17,7 +17,7 @@ import {
 import { getDictionary, isLocale, locales } from "@/i18n";
 import type { Locale } from "@/types";
 import { routes } from "@/lib/routes";
-import { formatDate, formatDimensions, formatPrice, formatPriceFrom } from "@/lib/utils";
+import { formatDate, formatDimensions, formatPrice } from "@/lib/utils";
 import { brand } from "@/config/brand";
 import {
   Badge,
@@ -32,10 +32,11 @@ import { Accordion, Tabs } from "@/components/ui/disclosure";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductActions } from "@/components/product/ProductActions";
 import { ProductCard } from "@/components/product/ProductCard";
-import { getProduct, getRelatedProducts, materialLabels, products, styleLabels } from "@/mock/products";
+import { getProduct, getRelatedProducts, products } from "@/mock/products";
 import { getBrand, getCategory } from "@/mock/taxonomy";
 import { faq, reviews } from "@/mock/content";
 import { optionGroups } from "@/mock/options";
+import { materialName, priceFrom, styleName } from "@/lib/i18n-format";
 
 export function generateStaticParams() {
   return locales.flatMap((locale) => products.map((p) => ({ locale, slug: p.slug })));
@@ -163,7 +164,7 @@ export default async function ProductPage({
                 {dict.product.startingPrice}
               </p>
               <p className="mt-1 text-3xl font-semibold tracking-tight text-ink">
-                {formatPriceFrom(product.basePrice)}
+                {priceFrom(product.basePrice, locale, dict)}
               </p>
             </div>
             {product.oldPrice && (
@@ -178,7 +179,7 @@ export default async function ProductPage({
               <KeySpec icon={ShieldCheck} label="Təhlükəsizlik" value={product.securityClass} />
             )}
             <KeySpec icon={Volume2} label="Səs izolyasiyası" value={`${product.soundInsulationDb} dB`} />
-            <KeySpec icon={Package} label="Material" value={materialLabels[product.material]} />
+            <KeySpec icon={Package} label="Material" value={materialName(product.material, dict)} />
             {product.fireRating && <KeySpec icon={Flame} label="Yanğın" value={product.fireRating} />}
             <KeySpec icon={Award} label="Zəmanət" value={`${product.warrantyYears} il`} />
             <KeySpec
@@ -220,7 +221,7 @@ export default async function ProductPage({
                   <div className="max-w-2xl space-y-4 text-[15px] leading-relaxed text-graphite">
                     <p>{product.description}</p>
                     <p>
-                      Model {styleLabels[product.style].toLowerCase()} stildə hazırlanıb və{" "}
+                      Model {styleName(product.style, dict).toLowerCase()} stildə hazırlanıb və{" "}
                       {category?.name.toLowerCase()} qrupuna aiddir. Konfiquratorda xarici və daxili
                       rəngi ayrıca seçmək, kilid sistemini gücləndirmək və smart lock əlavə etmək
                       mümkündür.
@@ -233,7 +234,7 @@ export default async function ProductPage({
                     <dl>
                       <DataRow label={dict.product.brand} value={productBrand?.name ?? "—"} />
                       <DataRow label="Kolleksiya" value={product.collection} />
-                      <DataRow label="Stil" value={styleLabels[product.style]} />
+                      <DataRow label="Stil" value={styleName(product.style, dict)} />
                       <DataRow label={dict.product.availability} value={product.inStock ? dict.common.inStock : dict.common.madeToOrder} />
                       <DataRow label={dict.product.warrantyPeriod} value={`${product.warrantyYears} il`} />
                     </dl>
@@ -478,7 +479,7 @@ export default async function ProductPage({
             <SectionHeading title={dict.product.similar} />
             <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
               {related.map((p) => (
-                <ProductCard key={p.id} product={p} locale={locale} />
+                <ProductCard key={p.id} product={p} locale={locale} dict={dict} />
               ))}
             </div>
           </div>

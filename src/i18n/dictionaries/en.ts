@@ -97,6 +97,12 @@ export const en: Dictionary = {
     loading: "Loading…",
     empty: "No data",
     results: "results",
+    popularSearches: "Popular searches",
+    searchPlaceholder: "Model, SKU, category, brand…",
+    noSearchResults: "returned no results.",
+    categoriesLabel: "Categories",
+    brandsLabel: "Brands",
+    productsLabel: "Products",
   },
 
   home: {
@@ -187,6 +193,42 @@ export const en: Dictionary = {
     onlySale: "On sale only",
   },
 
+  taxonomy: {
+    categories: {
+      "giris-qapilari": "Entrance doors",
+      "villa-qapilari": "Villa doors",
+      "otaq-qapilari": "Interior doors",
+      "tehlukesizlik-qapilari": "Security doors",
+      "smart-qapilar": "Smart doors",
+      "shuseli-qapilar": "Glazed doors",
+      "metal-qapilar": "Metal doors",
+      "yangin-qapilari": "Fire doors",
+    },
+    materials: {
+      STEEL: "Steel",
+      SOLID_WOOD: "Solid wood",
+      MDF: "MDF",
+      ALUMINIUM: "Aluminium",
+      COMPOSITE: "Composite",
+      GLASS: "Glass",
+    },
+    styles: {
+      MODERN: "Modern",
+      CLASSIC: "Classic",
+      MINIMAL: "Minimalist",
+      LOFT: "Loft",
+      NEOCLASSIC: "Neoclassical",
+    },
+    countries: {
+      "İtaliya": "Italy",
+      "Almaniya": "Germany",
+      "Avstriya": "Austria",
+      "İspaniya": "Spain",
+      "Polşa": "Poland",
+      "Çexiya": "Czechia",
+    },
+  },
+
   sort: {
     popular: "Most popular",
     newest: "Newest",
@@ -225,6 +267,8 @@ export const en: Dictionary = {
     similar: "Similar doors",
     addedToFavorites: "Added to favourites",
     addedToCompare: "Added to comparison",
+    removedFromFavorites: "Removed from favourites",
+    removedFromCompare: "Removed from comparison",
     compareFull: "You can compare up to 4 products",
   },
 

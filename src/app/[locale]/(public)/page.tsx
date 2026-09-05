@@ -22,6 +22,7 @@ import { ProductCard } from "@/components/product/ProductCard";
 import { categories, brands } from "@/mock/taxonomy";
 import { getFeaturedProducts } from "@/mock/products";
 import { faq, projects, reviews } from "@/mock/content";
+import { categoryName, countryName } from "@/lib/i18n-format";
 
 export default async function HomePage({
   params,
@@ -138,9 +139,9 @@ export default async function HomePage({
                 href={r.category(c.slug)}
                 className="group overflow-hidden border border-line bg-paper transition-shadow hover:shadow-lg"
               >
-                <div className="aspect-[4/3] overflow-hidden"><DoorScene color={c.accent} variant={i} title={c.name} /></div>
+                <div className="aspect-[4/3] overflow-hidden"><DoorScene color={c.accent} variant={i} title={categoryName(c, dict)} /></div>
                 <div className="p-4 sm:p-5">
-                  <h3 className="text-[15px] font-medium text-ink sm:text-lg">{c.name}</h3>
+                  <h3 className="text-[15px] font-medium text-ink sm:text-lg">{categoryName(c, dict)}</h3>
                   <p className="mt-1 text-xs text-stone">{c.productCount} model</p>
                 </div>
               </Link>
@@ -214,7 +215,7 @@ export default async function HomePage({
           />
           <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
             {featured.map((p) => (
-              <ProductCard key={p.id} product={p} locale={locale} />
+              <ProductCard key={p.id} product={p} locale={locale} dict={dict} />
             ))}
           </div>
         </div>
@@ -340,7 +341,7 @@ export default async function HomePage({
               >
                 <span className="text-[15px] font-semibold tracking-tight text-ink">{b.name}</span>
                 <span className="mt-1 text-[11px] uppercase tracking-[0.14em] text-stone">
-                  {b.country}
+                  {countryName(b, dict)}
                 </span>
               </Link>
             ))}

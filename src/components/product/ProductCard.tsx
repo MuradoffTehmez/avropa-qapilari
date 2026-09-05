@@ -2,24 +2,27 @@
 
 import Link from "next/link";
 import { Heart, Scale, ShieldCheck, Volume2 } from "lucide-react";
+import type { Dictionary } from "@/i18n";
 import type { Locale, Product } from "@/types";
 import { routes } from "@/lib/routes";
-import { cn, formatPrice, formatPriceFrom } from "@/lib/utils";
+import { cn, formatPrice } from "@/lib/utils";
 import { Badge } from "@/components/ui/primitives";
 import { DoorVisual } from "@/components/product/DoorVisual";
-import { useCompare, useFavorites, COMPARE_LIMIT } from "@/store/lists";
+import { useCompare, useFavorites } from "@/store/lists";
 import { useHydrated } from "@/lib/hooks";
 import { toast } from "@/components/ui/overlays";
-import { materialLabels } from "@/mock/products";
+import { materialName, priceFrom } from "@/lib/i18n-format";
 
 export function ProductCard({
   product,
   locale,
+  dict,
   view = "grid",
   className,
 }: {
   product: Product;
   locale: Locale;
+  dict: Dictionary;
   view?: "grid" | "list";
   className?: string;
 }) {
@@ -37,21 +40,21 @@ export function ProductCard({
   function onFav(e: React.MouseEvent) {
     e.preventDefault();
     toggleFav(product.id);
-    toast(isFav ? "Favorilərdən çıxarıldı" : "Favorilərə əlavə edildi");
+    toast(isFav ? dict.product.removedFromFavorites : dict.product.addedToFavorites);
   }
 
   function onCmp(e: React.MouseEvent) {
     e.preventDefault();
     const result = toggleCmp(product.id);
-    if (result === "full") toast(`Müqayisədə maksimum ${COMPARE_LIMIT} məhsul ola bilər`);
-    else toast(result === "added" ? "Müqayisəyə əlavə edildi" : "Müqayisədən çıxarıldı");
+    if (result === "full") toast(dict.product.compareFull);
+    else toast(result === "added" ? dict.product.addedToCompare : dict.product.removedFromCompare);
   }
 
   const badges = (
     <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-col items-start gap-1.5">
-      {product.isNew && <Badge tone="dark">Yeni</Badge>}
-      {product.onSale && <Badge tone="gold">Endirim</Badge>}
-      {product.isBestseller && !product.isNew && <Badge tone="neutral">Bestseller</Badge>}
+      {product.isNew && <Badge tone="dark">{dict.common.new}</Badge>}
+      {product.onSale && <Badge tone="gold">{dict.common.sale}</Badge>}
+      {product.isBestseller && !product.isNew && <Badge tone="neutral">{dict.common.bestseller}</Badge>}
     </div>
   );
 
@@ -60,7 +63,7 @@ export function ProductCard({
       <button
         type="button"
         onClick={onFav}
-        aria-label="Favorilərə əlavə et"
+        aria-label={dict.actions.favorites}
         aria-pressed={isFav}
         className={cn(
           "flex h-8 w-8 items-center justify-center rounded-full border bg-paper/90 backdrop-blur transition-colors",
@@ -72,7 +75,7 @@ export function ProductCard({
       <button
         type="button"
         onClick={onCmp}
-        aria-label="Müqayisəyə əlavə et"
+        aria-label={dict.actions.compare}
         aria-pressed={isCmp}
         className={cn(
           "flex h-8 w-8 items-center justify-center rounded-full border bg-paper/90 backdrop-blur transition-colors",
@@ -107,10 +110,10 @@ export function ProductCard({
               {product.shortDescription}
             </p>
             <div className="mt-3 hidden flex-wrap gap-x-4 gap-y-1 text-xs text-graphite sm:flex">
-              <span>{materialLabels[product.material]}</span>
+              <span>{materialName(product.material, dict)}</span>
               {product.securityClass !== "—" && <span>{product.securityClass}</span>}
               <span>{product.soundInsulationDb} dB</span>
-              <span>{product.warrantyYears} il zəmanət</span>
+              <span>{product.warrantyYears} {dict.common.years} {dict.common.warranty}</span>
             </div>
           </div>
 
@@ -120,11 +123,11 @@ export function ProductCard({
                 <p className="text-xs text-mist line-through">{formatPrice(product.oldPrice)}</p>
               )}
               <p className="text-[17px] font-semibold tracking-tight text-ink">
-                {formatPriceFrom(product.basePrice)}
+                {priceFrom(product.basePrice, locale, dict)}
               </p>
             </div>
             <span className="hidden text-[13px] font-medium text-gold-600 underline-offset-4 group-hover:underline sm:inline">
-              Ətraflı
+              {dict.actions.details}
             </span>
           </div>
         </div>
@@ -174,7 +177,7 @@ export function ProductCard({
               <p className="text-[11px] text-mist line-through">{formatPrice(product.oldPrice)}</p>
             )}
             <p className="text-base font-semibold tracking-tight text-ink">
-              {formatPriceFrom(product.basePrice)}
+              {priceFrom(product.basePrice, locale, dict)}
             </p>
           </div>
           <span
@@ -183,7 +186,7 @@ export function ProductCard({
               product.inStock ? "text-success" : "text-stone",
             )}
           >
-            {product.inStock ? "Anbarda" : "Sifarişlə"}
+            {product.inStock ? dict.common.inStock : dict.common.madeToOrder}
           </span>
         </div>
       </div>

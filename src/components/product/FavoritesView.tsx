@@ -56,7 +56,7 @@ export function FavoritesView({ locale, dict }: { locale: Locale; dict: Dictiona
 
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
         {list.map((p) => (
-          <ProductCard key={p.id} product={p} locale={locale} />
+          <ProductCard key={p.id} product={p} locale={locale} dict={dict} />
         ))}
       </div>
     </div>

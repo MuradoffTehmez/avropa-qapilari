@@ -8,6 +8,7 @@ import { routes } from "@/lib/routes";
 import { Breadcrumbs, Section } from "@/components/ui/primitives";
 import { brands } from "@/mock/taxonomy";
 import { products } from "@/mock/products";
+import { countryName } from "@/lib/i18n-format";
 
 export const metadata: Metadata = {
   title: "Brendlər",
@@ -49,7 +50,7 @@ export default async function BrandsPage({
                 <div className="flex items-baseline justify-between">
                   <h2 className="text-xl font-semibold tracking-tight text-ink">{b.name}</h2>
                   <span className="text-[11px] uppercase tracking-[0.14em] text-stone">
-                    {b.country}
+                    {countryName(b, dict)}
                   </span>
                 </div>
                 <p className="mt-3 flex-1 text-[14px] leading-relaxed text-stone">{b.description}</p>
