@@ -3,7 +3,6 @@ import type { Locale } from "@/types";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { AccountNav } from "@/components/account/AccountNav";
-import { Notice } from "@/components/ui/primitives";
 import { accountUser } from "@/mock/account";
 
 export default async function AccountLayout({

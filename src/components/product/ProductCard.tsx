@@ -51,7 +51,7 @@ export function ProductCard({
     <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-col items-start gap-1.5">
       {product.isNew && <Badge tone="dark">Yeni</Badge>}
       {product.onSale && <Badge tone="gold">Endirim</Badge>}
-      {product.isBestseller && !product.isNew && <Badge tone="outline">Bestseller</Badge>}
+      {product.isBestseller && !product.isNew && <Badge tone="neutral">Bestseller</Badge>}
     </div>
   );
 

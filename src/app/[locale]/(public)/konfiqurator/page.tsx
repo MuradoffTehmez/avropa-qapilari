@@ -32,7 +32,7 @@ export default async function ConfiguratorIndexPage({
       <div className="border-b border-line bg-bone">
         <div className="container-page py-8 sm:py-10">
           <Breadcrumbs
-            items={[{ label: "Ana səhifə", href: r.home }, { label: dict.configurator.title }]}
+            items={[{ label: dict.nav.home, href: r.home }, { label: dict.configurator.title }]}
           />
           <h1 className="mt-4 text-2xl font-semibold tracking-tight text-ink sm:text-3xl lg:text-[2.35rem]">
             {dict.configurator.title}
@@ -61,7 +61,7 @@ export default async function ConfiguratorIndexPage({
             ))}
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
             {products.map((p) => (
               <Link
                 key={p.id}

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { CheckCircle2 } from "lucide-react";
 import type { Dictionary } from "@/i18n";
 import { Button } from "@/components/ui/Button";
-import { Card, Notice } from "@/components/ui/primitives";
+import { Card } from "@/components/ui/primitives";
 import { Field, Input, Select, Textarea } from "@/components/ui/form";
 
 const subjects = [

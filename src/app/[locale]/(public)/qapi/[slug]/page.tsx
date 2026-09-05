@@ -114,7 +114,7 @@ export default async function ProductPage({
         <div className="container-page py-5">
           <Breadcrumbs
             items={[
-              { label: "Ana səhifə", href: r.home },
+              { label: dict.nav.home, href: r.home },
               { label: dict.catalog.title, href: r.doors },
               ...(category ? [{ label: category.name, href: r.category(category.slug) }] : []),
               { label: product.name },
@@ -476,7 +476,7 @@ export default async function ProductPage({
         <Section tone="bone" className="border-t border-line">
           <div className="container-page">
             <SectionHeading title={dict.product.similar} />
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
               {related.map((p) => (
                 <ProductCard key={p.id} product={p} locale={locale} />
               ))}

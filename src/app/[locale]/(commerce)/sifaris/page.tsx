@@ -26,7 +26,7 @@ export default async function CheckoutPage({
         <div className="container-page py-8">
           <Breadcrumbs
             items={[
-              { label: "Ana səhifə", href: r.home },
+              { label: dict.nav.home, href: r.home },
               { label: dict.cart.title, href: r.cart },
               { label: dict.checkout.title },
             ]}

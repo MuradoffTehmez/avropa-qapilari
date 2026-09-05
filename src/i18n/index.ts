@@ -2,20 +2,12 @@ import type { Locale } from "@/types";
 import { az, type Dictionary } from "@/i18n/dictionaries/az";
 import { en } from "@/i18n/dictionaries/en";
 import { ru } from "@/i18n/dictionaries/ru";
-import { deepMerge } from "@/i18n/merge";
 
-const cache = new Map<Locale, Dictionary>();
+const dictionaries: Record<Locale, Dictionary> = { az, en, ru };
 
-/** AZ baza dictionary-dir; EN/RU onun üzərinə merge olunur. */
+/** Hər dil üçün tam dictionary — fallback tələb olunmur. */
 export function getDictionary(locale: Locale): Dictionary {
-  const cached = cache.get(locale);
-  if (cached) return cached;
-
-  const dict =
-    locale === "en" ? deepMerge(az, en) : locale === "ru" ? deepMerge(az, ru) : az;
-
-  cache.set(locale, dict as Dictionary);
-  return dict as Dictionary;
+  return dictionaries[locale] ?? az;
 }
 
 export type { Dictionary };

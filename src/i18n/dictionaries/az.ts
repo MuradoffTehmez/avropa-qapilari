@@ -6,6 +6,7 @@ export const az = {
   },
 
   nav: {
+    home: "Ana səhifə",
     doors: "Qapılar",
     configurator: "Konfiqurator",
     services: "Xidmətlər",

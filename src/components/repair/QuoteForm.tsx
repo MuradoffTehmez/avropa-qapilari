@@ -8,7 +8,7 @@ import type { Locale } from "@/types";
 import { routes } from "@/lib/routes";
 import { createReference } from "@/lib/utils";
 import { Button, ButtonLink } from "@/components/ui/Button";
-import { Card, Notice } from "@/components/ui/primitives";
+import { Card } from "@/components/ui/primitives";
 import { Field, Input, Select, Textarea } from "@/components/ui/form";
 import { products } from "@/mock/products";
 

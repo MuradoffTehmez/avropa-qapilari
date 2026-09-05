@@ -4,8 +4,7 @@ import { Award, Factory, Users, Wrench } from "lucide-react";
 import { getDictionary, isLocale } from "@/i18n";
 import type { Locale } from "@/types";
 import { routes } from "@/lib/routes";
-import { brand } from "@/config/brand";
-import { Breadcrumbs, Notice, Section, SectionHeading, Stat } from "@/components/ui/primitives";
+import { Breadcrumbs, Section, SectionHeading, Stat } from "@/components/ui/primitives";
 import { ButtonLink } from "@/components/ui/Button";
 import { brands } from "@/mock/taxonomy";
 import { technicians } from "@/mock/content";
@@ -30,7 +29,7 @@ export default async function AboutPage({
     <>
       <div className="border-b border-line bg-bone">
         <div className="container-page py-8 sm:py-10">
-          <Breadcrumbs items={[{ label: "Ana səhifə", href: r.home }, { label: dict.nav.about }]} />
+          <Breadcrumbs items={[{ label: dict.nav.home, href: r.home }, { label: dict.nav.about }]} />
           <h1 className="mt-4 max-w-3xl text-balance-heading text-2xl font-semibold leading-tight tracking-tight text-ink sm:text-3xl lg:text-[2.5rem]">
             Qapı bir məhsul deyil — uzunmüddətli münasibətdir
           </h1>

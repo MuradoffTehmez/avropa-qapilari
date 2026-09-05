@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { Dictionary } from "@/i18n";
 import { Button } from "@/components/ui/Button";
-import { Card, Notice } from "@/components/ui/primitives";
+import { Card } from "@/components/ui/primitives";
 import { Checkbox, Field, Input, Select } from "@/components/ui/form";
 import { toast } from "@/components/ui/overlays";
 import { accountUser } from "@/mock/account";

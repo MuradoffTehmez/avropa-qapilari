@@ -86,7 +86,7 @@ export default async function LocaleLayout({
           Əsas məzmuna keç
         </a>
         {children}
-        <MobileNav locale={typedLocale} />
+        <MobileNav locale={typedLocale} dict={dict} />
         <ToastHost />
         <CookieBar dict={dict} />
       </body>

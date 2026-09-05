@@ -48,7 +48,7 @@ export default async function BrandPage({
         <div className="container-page py-8 sm:py-10">
           <Breadcrumbs
             items={[
-              { label: "Ana səhifə", href: r.home },
+              { label: dict.nav.home, href: r.home },
               { label: dict.nav.brands, href: r.brands },
               { label: b.name },
             ]}
@@ -72,7 +72,7 @@ export default async function BrandPage({
           <h2 className="mb-6 text-lg font-semibold tracking-tight text-ink">
             {b.name} modelləri
           </h2>
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
             {list.map((p) => (
               <ProductCard key={p.id} product={p} locale={locale} />
             ))}

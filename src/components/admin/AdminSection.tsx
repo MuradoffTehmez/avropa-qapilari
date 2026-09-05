@@ -7,7 +7,7 @@ import { notFound } from "next/navigation";
 import { getDictionary } from "@/i18n";
 import type { Locale } from "@/types";
 import { formatDate, formatDateTime, formatNumber, formatPrice } from "@/lib/utils";
-import { Badge, Card, DataRow, Notice, Rating } from "@/components/ui/primitives";
+import { Badge, Card, DataRow, Rating } from "@/components/ui/primitives";
 
 import { AdminPageHeader, DataTable } from "@/components/admin/DataTable";
 import { OrderStatusPill, RepairStatusPill } from "@/components/account/StatusPill";

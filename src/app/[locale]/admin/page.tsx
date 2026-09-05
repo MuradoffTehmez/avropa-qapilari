@@ -4,7 +4,7 @@ import { ArrowUpRight, TrendingDown, TrendingUp } from "lucide-react";
 import { getDictionary, isLocale } from "@/i18n";
 import type { Locale } from "@/types";
 import { formatDate, formatDateLong, formatPrice } from "@/lib/utils";
-import { Card, Notice } from "@/components/ui/primitives";
+import { Card } from "@/components/ui/primitives";
 import { OrderStatusPill, RepairStatusPill } from "@/components/account/StatusPill";
 import { orders, repairRequests, appointments, measurements } from "@/mock/account";
 import { products } from "@/mock/products";

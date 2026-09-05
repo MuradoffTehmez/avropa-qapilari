@@ -45,7 +45,7 @@ export default async function DoorPassportPage({
       <div className="border-b border-line bg-bone">
         <div className="container-page py-8">
           <Breadcrumbs
-            items={[{ label: "Ana səhifə", href: r.home }, { label: dict.service.doorPassport }]}
+            items={[{ label: dict.nav.home, href: r.home }, { label: dict.service.doorPassport }]}
           />
           <div className="mt-4 flex items-start gap-4">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center border border-line bg-paper">

@@ -39,38 +39,62 @@ export default async function HomePage({
   return (
     <>
       {/* ---------------------------------------------------------- HERO */}
-      <section className="home-hero relative overflow-hidden bg-ink text-paper">
+      <section className="relative overflow-hidden bg-ink text-paper">
         <div
           aria-hidden
-          className="absolute inset-0 opacity-[0.07]"
+          className="absolute inset-0 opacity-[0.06]"
           style={{
             backgroundImage:
               "repeating-linear-gradient(90deg,#fff 0 1px,transparent 1px 96px)",
           }}
         />
-        <div className="container-page relative grid gap-12 py-16 lg:grid-cols-[1.15fr_1fr] lg:items-center lg:gap-8 lg:py-24">
-          <div className="hero-copy animate-fade-up">
-            <p className="mb-5 text-[11px] font-semibold uppercase tracking-[0.28em] text-gold-300">
+
+        <div className="container-page relative grid items-center gap-8 py-10 sm:py-14 lg:grid-cols-[1.1fr_1fr] lg:gap-12 lg:py-20 xl:py-24">
+          {/* Mobil: şəkil əvvəl, desktop: sağda */}
+          <div className="relative order-1 w-full lg:order-2">
+            <div className="relative aspect-16/10 overflow-hidden sm:aspect-3/2 lg:aspect-4/5">
+              <Image
+                src="/images/entrance-hero.webp"
+                alt="Mat qara giriş qapısı, qızıl bar dəstək"
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 45vw"
+                className="object-cover"
+              />
+            </div>
+            <div className="absolute bottom-3 left-3 border border-paper/15 bg-obsidian/85 px-3 py-2 backdrop-blur sm:bottom-4 sm:left-4 sm:px-4 sm:py-3">
+              <p className="text-[10px] uppercase tracking-[0.16em] text-paper/45">
+                {dict.configurator.title}
+              </p>
+              <p className="mt-1 text-[13px] font-medium text-paper sm:text-sm">
+                1000 × 2100 · Antrasit
+              </p>
+              <p className="text-[13px] font-semibold text-gold-300 sm:text-sm">2 890 AZN</p>
+            </div>
+          </div>
+
+          <div className="order-2 animate-fade-up lg:order-1">
+            <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.24em] text-gold-300 sm:mb-5 sm:text-[11px] sm:tracking-[0.28em]">
               {dict.home.heroEyebrow}
             </p>
-            <h1 className="text-balance-heading text-[2.15rem] font-semibold leading-[1.08] tracking-tight sm:text-5xl lg:text-[3.9rem]">
+            <h1 className="text-balance-heading text-[1.9rem] font-semibold leading-[1.1] tracking-tight sm:text-[2.75rem] lg:text-[3.25rem] xl:text-[3.75rem]">
               {dict.home.heroTitleTop}
               <br />
               <span className="text-gold-300">{dict.home.heroTitleBottom}</span>
             </h1>
-            <p className="mt-6 max-w-lg text-[15px] leading-relaxed text-paper/65 sm:text-base">
+            <p className="mt-4 max-w-lg text-[14.5px] leading-relaxed text-paper/65 sm:mt-6 sm:text-base">
               {dict.home.heroText}
             </p>
 
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <ButtonLink href={r.doors} variant="gold" size="lg">
+            <div className="mt-6 grid gap-2.5 sm:mt-8 sm:flex sm:flex-wrap sm:gap-3">
+              <ButtonLink href={r.doors} variant="gold" size="lg" className="justify-center">
                 {dict.actions.selectDoor}
                 <ArrowRight size={17} />
               </ButtonLink>
               <ButtonLink
                 href={r.configurator}
                 size="lg"
-                className="border-paper/25 bg-transparent text-paper hover:border-paper hover:bg-paper/5"
+                className="justify-center border-paper/25 bg-transparent text-paper hover:border-paper hover:bg-paper/5"
               >
                 {dict.actions.configure}
               </ButtonLink>
@@ -78,30 +102,16 @@ export default async function HomePage({
                 href={r.measurement}
                 variant="ghost"
                 size="lg"
-                className="text-paper/70 hover:bg-paper/5 hover:text-paper"
+                className="justify-center text-paper/70 hover:bg-paper/5 hover:text-paper"
               >
                 {dict.actions.bookMeasurement}
               </ButtonLink>
             </div>
 
-            <div className="mt-12 grid grid-cols-3 items-stretch gap-6 border-t border-paper/12 pt-8">
-              <Stat invert label={dict.home.heroStatDoors} value="4 200+" />
-              <Stat invert label={dict.home.heroStatYears} value="18" />
-              <Stat invert label={dict.home.heroStatBrands} value="12" />
-            </div>
-          </div>
-
-          <div className="hero-visual relative mx-auto w-full max-w-md lg:max-w-none">
-            <div className="relative aspect-4/5 overflow-hidden rounded-sm">
-              <Image src="/images/entrance-hero.webp" alt="Mat qara giriş qapısı, qızıl bar dəstək — villa girişi" fill priority sizes="(max-width:1024px) 100vw, 50vw" className="object-cover" />
-              
-            </div>
-            <div className="absolute -left-2 bottom-6 border border-paper/15 bg-obsidian/80 px-4 py-3 backdrop-blur sm:left-0">
-              <p className="text-[10px] uppercase tracking-[0.16em] text-paper/45">Konfiqurasiya</p>
-              <p className="mt-1 text-sm font-medium text-paper">
-                1000 × 2100 · Antrasit ağac
-              </p>
-              <p className="text-sm font-semibold text-gold-300">2 890 AZN</p>
+            <div className="mt-8 grid grid-cols-3 items-stretch gap-3 border-t border-paper/12 pt-6 sm:mt-10 sm:gap-6 sm:pt-8">
+              <Stat invert compact label={dict.home.heroStatDoors} value="4 200+" />
+              <Stat invert compact label={dict.home.heroStatYears} value="18" />
+              <Stat invert compact label={dict.home.heroStatBrands} value="12" />
             </div>
           </div>
         </div>
@@ -202,7 +212,7 @@ export default async function HomePage({
               </ButtonLink>
             }
           />
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
             {featured.map((p) => (
               <ProductCard key={p.id} product={p} locale={locale} />
             ))}

@@ -45,7 +45,7 @@ export default async function ProjectPage({
         <div className="container-page py-8 sm:py-10">
           <Breadcrumbs
             items={[
-              { label: "Ana səhifə", href: r.home },
+              { label: dict.nav.home, href: r.home },
               { label: dict.nav.projects, href: r.projects },
               { label: project.title },
             ]}

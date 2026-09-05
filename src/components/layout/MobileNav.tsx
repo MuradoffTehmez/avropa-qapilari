@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { DoorOpen, Home, SlidersHorizontal, User, Wrench } from "lucide-react";
+import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/types";
 import { routes } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
 /** Telefon və planşetdə alt naviqasiya paneli. */
-export function MobileNav({ locale }: { locale: Locale }) {
+export function MobileNav({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const path = usePathname();
   const r = routes(locale);
 
@@ -18,11 +19,11 @@ export function MobileNav({ locale }: { locale: Locale }) {
   if (hidden) return null;
 
   const items = [
-    { href: r.home, label: "Ana səhifə", icon: Home },
-    { href: r.doors, label: "Kataloq", icon: DoorOpen },
-    { href: r.configurator, label: "Qapını yarat", icon: SlidersHorizontal },
-    { href: r.repair, label: "Servis", icon: Wrench },
-    { href: r.account, label: "Hesab", icon: User },
+    { href: r.home, label: dict.nav.home, icon: Home },
+    { href: r.doors, label: dict.nav.doors, icon: DoorOpen },
+    { href: r.configurator, label: dict.nav.configurator, icon: SlidersHorizontal },
+    { href: r.repair, label: dict.nav.services, icon: Wrench },
+    { href: r.account, label: dict.actions.account, icon: User },
   ];
 
   return (

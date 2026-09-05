@@ -163,7 +163,7 @@ export default async function ServiceDetailPage({
         <div className="container-page py-8 sm:py-10">
           <Breadcrumbs
             items={[
-              { label: "Ana səhifə", href: r.home },
+              { label: dict.nav.home, href: r.home },
               { label: dict.nav.services, href: r.services },
               { label: item.title },
             ]}

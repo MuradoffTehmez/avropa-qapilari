@@ -284,19 +284,25 @@ export function Stat({
   value,
   hint,
   invert,
+  compact,
   className,
 }: {
   label: string;
   value: ReactNode;
   hint?: string;
   invert?: boolean;
+  /** Dar sütunlarda daha kiçik hərf aralığı və ölçü */
+  compact?: boolean;
   className?: string;
 }) {
   return (
     <div className={cn("flex h-full flex-col justify-end", className)}>
       <p
         className={cn(
-          "text-[11px] font-semibold uppercase leading-tight tracking-[0.16em]",
+          "font-semibold uppercase leading-tight",
+          compact
+            ? "text-[9.5px] tracking-[0.08em] sm:text-[11px] sm:tracking-[0.16em]"
+            : "text-[11px] tracking-[0.16em]",
           invert ? "text-paper/45" : "text-stone",
         )}
       >
@@ -304,7 +310,8 @@ export function Stat({
       </p>
       <p
         className={cn(
-          "mt-1.5 text-2xl font-semibold tracking-tight tabular-nums sm:text-[1.75rem]",
+          "mt-1.5 font-semibold tracking-tight tabular-nums",
+          compact ? "text-xl sm:text-2xl lg:text-[1.75rem]" : "text-2xl sm:text-[1.75rem]",
           invert ? "text-paper" : "text-ink",
         )}
       >

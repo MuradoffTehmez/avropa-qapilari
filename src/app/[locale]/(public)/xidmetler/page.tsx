@@ -85,7 +85,7 @@ export default async function ServicesPage({
     <>
       <div className="border-b border-line bg-bone">
         <div className="container-page py-8 sm:py-10">
-          <Breadcrumbs items={[{ label: "Ana səhifə", href: r.home }, { label: dict.nav.services }]} />
+          <Breadcrumbs items={[{ label: dict.nav.home, href: r.home }, { label: dict.nav.services }]} />
           <h1 className="mt-4 text-2xl font-semibold tracking-tight text-ink sm:text-3xl lg:text-[2.35rem]">
             {dict.nav.services}
           </h1>
