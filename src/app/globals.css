@@ -1,0 +1,158 @@
+@import "tailwindcss";
+
+/* =========================================================================
+   DESIGN SYSTEM — "Premium architectural"
+   PRD §116 Palette: White / Off-white / Graphite / Dark Grey / Black + accent
+   ========================================================================= */
+
+@theme {
+  /* Neutral ladder */
+  --color-paper: #ffffff;
+  --color-bone: #f7f6f4;
+  --color-sand: #efedea;
+  --color-line: #e2dfda;
+  --color-mist: #c9c5be;
+  --color-stone: #8b877f;
+  --color-graphite: #4a4844;
+  --color-slate: #2c2b28;
+  --color-ink: #1a1917;
+  --color-obsidian: #0e0e0d;
+
+  /* Accent — brushed brass (demo brend rəngi) */
+  --color-brass-50: #faf6ee;
+  --color-brass-100: #f1e7d3;
+  --color-brass-200: #e3cfa8;
+  --color-brass-300: #d2b47b;
+  --color-brass-400: #c19d5c;
+  --color-brass-500: #a9844a;
+  --color-brass-600: #8b6a3a;
+  --color-brass-700: #6d5230;
+
+  /* Semantic */
+  --color-success: #2f7d54;
+  --color-warning: #b7791f;
+  --color-danger: #a5342c;
+  --color-info: #2b5f7e;
+
+  /* Typography */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  --font-display: var(--font-display), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  /* Radii — architectural: az yumşaldılmış */
+  --radius-xs: 2px;
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 10px;
+
+  /* Layout */
+  --spacing-header: 4.5rem;
+
+  /* Breakpoints — PRD §115 */
+  --breakpoint-sm: 40rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-xl: 90rem;
+}
+
+:root {
+  --background: var(--color-paper);
+  --foreground: var(--color-ink);
+  color-scheme: light;
+}
+
+* {
+  border-color: var(--color-line);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Accessibility — PRD §118 */
+:focus-visible {
+  outline: 2px solid var(--color-brass-500);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Utilities */
+@utility container-page {
+  width: 100%;
+  margin-inline: auto;
+  max-width: 90rem;
+  padding-inline: 1rem;
+  @media (width >= 40rem) {
+    padding-inline: 1.5rem;
+  }
+  @media (width >= 64rem) {
+    padding-inline: 2.5rem;
+  }
+}
+
+@utility text-balance-heading {
+  text-wrap: balance;
+}
+
+@utility hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Fixed aspect ratio media — CLS 0 (PRD §113) */
+@utility door-frame {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: var(--color-bone);
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@utility animate-fade-up {
+  animation: fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+::selection {
+  background: var(--color-brass-200);
+  color: var(--color-ink);
+}

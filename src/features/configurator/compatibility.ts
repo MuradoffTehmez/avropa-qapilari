@@ -1,0 +1,95 @@
+import type { ConfigurationSelection, OptionValue } from "@/types";
+
+/**
+ * COMPATIBILITY ENGINE — PRD §97.
+ * `requires`: dəyər yalnız sadalanan option-lardan biri seçilibsə mümkündür.
+ * `excludes`: dəyər seçilibsə, sadalanan option-lar bloklanır.
+ */
+
+export interface CompatibilityResult {
+  allowed: boolean;
+  reason?: string;
+}
+
+function selectedIds(selection: ConfigurationSelection): string[] {
+  return Object.values(selection.choices).flatMap((raw) =>
+    !raw ? [] : Array.isArray(raw) ? raw : [raw],
+  );
+}
+
+export function checkCompatibility(
+  value: OptionValue,
+  selection: ConfigurationSelection,
+  labelOf: (id: string) => string,
+): CompatibilityResult {
+  const chosen = selectedIds(selection);
+
+  if (value.requires?.length) {
+    const ok = value.requires.some((id) => chosen.includes(id));
+    if (!ok) {
+      const names = value.requires.map(labelOf).join(" və ya ");
+      return { allowed: false, reason: `Əvvəlcə seçin: ${names}` };
+    }
+  }
+
+  if (value.excludes?.length) {
+    const clash = value.excludes.find((id) => chosen.includes(id));
+    if (clash) {
+      return { allowed: false, reason: `${labelOf(clash)} ilə uyğun deyil` };
+    }
+  }
+
+  for (const id of chosen) {
+    // Əks istiqamət: artıq seçilmiş dəyər bunu excludes edirmi?
+    if (id === value.id) continue;
+  }
+
+  return { allowed: true };
+}
+
+/**
+ * Seçim dəyişdikdən sonra artıq uyğun olmayan seçimləri təmizləyir.
+ * Məsələn: kilid "3 nöqtəli"yə dəyişilsə, Smart Lock X2 avtomatik düşür.
+ */
+export function pruneIncompatible(
+  selection: ConfigurationSelection,
+  resolve: (id: string) => OptionValue | undefined,
+): ConfigurationSelection {
+  const next: ConfigurationSelection = {
+    ...selection,
+    choices: { ...selection.choices },
+  };
+
+  let changed = true;
+  let guard = 0;
+
+  while (changed && guard < 10) {
+    changed = false;
+    guard += 1;
+
+    const chosen = selectedIds(next);
+
+    for (const [group, raw] of Object.entries(next.choices)) {
+      if (!raw) continue;
+      const ids = Array.isArray(raw) ? raw : [raw];
+
+      const kept = ids.filter((id) => {
+        const value = resolve(id);
+        if (!value?.requires?.length) return true;
+        return value.requires.some((req) => chosen.includes(req));
+      });
+
+      if (kept.length !== ids.length) {
+        changed = true;
+        const key = group as keyof ConfigurationSelection["choices"];
+        if (Array.isArray(raw)) {
+          next.choices[key] = kept;
+        } else {
+          delete next.choices[key];
+        }
+      }
+    }
+  }
+
+  return next;
+}

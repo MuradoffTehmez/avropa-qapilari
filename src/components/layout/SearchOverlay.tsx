@@ -1,0 +1,170 @@
+"use client";
+
+import Link from "next/link";
+import { useMemo, useState } from "react";
+import { Search, X } from "lucide-react";
+import type { Dictionary } from "@/i18n";
+import type { Locale } from "@/types";
+import { routes } from "@/lib/routes";
+import { formatPriceFrom } from "@/lib/utils";
+import { useEscapeKey, useLockBodyScroll } from "@/lib/hooks";
+import { products } from "@/mock/products";
+import { brands, categories } from "@/mock/taxonomy";
+import { DoorVisual } from "@/components/product/DoorVisual";
+
+/**
+ * PRD §40 — search + autocomplete.
+ * MVP-də client-side filtrasiya; backend-də D1 FTS5 (PRD §119) əvəz edəcək.
+ */
+export function SearchOverlay({
+  open,
+  onClose,
+  locale,
+  dict,
+}: {
+  open: boolean;
+  onClose: () => void;
+  locale: Locale;
+  dict: Dictionary;
+}) {
+  const [query, setQuery] = useState("");
+  const r = routes(locale);
+
+  useEscapeKey(onClose, open);
+  useLockBodyScroll(open);
+
+  const results = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (q.length < 2) return null;
+
+    return {
+      products: products
+        .filter((p) =>
+          [p.name, p.sku, p.collection, p.shortDescription, p.material].some((f) =>
+            f.toLowerCase().includes(q),
+          ),
+        )
+        .slice(0, 6),
+      categories: categories.filter((c) => c.name.toLowerCase().includes(q)).slice(0, 4),
+      brands: brands.filter((b) => b.name.toLowerCase().includes(q)).slice(0, 4),
+    };
+  }, [query]);
+
+  if (!open) return null;
+
+  const empty =
+    results !== null &&
+    results.products.length === 0 &&
+    results.categories.length === 0 &&
+    results.brands.length === 0;
+
+  return (
+    <div className="fixed inset-0 z-100" role="dialog" aria-modal="true" aria-label={dict.actions.search}>
+      <button type="button" aria-label={dict.actions.close} onClick={onClose} className="absolute inset-0 bg-obsidian/50 backdrop-blur-[3px]" />
+
+      <div className="relative mx-auto flex max-h-[85vh] w-full max-w-2xl flex-col bg-paper shadow-2xl sm:mt-24">
+        <div className="flex h-16 shrink-0 items-center gap-3 border-b border-line px-4 sm:px-5">
+          <Search size={19} className="shrink-0 text-stone" aria-hidden />
+          <input
+            autoFocus
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Model, artikul, kateqoriya, brend…"
+            aria-label={dict.actions.search}
+            className="h-full flex-1 bg-transparent text-[15px] text-ink outline-none placeholder:text-mist"
+          />
+          <button type="button" onClick={onClose} aria-label={dict.actions.close} className="-mr-1 flex h-9 w-9 items-center justify-center text-stone hover:text-ink">
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          {results === null && (
+            <div className="p-5">
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-stone">
+                Populyar axtarışlar
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {["Milano", "Smart lock", "RC3", "Villa", "Şüşəli", "RAL 7016"].map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setQuery(s)}
+                    className="border border-line px-3 py-1.5 text-[13px] text-graphite transition-colors hover:border-ink hover:text-ink"
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {empty && (
+            <p className="p-8 text-center text-sm text-stone">
+              &laquo;{query}&raquo; üzrə nəticə tapılmadı.
+            </p>
+          )}
+
+          {results && results.products.length > 0 && (
+            <div className="border-b border-line p-3">
+              <p className="px-2 pb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-stone">
+                Məhsullar
+              </p>
+              {results.products.map((p) => (
+                <Link
+                  key={p.id}
+                  href={r.product(p.slug)}
+                  onClick={onClose}
+                  className="flex items-center gap-3 rounded-[3px] p-2 transition-colors hover:bg-bone"
+                >
+                  <span className="h-14 w-11 shrink-0 overflow-hidden bg-bone">
+                    <DoorVisual panelHex={p.panelHexes[0]} style={p.style} ambient={false} />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-medium text-ink">{p.name}</span>
+                    <span className="block text-xs text-stone">
+                      {p.sku} · {formatPriceFrom(p.basePrice)}
+                    </span>
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {results && (results.categories.length > 0 || results.brands.length > 0) && (
+            <div className="grid gap-4 p-5 sm:grid-cols-2">
+              {results.categories.length > 0 && (
+                <div>
+                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-stone">
+                    Kateqoriyalar
+                  </p>
+                  <div className="flex flex-col gap-1.5">
+                    {results.categories.map((c) => (
+                      <Link key={c.id} href={r.category(c.slug)} onClick={onClose} className="text-sm text-graphite hover:text-ink">
+                        {c.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {results.brands.length > 0 && (
+                <div>
+                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-stone">
+                    Brendlər
+                  </p>
+                  <div className="flex flex-col gap-1.5">
+                    {results.brands.map((b) => (
+                      <Link key={b.id} href={r.brand(b.slug)} onClick={onClose} className="text-sm text-graphite hover:text-ink">
+                        {b.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
