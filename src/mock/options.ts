@@ -40,7 +40,7 @@ const glass: OptionValue[] = [
 const handles: OptionValue[] = [
   { id: "hd-inox", groupKey: "HANDLE", code: "INOX", label: "Paslanmayan polad", priceDelta: 0, hex: "#b9bcc0" },
   { id: "hd-black", groupKey: "HANDLE", code: "BLACK", label: "Premium mat qara", priceDelta: 85, hex: "#1b1b1d", badge: "Populyar" },
-  { id: "hd-brass", groupKey: "HANDLE", code: "BRASS", label: "Fırçalanmış bürünc", priceDelta: 140, hex: "#a9844a" },
+  { id: "hd-brass", groupKey: "HANDLE", code: "BRASS", label: "Fırçalanmış bürünc", priceDelta: 140, hex: "#ad7d38" },
   { id: "hd-bar", groupKey: "HANDLE", code: "BAR", label: "Uzun bar dəstək 1200 mm", priceDelta: 260, hex: "#8d9094" },
 ];
 
