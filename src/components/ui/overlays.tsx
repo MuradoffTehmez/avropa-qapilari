@@ -156,7 +156,7 @@ export function ToastHost() {
     <Portal>
       <div
         aria-live="polite"
-        className="pointer-events-none fixed inset-x-0 bottom-4 z-200 flex flex-col items-center gap-2 px-4 sm:bottom-6"
+        className="pointer-events-none fixed inset-x-0 bottom-24 z-200 flex flex-col items-center gap-2 px-4 sm:bottom-6"
       >
         {messages.map((m) => (
           <div

@@ -1,3 +1,4 @@
+import { DoorScene } from "@/components/product/DoorScene";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getDictionary, isLocale } from "@/i18n";
@@ -45,6 +46,7 @@ export default async function BlogPage({
                 className="relative aspect-16/10 border-b border-line"
                 style={{ background: `linear-gradient(135deg, ${post.accent}, ${post.accent}cc)` }}
               >
+                <DoorScene color={post.accent} variant={blogPosts.indexOf(post)} title={post.title} />
                 <Badge tone="dark" className="absolute left-3 top-3">
                   {post.category}
                 </Badge>

@@ -43,6 +43,7 @@ export function AdminShell({
   const r = routes(locale);
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
   useLockBodyScroll(open);
 
   const groups: {
@@ -206,15 +207,18 @@ export function AdminShell({
               className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-mist"
             />
             <input
-              placeholder="Axtarış…"
+              value={query} onChange={(e) => setQuery(e.target.value)}
+              placeholder="Bölmə axtarışı…"
               aria-label="Axtarış"
               className="h-9 w-full rounded-[3px] border border-line bg-bone pl-9 pr-3 text-[13px] text-ink outline-none placeholder:text-mist focus:border-ink"
             />
           </div>
 
+          {query && <div className="absolute left-4 top-14 z-50 max-h-80 w-72 overflow-auto border bg-paper p-3 shadow-xl">{groups.flatMap(g=>g.items).filter(i=>i.label.toLocaleLowerCase("az").includes(query.toLocaleLowerCase("az"))).map(i=><Link className="block border-b p-3 text-sm" key={i.href} href={i.href} onClick={()=>setQuery("")}>{i.label}</Link>)}</div>}
           <div className="ml-auto flex items-center gap-2">
             <button
               type="button"
+              onClick={() => { setQuery("Təmir"); }}
               aria-label="Bildirişlər"
               className="relative flex h-9 w-9 items-center justify-center text-graphite hover:text-ink"
             >

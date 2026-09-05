@@ -1,3 +1,5 @@
+import { MobileNav } from "@/components/layout/MobileNav";
+import { DemoNav } from "@/components/layout/DemoNav";
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { notFound } from "next/navigation";
@@ -77,7 +79,9 @@ export default async function LocaleLayout({
         >
           Əsas məzmuna keç
         </a>
+        <DemoNav locale={locale} />
         {children}
+        <MobileNav locale={typedLocale} />
         <ToastHost />
         <CookieBar dict={dict} />
       </body>

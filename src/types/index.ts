@@ -183,6 +183,7 @@ export interface CartItem {
   panelHex: string;
   quantity: number;
   unitPrice: Money;
+  includedServices?: number;
   /** PRD §65 — order snapshot */
   snapshot: {
     width: number;

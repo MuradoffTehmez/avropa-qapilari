@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Bell,
   CalendarClock,
@@ -21,6 +21,7 @@ import { routes } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
 export function AccountNav({ locale, dict }: { locale: Locale; dict: Dictionary }) {
+  const router = useRouter();
   const r = routes(locale);
   const pathname = usePathname();
 
@@ -61,6 +62,7 @@ export function AccountNav({ locale, dict }: { locale: Locale; dict: Dictionary 
         })}
         <li className="shrink-0 lg:mt-4 lg:border-t lg:border-line lg:pt-4">
           <button
+            onClick={() => { router.push(`/${locale}/giris`); }}
             type="button"
             className="flex w-full items-center gap-2.5 whitespace-nowrap border border-line px-3 py-2.5 text-[13.5px] text-stone transition-colors hover:text-danger lg:border-0 lg:px-3"
           >

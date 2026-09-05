@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { cn } from "@/lib/utils";
 import type { SurfaceStyle } from "@/types";
 
@@ -80,7 +81,7 @@ export function DoorVisual({
   className,
   ambient = true,
 }: DoorVisualProps) {
-  const uid = `${panelHex}-${style}-${glass}-${handle}-${side}`.replace(/[^a-z0-9]/gi, "");
+  const uid = useId().replace(/[^a-z0-9]/gi, "");
 
   // Vizual proporsiya: geniş qapılar daha enli görünür
   const ratio = widthMm / heightMm;

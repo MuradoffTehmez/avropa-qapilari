@@ -1,5 +1,6 @@
 "use client";
 
+import { useDemo } from "@/store/demo";
 import Link from "next/link";
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, CheckCircle2, ShoppingBag } from "lucide-react";
@@ -131,7 +132,7 @@ export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionar
     );
   }
 
-  const subtotal = cartSubtotal(items);
+  const subtotal = cartSubtotal(items) - items.reduce((sum, item) => sum + (item.includedServices ?? 0) * item.quantity, 0);
   const deliveryPrice =
     optionGroups.DELIVERY.values.find((v) => v.id === form.delivery)?.priceDelta ?? 0;
   const installationPrice =
@@ -168,6 +169,7 @@ export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionar
 
     if (current === "confirmation") {
       const number = demoReference("ORD");
+      useDemo.getState().add({ id: number, kind: "orders", title: "Qapı sifarişi", total, detail: items.map((i) => `${i.productName} · ${i.quantity} ədəd · ${i.snapshot.width}×${i.snapshot.height} mm`).join("\n") });
       clear();
       setPlacedOrder(number);
       return;
@@ -178,7 +180,7 @@ export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionar
   const current = stepOrder[step];
 
   return (
-    <div className="container-page grid gap-8 py-8 lg:grid-cols-[1.5fr_1fr] lg:gap-12 lg:py-10">
+    <div className="checkout-shell container-page grid gap-8 py-8 lg:grid-cols-[1.5fr_1fr] lg:gap-12 lg:py-10">
       <div>
         <Stepper
           className="mb-8 border-b border-line"

@@ -1,15 +1,18 @@
+import { NotificationSettings } from "@/components/account/NotificationSettings";
+import { LocalManager } from "@/components/admin/LocalManager";
+import { DemoActivity } from "@/components/account/DemoActivity";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Bell, MapPin, Sliders } from "lucide-react";
+import { MapPin, Sliders } from "lucide-react";
 
 import { getDictionary, isLocale, locales } from "@/i18n";
 import type { Locale } from "@/types";
 import { routes } from "@/lib/routes";
 import { formatDate, formatDateTime, formatPrice, monthShort } from "@/lib/utils";
-import { Badge, Card, DataRow, EmptyState, Notice } from "@/components/ui/primitives";
+import { Badge, Card, DataRow, EmptyState } from "@/components/ui/primitives";
 import { Timeline } from "@/components/ui/disclosure";
-import { Button, ButtonLink } from "@/components/ui/Button";
+import { ButtonLink } from "@/components/ui/Button";
 import { OrderStatusPill, RepairStatusPill } from "@/components/account/StatusPill";
 import { DoorVisual } from "@/components/product/DoorVisual";
 import { ProfileForm } from "@/components/account/ProfileForm";
@@ -17,7 +20,6 @@ import {
   addresses,
   appointments,
   measurements,
-  notifications,
   orders,
   quotes,
   repairRequests,
@@ -60,7 +62,7 @@ export default async function AccountSectionPage({
   /* ------------------------------------------------------------ ORDERS */
   if (section === "orders") {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4"><DemoActivity section={section} locale={locale} />
         <h2 className="text-xl font-semibold tracking-tight text-ink">{dict.account.orders}</h2>
 
         {orders.map((o) => (
@@ -153,7 +155,7 @@ export default async function AccountSectionPage({
   /* ---------------------------------------------------- CONFIGURATIONS */
   if (section === "configurations") {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4"><DemoActivity section={section} locale={locale} />
         <h2 className="text-xl font-semibold tracking-tight text-ink">
           {dict.account.configurations}
         </h2>
@@ -187,7 +189,7 @@ export default async function AccountSectionPage({
   /* ----------------------------------------------------------- REPAIRS */
   if (section === "repairs") {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4"><DemoActivity section={section} locale={locale} />
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold tracking-tight text-ink">{dict.account.repairs}</h2>
           <ButtonLink href={r.repair} size="sm">
@@ -246,7 +248,7 @@ export default async function AccountSectionPage({
   /* ------------------------------------------------------ APPOINTMENTS */
   if (section === "appointments") {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4"><DemoActivity section={section} locale={locale} />
         <h2 className="text-xl font-semibold tracking-tight text-ink">
           {dict.account.appointments}
         </h2>
@@ -279,11 +281,6 @@ export default async function AccountSectionPage({
             </Card>
           );
         })}
-
-        <Notice>
-          Görüş vaxtının dəyişdirilməsi və usta təyinatı serverdə konflikt yoxlaması ilə aparılır
-          (PRD §78, §79).
-        </Notice>
       </div>
     );
   }
@@ -291,7 +288,7 @@ export default async function AccountSectionPage({
   /* -------------------------------------------------------- WARRANTIES */
   if (section === "warranties") {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4"><DemoActivity section={section} locale={locale} />
         <h2 className="text-xl font-semibold tracking-tight text-ink">
           {dict.account.warranties}
         </h2>
@@ -333,14 +330,12 @@ export default async function AccountSectionPage({
   /* --------------------------------------------------------- ADDRESSES */
   if (section === "addresses") {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4"><DemoActivity section={section} locale={locale} />
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold tracking-tight text-ink">
             {dict.account.addresses}
           </h2>
-          <Button size="sm" variant="secondary">
-            Yeni ünvan
-          </Button>
+          <LocalManager section="addresses" label="Yeni ünvan" />
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
@@ -368,66 +363,8 @@ export default async function AccountSectionPage({
   }
 
   /* ----------------------------------------------------- NOTIFICATIONS */
-  if (section === "notifications") {
-    return (
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold tracking-tight text-ink">
-          {dict.account.notifications}
-        </h2>
-
-        <div className="space-y-2">
-          {notifications.map((n) => (
-            <Card
-              key={n.id}
-              className={n.read ? "p-4" : "border-l-2 border-l-brass-400 bg-brass-50/40 p-4"}
-            >
-              <div className="flex items-start gap-3">
-                <Bell size={16} className="mt-0.5 shrink-0 text-brass-500" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-[14.5px] font-medium text-ink">{n.title}</p>
-                  <p className="mt-0.5 text-[13px] text-stone">{n.body}</p>
-                  <p className="mt-1.5 text-[12px] text-mist">{formatDateTime(n.date)}</p>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-
-        <Card className="p-5">
-          <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-stone">
-            Bildiriş kanalları
-          </h3>
-          <div className="space-y-3">
-            <NotificationPref label="E-poçt" enabled />
-            <NotificationPref label="SMS" enabled />
-            <NotificationPref label="WhatsApp" enabled={false} />
-            <NotificationPref label="Marketinq bildirişləri" enabled={false} />
-          </div>
-          <Notice className="mt-5">
-            Bildiriş seçimləri backend mərhələsində saxlanılacaq (PRD §123).
-          </Notice>
-        </Card>
-      </div>
-    );
-  }
+  if (section === "notifications") return <NotificationSettings />;
 
   /* ----------------------------------------------------------- PROFILE */
   return <ProfileForm dict={dict} />;
-}
-
-function NotificationPref({ label, enabled }: { label: string; enabled: boolean }) {
-  return (
-    <div className="flex items-center justify-between border-b border-line pb-3 last:border-b-0 last:pb-0">
-      <span className="text-sm text-graphite">{label}</span>
-      <span
-        className={
-          enabled
-            ? "text-[12px] font-medium uppercase tracking-wider text-success"
-            : "text-[12px] font-medium uppercase tracking-wider text-mist"
-        }
-      >
-        {enabled ? "Aktiv" : "Deaktiv"}
-      </span>
-    </div>
-  );
 }

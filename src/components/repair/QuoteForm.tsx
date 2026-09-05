@@ -1,5 +1,6 @@
 "use client";
 
+import { useDemo } from "@/store/demo";
 import { useState } from "react";
 import { CheckCircle2, FileText } from "lucide-react";
 import type { Dictionary } from "@/i18n";
@@ -41,7 +42,9 @@ export function QuoteForm({ locale, dict }: { locale: Locale; dict: Dictionary }
 
     setErrors(next);
     if (Object.keys(next).length > 0) return;
-    setSubmitted(demoReference("QTE"));
+    const reference = demoReference("QTE");
+    useDemo.getState().add({ id: reference, kind: "quotes", title: "Qiymət təklifi", detail: `${form.message} · ${form.quantity} ədəd · ${form.width} × ${form.height} mm` });
+    setSubmitted(reference);
   }
 
   if (submitted) {

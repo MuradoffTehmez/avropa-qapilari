@@ -17,7 +17,7 @@ export function CookieBar({ dict }: { dict: Dictionary }) {
     <div
       role="region"
       aria-label={dict.cookie.title}
-      className="fixed inset-x-0 bottom-0 z-90 border-t border-line bg-paper/97 backdrop-blur-md"
+      className="fixed inset-x-0 bottom-16 lg:bottom-0 z-90 border-t border-line bg-paper/97 backdrop-blur-md"
     >
       <div className="container-page flex flex-col gap-4 py-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="max-w-2xl text-[13px] leading-relaxed text-graphite">

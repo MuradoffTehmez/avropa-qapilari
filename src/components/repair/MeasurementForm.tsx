@@ -1,5 +1,6 @@
 "use client";
 
+import { useDemo } from "@/store/demo";
 import { useState } from "react";
 import { CheckCircle2, Ruler } from "lucide-react";
 import type { Dictionary } from "@/i18n";
@@ -50,7 +51,9 @@ export function MeasurementForm({ locale, dict }: { locale: Locale; dict: Dictio
     setErrors(next);
     if (Object.keys(next).length > 0) return;
 
-    setSubmitted(demoReference("MSR"));
+    const reference = demoReference("MSR");
+    useDemo.getState().add({ id: reference, kind: "measurements", title: "Ölçü sifarişi", detail: `${form.doorCount} qapı · ${form.city}, ${form.street} · ${form.date} ${form.slot}` });
+    setSubmitted(reference);
   }
 
   if (submitted) {

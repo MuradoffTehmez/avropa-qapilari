@@ -156,3 +156,44 @@ body {
   background: var(--color-brass-200);
   color: var(--color-ink);
 }
+
+/* Phone interactions have their own layout and safe-area spacing. */
+html { scroll-padding-top: 5rem; }
+body { overflow-wrap: break-word; }
+main, section, article, aside { min-width: 0; }
+img, video { max-width: 100%; }
+.mobile-bottom-nav { padding-bottom: env(safe-area-inset-bottom, 0px); }
+@media (width < 64rem) {
+  body:has(.mobile-bottom-nav) { padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px)); }
+  .home-hero > .container-page { padding-block: 1rem 2rem; gap: 1.5rem; }
+  .hero-visual { order: -1; max-width: none; }
+  .hero-visual > div:first-child { aspect-ratio: 16 / 8; }
+  .hero-visual > div:last-child { display: none; }
+  .hero-copy h1 { font-size: clamp(1.85rem, 5.5vw, 3rem); }
+  .hero-copy > p:first-child { margin-bottom: .75rem; }
+  .hero-copy > p { margin-top: .75rem; }
+  .hero-copy > div { margin-top: 1.25rem; }
+  .hero-copy > div:last-child { padding-top: 1rem; }
+  .catalog-toolbar { position: sticky; top: 4rem; z-index: 25; background: var(--color-paper); padding-block: .75rem; }
+  .configurator-shell { padding-bottom: 10rem; }
+  .configurator-preview { top: 4rem; }
+  .configurator-preview > div { height: clamp(9rem, 23dvh, 13rem); }
+  .configurator-price { position: fixed; inset: auto 0 0; padding-bottom: env(safe-area-inset-bottom, 0px); box-shadow: 0 -4px 20px #0000000a; }
+  .configurator-price > div { padding-block: .65rem; }
+  .configurator-price details { max-height: 35dvh; overflow: auto; }
+  .checkout-shell { padding-bottom: 3rem; }
+}
+@media (width < 40rem) {
+  input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea { font-size: 16px !important; }
+  button:not([role=tab]), a[role=button] { min-height: 44px; }
+  .hero-copy > div:first-of-type { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+  .hero-copy > div:first-of-type > a { white-space: normal; padding-inline: .75rem; font-size: .85rem; text-align: center; }
+  .hero-copy > div:first-of-type > a:last-child { grid-column: 1 / -1; }
+  .catalog-toolbar > div { display: flex; flex-wrap: wrap; width: 100%; }
+  .catalog-toolbar select { min-width: 0; max-width: 100%; width: 100%; }
+  .catalog-toolbar > div > div { flex: 1; min-width: 0; }
+}
+@media (orientation: landscape) and (height < 32rem) and (width < 64rem) {
+  .configurator-preview { position: relative; top: 0; }
+  .configurator-preview > div { height: 10rem; }
+}

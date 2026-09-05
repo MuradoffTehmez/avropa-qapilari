@@ -1,5 +1,6 @@
 "use client";
 
+import { useDemo } from "@/store/demo";
 import { useState } from "react";
 import {
   ArrowLeft,
@@ -118,7 +119,9 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
     if (!validate(id)) return;
 
     if (id === "confirm") {
-      setSubmitted(demoReference("REP"));
+      const reference = demoReference("REP");
+    useDemo.getState().add({ id: reference, kind: "repairs", title: "Qapı təmiri", detail: `${form.description} · ${form.city}, ${form.street} ${form.building} · ${form.date} ${form.slot}` });
+    setSubmitted(reference);
       return;
     }
     setStep((s) => s + 1);

@@ -1,5 +1,6 @@
 "use client";
 
+import { useDemo } from "@/store/demo";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, Link2, RotateCcw, Save } from "lucide-react";
@@ -29,7 +30,9 @@ export function Configurator({
   product,
   locale,
   dict,
+  initialSelection,
 }: {
+  initialSelection?: ConfigurationSelection;
   product: Product;
   locale: Locale;
   dict: Dictionary;
@@ -38,14 +41,14 @@ export function Configurator({
   const addToCart = useCart((s) => s.add);
 
   const steps = useMemo(
-    () => product.optionGroups.filter((g) => g !== "SIZE" || true),
+    () => product.optionGroups,
     [product.optionGroups],
   );
 
   const [stepIndex, setStepIndex] = useState(0);
   const [customSize, setCustomSize] = useState(false);
 
-  const [selection, setSelection] = useState<ConfigurationSelection>(() => ({
+  const [selection, setSelection] = useState<ConfigurationSelection>(() => initialSelection ?? ({
     width: product.defaultWidth,
     height: product.defaultHeight,
     choices: defaultChoices(product),
@@ -101,6 +104,7 @@ export function Configurator({
       panelHex: previewProps.panelHex,
       quantity: 1,
       unitPrice: price.total,
+      includedServices: [selection.choices.INSTALLATION, selection.choices.DELIVERY].reduce<number>((sum, id) => sum + (typeof id === "string" ? findOptionValue(id)?.priceDelta ?? 0 : 0), 0),
       snapshot: {
         width: selection.width,
         height: selection.height,
@@ -111,12 +115,13 @@ export function Configurator({
   }
 
   const previewProps = buildPreview(selection, product);
+  if (currentGroup === "INSIDE_COLOR") previewProps.panelHex = findOptionValue(selection.choices.INSIDE_COLOR as string)?.hex ?? previewProps.panelHex;
   const selectedLines = summaryLines(selection);
 
   return (
-    <div className="lg:grid lg:min-h-[calc(100dvh-4.5rem)] lg:grid-cols-[1.15fr_1fr]">
+    <div className="configurator-shell lg:grid lg:min-h-[calc(100dvh-4.5rem)] lg:grid-cols-[1.15fr_1fr]">
       {/* ------------------------------------------------- PREVIEW */}
-      <div className="sticky top-16 z-20 border-b border-line bg-bone lg:top-[4.5rem] lg:h-[calc(100dvh-4.5rem)] lg:border-b-0 lg:border-r">
+      <div className="configurator-preview sticky top-16 z-20 border-b border-line bg-bone lg:top-[4.5rem] lg:h-[calc(100dvh-4.5rem)] lg:border-b-0 lg:border-r">
         <div className="relative flex h-52 items-center justify-center px-4 py-4 sm:h-72 lg:h-full lg:px-10">
           <div className="h-full max-h-[70vh] w-auto">
             <div className="h-full" style={{ aspectRatio: "3 / 4" }}>
@@ -186,7 +191,7 @@ export function Configurator({
         </div>
 
         {/* --------------------------------------------- PRICE BAR */}
-        <div className="sticky bottom-0 z-30 border-t border-line bg-paper/97 backdrop-blur">
+        <div className="configurator-price sticky bottom-0 z-30 border-t border-line bg-paper/97 backdrop-blur">
           <div className="px-4 py-3 sm:px-6 lg:px-8">
             <details className="group mb-3 hidden lg:block">
               <summary className="cursor-pointer list-none text-[12px] font-medium text-brass-600 underline-offset-2 hover:underline">
@@ -243,7 +248,7 @@ export function Configurator({
                   </Button>
                 ) : (
                   <Button onClick={() => setStepIndex((i) => i + 1)}>
-                    <span className="hidden sm:inline">{dict.actions.continue}</span>
+                    <span className="inline">{dict.actions.continue}</span>
                     <ArrowRight size={16} />
                   </Button>
                 )}
@@ -591,8 +596,13 @@ function SummaryStep({
   const r = routes(locale);
   const [configId] = useState(() => `CFG-26-${uid().toUpperCase()}`);
 
+  function save() {
+    useDemo.getState().save({ id: configId, productSlug: product.slug, productName: product.name, selection, total: calculatePrice(product, selection).total, date: new Date().toISOString() });
+    toast(dict.configurator.configurationSaved);
+  }
+
   function share() {
-    const url = `${window.location.origin}${r.configuration(configId)}`;
+    const url = `${window.location.origin}${r.configuratorFor(product.slug)}?design=${encodeURIComponent(JSON.stringify(selection))}`;
     navigator.clipboard?.writeText(url).then(
       () => toast(dict.configurator.linkCopied),
       () => toast(url),
@@ -625,7 +635,7 @@ function SummaryStep({
       </dl>
 
       <div className="mt-6 flex flex-wrap gap-2">
-        <Button variant="secondary" size="sm" onClick={() => toast(dict.configurator.configurationSaved)}>
+        <Button variant="secondary" size="sm" onClick={save}>
           <Save size={15} /> {dict.configurator.saveConfiguration}
         </Button>
         <Button variant="secondary" size="sm" onClick={share}>
@@ -637,8 +647,7 @@ function SummaryStep({
       </div>
 
       <p className="mt-4 text-xs text-stone">
-        Konfiqurasiya ID: <span className="font-mono text-graphite">{configId}</span> — backend
-        qoşulduqda hesabınıza yazılacaq və link vasitəsilə paylaşıla biləcək (PRD §56, §57).
+        Konfiqurasiya ID: <span className="font-mono text-graphite">{configId}</span> — bu brauzerdə saxlanılır. Paylaşma linkində yalnız qapı seçimləri olur.
       </p>
     </div>
   );

@@ -1,3 +1,5 @@
+import Image from "next/image";
+import { DoorScene } from "@/components/product/DoorScene";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -37,7 +39,7 @@ export default async function HomePage({
   return (
     <>
       {/* ---------------------------------------------------------- HERO */}
-      <section className="relative overflow-hidden bg-ink text-paper">
+      <section className="home-hero relative overflow-hidden bg-ink text-paper">
         <div
           aria-hidden
           className="absolute inset-0 opacity-[0.07]"
@@ -47,7 +49,7 @@ export default async function HomePage({
           }}
         />
         <div className="container-page relative grid gap-12 py-16 lg:grid-cols-[1.15fr_1fr] lg:items-center lg:gap-8 lg:py-24">
-          <div className="animate-fade-up">
+          <div className="hero-copy animate-fade-up">
             <p className="mb-5 text-[11px] font-semibold uppercase tracking-[0.28em] text-brass-300">
               {dict.home.heroEyebrow}
             </p>
@@ -89,22 +91,10 @@ export default async function HomePage({
             </div>
           </div>
 
-          <div className="relative mx-auto w-full max-w-md lg:max-w-none">
-            <div className="relative aspect-4/5">
-              <div
-                aria-hidden
-                className="absolute inset-x-8 bottom-0 top-12 bg-gradient-to-b from-paper/[0.06] to-transparent"
-              />
-              <DoorVisual
-                panelHex="#33312e"
-                style="MODERN"
-                glass="SATIN"
-                handle="BRASS"
-                smartLock
-                widthMm={1000}
-                heightMm={2100}
-                className="relative"
-              />
+          <div className="hero-visual relative mx-auto w-full max-w-md lg:max-w-none">
+            <div className="relative aspect-4/5 overflow-hidden rounded-sm">
+              <Image src="/images/villa-demo.png" alt="Antrasit qapılı müasir villa girişi — demo vizual" fill priority sizes="(max-width:1024px) 100vw, 50vw" className="object-cover" />
+              <span className="absolute right-3 top-3 bg-ink/70 px-2 py-1 text-xs text-white">Demo dizayn</span>
             </div>
             <div className="absolute -left-2 bottom-6 border border-paper/15 bg-obsidian/80 px-4 py-3 backdrop-blur sm:left-0">
               <p className="text-[10px] uppercase tracking-[0.16em] text-paper/45">Konfiqurasiya</p>
@@ -136,15 +126,10 @@ export default async function HomePage({
               <Link
                 key={c.id}
                 href={r.category(c.slug)}
-                className="group relative flex min-h-44 flex-col justify-end overflow-hidden border border-line bg-bone p-5 transition-colors hover:border-mist sm:min-h-56 sm:p-6"
+                className="group overflow-hidden border border-line bg-paper transition-shadow hover:shadow-lg"
               >
-                <div
-                  aria-hidden
-                  className="absolute -right-6 -top-4 h-40 w-28 opacity-25 transition-transform duration-500 group-hover:scale-105 sm:h-52 sm:w-36"
-                >
-                  <DoorVisual panelHex={c.accent} style={i % 2 === 0 ? "MODERN" : "CLASSIC"} ambient={false} />
-                </div>
-                <div className="relative">
+                <div className="aspect-[4/3] overflow-hidden"><DoorScene color={c.accent} variant={i} title={c.name} /></div>
+                <div className="p-4 sm:p-5">
                   <h3 className="text-[15px] font-medium text-ink sm:text-lg">{c.name}</h3>
                   <p className="mt-1 text-xs text-stone">{c.productCount} model</p>
                 </div>
@@ -308,15 +293,11 @@ export default async function HomePage({
             {projects.slice(0, 3).map((p) => (
               <Link
                 key={p.id}
-                href={r.projects}
+                href={`${r.projects}/${p.slug}`}
                 className="group border border-line bg-paper transition-colors hover:border-mist"
               >
                 <div className="relative aspect-4/3 overflow-hidden bg-bone">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="h-[85%] w-[45%] transition-transform duration-500 group-hover:scale-105">
-                      <DoorVisual panelHex={p.accent} style="CLASSIC" handle="BRASS" ambient={false} />
-                    </div>
-                  </div>
+                  <DoorScene color={p.accent} variant={projects.indexOf(p)} title={p.title} />
                   <Badge tone="dark" className="absolute left-3 top-3">
                     {p.category}
                   </Badge>

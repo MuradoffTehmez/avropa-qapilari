@@ -3,7 +3,8 @@ import { getDictionary, isLocale } from "@/i18n";
 import type { Locale } from "@/types";
 import { routes } from "@/lib/routes";
 import { Badge, Breadcrumbs, Section } from "@/components/ui/primitives";
-import { DoorVisual } from "@/components/product/DoorVisual";
+import { DoorScene } from "@/components/product/DoorScene";
+import Link from "next/link";
 import { projects } from "@/mock/content";
 
 export const metadata: Metadata = {
@@ -38,11 +39,7 @@ export default async function ProjectsPage({
           {projects.map((p) => (
             <article key={p.id} className="border border-line bg-paper">
               <div className="relative aspect-4/3 overflow-hidden bg-bone">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="h-[85%] w-[45%]">
-                    <DoorVisual panelHex={p.accent} style="CLASSIC" handle="BRASS" ambient={false} />
-                  </div>
-                </div>
+                <DoorScene color={p.accent} variant={projects.indexOf(p)} title={p.title} />
                 <Badge tone="dark" className="absolute left-3 top-3">
                   {p.category}
                 </Badge>
@@ -51,7 +48,7 @@ export default async function ProjectsPage({
                 </span>
               </div>
               <div className="p-5">
-                <h2 className="text-[16px] font-medium text-ink">{p.title}</h2>
+                <h2 className="text-[16px] font-medium text-ink"><Link className="underline-offset-4 hover:underline" href={`${r.projects}/${p.slug}`}>{p.title} →</Link></h2>
                 <p className="mt-1 text-[13px] text-stone">{p.location}</p>
                 <dl className="mt-4 border-t border-line pt-3 text-[13px]">
                   <div className="flex justify-between py-1">

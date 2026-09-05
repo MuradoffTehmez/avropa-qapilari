@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { LayoutGrid, List, SlidersHorizontal, X } from "lucide-react";
 import type { Dictionary } from "@/i18n";
 import type { DoorMaterial, Locale, Product, SecurityClass, SurfaceStyle } from "@/types";
@@ -35,8 +35,11 @@ export function CatalogView({
   dict: Dictionary;
   lockedCategory?: string;
 }) {
-  const [filters, setFilters] = useState<CatalogFilters>(emptyFilters);
-  const [sort, setSort] = useState<SortKey>("popular");
+  const query = useSyncExternalStore(subscribeQuery, () => window.location.search, () => "");
+  const filters = useMemo(() => readFilters(query), [query]);
+  const sort = (new URLSearchParams(query).get("sort") ?? "popular") as SortKey;
+  function setFilters(next: CatalogFilters) { updateQuery("filters", JSON.stringify(next)); }
+  function setSort(next: SortKey) { updateQuery("sort", next); }
   const [view, setView] = useState<"grid" | "list">("grid");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [visible, setVisible] = useState(PAGE_SIZE);
@@ -49,7 +52,7 @@ export function CatalogView({
   const activeCount = countActive(filters);
 
   function patch(next: Partial<CatalogFilters>) {
-    setFilters((f) => ({ ...f, ...next }));
+    setFilters({ ...filters, ...next });
     setVisible(PAGE_SIZE);
   }
 
@@ -92,7 +95,7 @@ export function CatalogView({
 
       <div className="min-w-0">
         {/* Toolbar */}
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
+        <div className="catalog-toolbar mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
           <p className="text-[13px] text-stone">
             <span className="font-semibold tabular-nums text-ink">{result.length}</span>{" "}
             {dict.common.results}
@@ -561,4 +564,10 @@ function ActiveChips({
       ))}
     </>
   );
+}
+
+function subscribeQuery(callback: () => void) { window.addEventListener("popstate",callback);return () => window.removeEventListener("popstate",callback); }
+function updateQuery(key: string, value: string) { const url=new URL(window.location.href);url.searchParams.set(key,value);window.history.replaceState(null,"",url);window.dispatchEvent(new PopStateEvent("popstate")); }
+function readFilters(query: string): CatalogFilters {
+ const result={...emptyFilters};try {const raw=JSON.parse(new URLSearchParams(query).get("filters")??"{}");for(const key of Object.keys(emptyFilters) as (keyof CatalogFilters)[]){const value=raw[key]; const base=emptyFilters[key];if((Array.isArray(base)&&Array.isArray(value)&&value.every(v=>typeof v==="string"))||(typeof base==="boolean"&&typeof value==="boolean")||(base===null&&(value===null||typeof value==="number"&&Number.isFinite(value)))) Object.assign(result,{[key]:value});}}catch{}return result;
 }

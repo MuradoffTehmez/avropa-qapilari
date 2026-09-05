@@ -1,3 +1,4 @@
+import { parseSharedDesign } from "@/features/configurator/shared";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getDictionary, isLocale, locales } from "@/i18n";
@@ -26,9 +27,10 @@ export async function generateMetadata({
 }
 
 export default async function ConfiguratorProductPage({
-  params,
+  params, searchParams,
 }: {
   params: Promise<{ locale: string; slug: string }>;
+  searchParams: Promise<{ design?: string }>;
 }) {
   const { locale: raw, slug } = await params;
   const locale = (isLocale(raw) ? raw : "az") as Locale;
@@ -37,5 +39,6 @@ export default async function ConfiguratorProductPage({
   const product = getProduct(slug);
   if (!product) notFound();
 
-  return <Configurator product={product} locale={locale} dict={dict} />;
+  const query = await searchParams;
+  return <Configurator initialSelection={parseSharedDesign(query.design, product)} product={product} locale={locale} dict={dict} />;
 }

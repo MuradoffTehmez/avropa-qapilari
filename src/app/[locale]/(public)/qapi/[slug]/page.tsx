@@ -1,9 +1,9 @@
+import { DemoDocument } from "@/components/product/DemoDocument";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   Award,
-  Download,
   FileText,
   Flame,
   Hammer,
@@ -421,19 +421,14 @@ export default async function ProductPage({
                         <FileText size={18} className="shrink-0 text-brass-500" />
                         <div className="min-w-0">
                           <p className="truncate text-[14px] font-medium text-ink">{doc.title}</p>
-                          <p className="text-xs text-stone">PDF · {doc.sizeKb} KB</p>
+                          <p className="text-xs text-stone">TXT · Demo sənəd</p>
                         </div>
                       </div>
-                      <span
-                        title="Sənədlər backend mərhələsində R2-dən veriləcək"
-                        className="flex shrink-0 items-center gap-1.5 text-[13px] text-mist"
-                      >
-                        <Download size={14} /> {dict.actions.download}
-                      </span>
+                      <DemoDocument title={doc.title} model={product.name} details={`${product.sku} · ${product.defaultWidth}×${product.defaultHeight} mm · ${product.securityClass} · ${product.warrantyYears} il zəmanət`} />
                     </div>
                   ))}
                   <p className="text-xs text-stone sm:col-span-2">
-                    Sənədlər backend mərhələsində Cloudflare R2-dən signed link ilə veriləcək.
+                    Təqdimat üçün nümunə sənədlər. Rəsmi sənədlər məhsul məlumatları ilə birlikdə əlavə olunacaq.
                   </p>
                 </div>
               ),

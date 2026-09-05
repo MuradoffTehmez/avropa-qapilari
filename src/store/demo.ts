@@ -1,0 +1,20 @@
+"use client";
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type { ConfigurationSelection } from "@/types";
+
+export type DemoRecord = { id: string; kind: string; title: string; date: string; status: string; detail: string; total?: number; technician?: string; history: { status: string; date: string }[] };
+export type SavedDesign = { id: string; productSlug: string; productName: string; selection: ConfigurationSelection; total: number; date: string };
+interface DemoState {
+  records: DemoRecord[];
+  designs: SavedDesign[];
+  add: (record: Omit<DemoRecord, "date" | "status" | "history">) => void;
+  update: (id: string, status: string, technician?: string) => void;
+  save: (design: SavedDesign) => void;
+}
+export const useDemo = create<DemoState>()(persist((set) => ({
+  records: [], designs: [],
+  add: (record) => set((s) => ({ records: [{ ...record, date: new Date().toISOString(), status: "Yeni", history: [{ status: "Yeni", date: new Date().toISOString() }] }, ...s.records] })),
+  update: (id, status, technician) => set((s) => ({ records: s.records.map((r) => r.id === id ? { ...r, status, technician: technician ?? r.technician, history: [...r.history, { status, date: new Date().toISOString() }] } : r) })),
+  save: (design) => set((s) => ({ designs: [design, ...s.designs.filter((d) => d.id !== design.id)] })),
+}), { name: "ep-demo-workflows-v1" }));
