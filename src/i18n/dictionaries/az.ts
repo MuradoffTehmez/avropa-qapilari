@@ -21,6 +21,7 @@ export const az = {
     measurement: "Ölçü",
     installation: "Quraşdırma",
     maintenance: "Baxım",
+    showroom: "Showroom",
   },
 
   actions: {
@@ -154,6 +155,61 @@ export const az = {
     securityCertified: "EN 1627 üzrə sertifikatlı təhlükəsizlik sinifləri",
     technicianResponse: "Təmir müraciətinə usta cavabı",
     warrantyRange: "Serial nömrəyə bağlı zəmanət",
+  },
+
+  showroom: {
+    title: "Showroom",
+    eyebrow: "Baxın, toxunun, sınayın",
+    heroTitle: "Qapını ekranda deyil, əlinizlə seçin",
+    heroText:
+      "Showroom-da qapıları tam ölçüdə görür, səthə toxunur, kilidi sınayır və rəng nümunələrini öz interyerinizin işığında müqayisə edirsiniz.",
+    bookVisit: "Ziyarət planlaşdır",
+    whatYouSee: "Nə görəcəksiniz",
+    whatYouSeeText: "Showroom dörd zonaya bölünüb.",
+    zone1: "Tam ölçülü qapılar",
+    zone1Text:
+      "Giriş, villa, interyer və şüşəli qapılar quraşdırılmış vəziyyətdə. Açıb-bağlayın, ağırlığını və səs izolyasiyasını hiss edin.",
+    zone1Meta: "18 model",
+    zone2: "Rəng və faktura kitabxanası",
+    zone2Text:
+      "RAL kataloqu, ağac dekorları və beton effektləri — əl boyda nümunələr. İstədiyinizi evə aparıb işıqda yoxlaya bilərsiniz.",
+    zone2Meta: "60+ nümunə",
+    zone3: "Kilid və smart lock stendi",
+    zone3Text:
+      "Çoxnöqtəli kilidlərin kəsik maketi, barmaq izi və kod ilə açılma, mobil tətbiqin canlı nümayişi.",
+    zone3Meta: "Canlı sınaq",
+    zone4: "Konstruksiya kəsikləri",
+    zone4Text:
+      "Qapının içini görün: polad təbəqə, gücləndirici qabırğalar, mineral yun və izolyasiya konturları.",
+    zone4Meta: "4 kəsik maket",
+    visitTitle: "Ziyarət haqqında",
+    visitText: "Randevusuz da gələ bilərsiniz, amma qeydiyyatla gözləmə olmur.",
+    duration: "Orta ziyarət müddəti",
+    durationValue: "40–60 dəqiqə",
+    consultant: "Məsləhətçi",
+    consultantValue: "Sizinlə bir mütəxəssis işləyir",
+    parking: "Parkinq",
+    parkingValue: "Binanın qarşısında pulsuz",
+    bring: "Özünüzlə gətirin",
+    bringValue: "Açırımın ölçüləri və interyer şəkilləri",
+    bookTitle: "Ziyarət üçün qeydiyyat",
+    bookText: "Vaxtı seçin — məsləhətçi sizin üçün ayrılsın.",
+    bookDate: "Tarix",
+    bookTime: "Saat",
+    bookPeople: "Neçə nəfər gələcəksiniz",
+    bookInterest: "Nə ilə maraqlanırsınız",
+    bookSubmit: "Ziyarəti təsdiqlə",
+    bookSuccess: "Ziyarətiniz qeydə alındı",
+    bookSuccessText: "Vaxtı təsdiqləmək üçün sizinlə əlaqə saxlayacağıq.",
+    bookNumber: "Qeydiyyat nömrəsi",
+    interestEntrance: "Giriş qapısı",
+    interestInterior: "Otaq qapıları",
+    interestVilla: "Villa qapısı",
+    interestSmart: "Smart kilid",
+    interestProject: "Layihə / toplu sifariş",
+    faqTitle: "Ziyarətdən əvvəl",
+    addressMissing:
+      "Ünvan tezliklə əlavə olunacaq. Qeydiyyatdan keçin — vaxt təsdiqlənəndə dəqiq ünvanı göndərəcəyik.",
   },
 
   process: {

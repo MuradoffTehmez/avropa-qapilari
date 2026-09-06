@@ -39,6 +39,7 @@ export function routes(locale: Locale) {
     measurement: `${base}/${seg("measurement", locale)}`,
     quote: `${base}/quote`,
 
+    showroom: `${base}/showroom`,
     projects: `${base}/${seg("projects", locale)}`,
     about: `${base}/${seg("about", locale)}`,
     blog: `${base}/blog`,

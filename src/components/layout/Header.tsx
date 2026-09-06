@@ -43,13 +43,15 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
 
   useLockBodyScroll(mobileOpen);
 
+  /** `wide: true` — yalnız geniş ekranda görünür; mobil menyuda hamısı var. */
   const nav = [
     { label: dict.nav.doors, href: r.doors },
     { label: dict.nav.configurator, href: r.configurator },
     { label: dict.nav.services, href: r.services },
     { label: dict.nav.repair, href: r.repair },
-    { label: dict.nav.projects, href: r.projects },
-    { label: dict.nav.about, href: r.about },
+    { label: dict.nav.showroom, href: r.showroom },
+    { label: dict.nav.projects, href: r.projects, wide: true },
+    { label: dict.nav.about, href: r.about, wide: true },
     { label: dict.nav.contact, href: r.contact },
   ];
 
@@ -82,7 +84,10 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
             <span className="sm:hidden">
               <Logo compact showTagline={false} />
             </span>
-            <span className="hidden sm:block">
+            <span className="hidden sm:block xl:hidden">
+              <Logo compact />
+            </span>
+            <span className="hidden xl:block">
               <Logo tagline={dict.meta.slogan} />
             </span>
           </Link>
@@ -95,13 +100,14 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "relative px-2.5 py-2 text-[13px] font-medium transition-colors xl:px-3.5 xl:text-[13.5px]",
+                    "relative whitespace-nowrap px-2 py-2 text-[13px] font-medium transition-colors xl:px-3 xl:text-[13.5px]",
                     active ? "text-ink" : "text-graphite hover:text-ink",
+                    item.wide && "hidden xl:block",
                   )}
                 >
                   {item.label}
                   {active && (
-                    <span className="absolute inset-x-2.5 bottom-0 h-0.5 bg-gold-500 xl:inset-x-3.5" />
+                    <span className="absolute inset-x-2 bottom-0 h-0.5 bg-gold-500 xl:inset-x-3" />
                   )}
                 </Link>
               );

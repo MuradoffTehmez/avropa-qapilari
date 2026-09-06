@@ -22,6 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/temir",
     "/olcu",
     "/quote",
+    "/showroom",
     "/layiheler",
     "/haqqimizda",
     "/blog",

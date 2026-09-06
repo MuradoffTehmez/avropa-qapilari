@@ -23,6 +23,7 @@ export const en: Dictionary = {
     measurement: "Measurement",
     installation: "Installation",
     maintenance: "Maintenance",
+    showroom: "Showroom",
   },
 
   actions: {
@@ -157,6 +158,61 @@ export const en: Dictionary = {
     securityCertified: "Security classes certified to EN 1627",
     technicianResponse: "Technician response to a repair request",
     warrantyRange: "Warranty tied to a serial number",
+  },
+
+  showroom: {
+    title: "Showroom",
+    eyebrow: "See it, touch it, try it",
+    heroTitle: "Choose your door by hand, not on a screen",
+    heroText:
+      "In the showroom you see doors at full size, feel the surface, try the lock and compare colour samples in your own interior light.",
+    bookVisit: "Book a visit",
+    whatYouSee: "What you will see",
+    whatYouSeeText: "The showroom is arranged in four zones.",
+    zone1: "Full-size doors",
+    zone1Text:
+      "Entrance, villa, interior and glazed doors, installed. Open and close them, feel the weight and the sound insulation.",
+    zone1Meta: "18 models",
+    zone2: "Colour and finish library",
+    zone2Text:
+      "RAL catalogue, wood decors and concrete effects — hand-sized samples. Take one home and check it in your own light.",
+    zone2Meta: "60+ samples",
+    zone3: "Lock and smart lock station",
+    zone3Text:
+      "Cutaway models of multipoint locks, fingerprint and code entry, and a live demonstration of the mobile app.",
+    zone3Meta: "Hands-on",
+    zone4: "Construction cutaways",
+    zone4Text:
+      "See inside the door: steel sheet, reinforcement ribs, mineral wool and the insulation seals.",
+    zone4Meta: "4 cutaway models",
+    visitTitle: "About the visit",
+    visitText: "You can drop in without an appointment, but booking means no waiting.",
+    duration: "Typical visit",
+    durationValue: "40–60 minutes",
+    consultant: "Consultant",
+    consultantValue: "One specialist works with you",
+    parking: "Parking",
+    parkingValue: "Free, in front of the building",
+    bring: "Bring with you",
+    bringValue: "Opening dimensions and photos of your interior",
+    bookTitle: "Book your visit",
+    bookText: "Pick a time and a consultant will be set aside for you.",
+    bookDate: "Date",
+    bookTime: "Time",
+    bookPeople: "How many people",
+    bookInterest: "What are you interested in",
+    bookSubmit: "Confirm visit",
+    bookSuccess: "Your visit is booked",
+    bookSuccessText: "We will contact you to confirm the time.",
+    bookNumber: "Booking number",
+    interestEntrance: "Entrance door",
+    interestInterior: "Interior doors",
+    interestVilla: "Villa door",
+    interestSmart: "Smart lock",
+    interestProject: "Project / bulk order",
+    faqTitle: "Before you visit",
+    addressMissing:
+      "The address will be added shortly. Book a visit and we will send the exact address when the time is confirmed.",
   },
 
   process: {

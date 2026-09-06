@@ -33,6 +33,7 @@ export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
       title: dict.footer.company,
       links: [
         { label: dict.nav.about, href: r.about },
+        { label: dict.nav.showroom, href: r.showroom },
         { label: dict.nav.projects, href: r.projects },
         { label: dict.nav.brands, href: r.brands },
         { label: dict.nav.blog, href: r.blog },
