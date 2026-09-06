@@ -14,11 +14,17 @@ zəmanət idarəçiliyi üçün platforma. Repozitoriya **Mərhələ 2**-dədir:
 | Məlumat mənbəyi | Prisma + SQLite; seed `src/mock/`-dan doldurur |
 | Formalar | Serverdə validasiya (zod) və qeydiyyat; nömrəni server verir |
 | Autentifikasiya | ✅ scrypt parol, HttpOnly sessiya kukisi, rol yoxlaması |
-| Ödəniş | Yoxdur — provayder abstraksiyası planlaşdırılıb |
+| Parol bərpası | ✅ Token axını hazırdır; link e-poçt əvəzinə server jurnalına yazılır |
+| Qiymət | ✅ Yalnız serverdə hesablanır — client-dən gələn məbləğ qəbul edilmir |
+| Kabinet · admin · usta paneli | ✅ Bazadan oxuyur, rol yoxlaması serverdədir |
+| Ödəniş | Provayder abstraksiyası hazırdır; real provayder qoşulmayıb |
+| Fayl yükləmə (təmir foto/video) | Yoxdur — R2 qurulumu tələb edir |
+| Bot qoruması (Turnstile) | Yoxdur — Cloudflare açarı tələb edir |
 | Şirkət əlaqə məlumatları | Boş — `src/config/brand.ts` faylında doldurulmalıdır |
 
-Test datası hər modeldən bir qeyddən ibarətdir (9 məhsul — hər kateqoriyadan biri).
-Təhvil zamanı `src/mock/` qovluğu repository qatı ilə əvəzlənəcək.
+Kataloq məzmunu `src/mock/` qovluğundadır və `prisma/seed.ts` bazanı oradan
+doldurur. Test datası hər modeldən bir qeyddən ibarətdir (9 məhsul — hər
+kateqoriyadan biri, 1 sifariş, 1 təmir, 1 zəmanət).
 
 ---
 
@@ -72,6 +78,47 @@ npm run lint
 ```bash
 npm run typecheck
 ```
+
+Baza:
+
+```bash
+npm run db:migrate
+```
+
+```bash
+npm run db:seed
+```
+
+Seed üç rol üçün hesab açır — `admin@europorta.az`, `usta@europorta.az`,
+`test@europorta.az`. Parol `SEED_PASSWORD` mühit dəyişənindən gəlir.
+Yalnız lokal inkişaf üçündür.
+
+Kataloq və ya konfiqurator seçimləri dəyişəndə:
+
+```bash
+npm run check:defaults
+```
+
+---
+
+## API
+
+Bütün cavablar eyni formadadır: uğurda `{ data }`, xətada
+`{ error: { code, message, details? } }`.
+
+| Endpoint | Təsvir |
+|---|---|
+| `GET /api/products`, `/api/products/[slug]` | Kataloq |
+| `POST /api/configurator/price` | **Server qiyməti** — client məbləği qəbul edilmir |
+| `POST/GET /api/configurations`, `GET /api/configurations/[code]` | Konfiqurasiyanın saxlanması və paylaşılması |
+| `POST/GET /api/orders` | Sifariş — `Idempotency-Key` dəstəklənir |
+| `POST /api/repair`, `/api/measurement`, `/api/quote` | Xidmət müraciətləri |
+| `POST /api/auth/register`, `/login`, `/logout`, `GET /me` | Sessiya |
+| `POST /api/auth/password/request`, `/reset` | Parol bərpası |
+| `GET/PATCH /api/account/profile`, `/addresses`, `POST /api/account/password` | Kabinet |
+| `PATCH /api/admin/orders/[number]` | Sifariş və ödəniş vəziyyəti |
+| `PATCH /api/admin/requests/[kind]/[number]` | Status və usta təyinatı |
+| `PATCH /api/technician/jobs/[number]` | Ustanın öz işi |
 
 ---
 
@@ -150,10 +197,13 @@ src/
     catalog/       # filter və sıralama məntiqi
     configurator/  # uyğunluq (compatibility) engine
     pricing/       # qiymət hesablama engine
+  server/          # data qatı — db, auth, pricing, account, admin,
+                   #   technician, payments, password-reset, validation
+  app/api/         # route handler-ləri
   i18n/            # AZ / EN / RU tam sözlüklər
-  mock/            # TEST DATASI — backend qoşulanda əvəzlənəcək
+  mock/            # kataloq məzmunu — seed mənbəyi
   store/           # zustand (səbət, siyahılar, iş axını)
-  lib/             # routes, utils, hooks, i18n-format
+  lib/             # routes, utils, hooks, i18n-format, api
   types/           # domain tipləri
   config/brand.ts  # brend konfiqurasiyası
 ```
@@ -175,13 +225,12 @@ Yoxlanılmış ekran ölçüləri: **320, 360, 390, 768, 1024, 1280, 1440, 1920 
 
 ## Növbəti mərhələ
 
-1. Cloudflare Workers + D1 + Prisma qurulumu
-2. `src/mock/` → repository/service qatına keçid
-3. Autentifikasiya və RBAC
-4. Server-side pricing və sifariş axını
-5. R2 + Cloudflare Images ilə real məhsul fotoları
-6. Turnstile, rate limiting, audit log
-7. Ödəniş provayderi inteqrasiyası
+1. E-poçt provayderi — parol bərpası və sifariş bildirişləri
+2. Real ödəniş provayderi (`src/server/payments.ts`-ə adapter)
+3. R2 + Cloudflare Images: məhsul fotoları və təmir müraciətinə fayl yükləmə
+4. Turnstile, rate limiting, audit log
+5. Cloudflare Workers + D1-ə deployment
+6. Admin panelin qalan bölmələri (endirim, kontent, SEO) üçün model və API
 
 Tam məhsul tələbləri sənədi: [`docs/PRD.md`](docs/PRD.md)
 Layihə konvensiyaları və iş qaydaları: [`CLAUDE.md`](CLAUDE.md)
