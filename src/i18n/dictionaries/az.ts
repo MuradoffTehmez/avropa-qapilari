@@ -316,6 +316,12 @@ export const az = {
     totalThickness: "Ümumi qalınlıq",
     showLayer: "göstər",
     hideLayer: "gizlət",
+    configurationId: "Konfiqurasiya ID",
+    sharedBadge: "Paylaşılan dizayn",
+    sharedOpen: "Konfiquratorda aç",
+    sharedPrivacy: "Bu linkdə yalnız qapı seçimləri var — şəxsi məlumat ötürülmür.",
+    sharedInvalid: "Konfiqurasiya tapılmadı",
+    sharedInvalidHint: "Link natamam və ya köhnəlmiş ola bilər. Öz qapınızı konfiquratorda yaradın.",
     layersHint: "Hər qatı ayrıca söndürüb qapının necə qurulduğunu görə bilərsiniz.",
   },
 
@@ -514,6 +520,7 @@ export const az = {
     model: "Model",
     warrantyStatus: "Zəmanət statusu",
     servicePhone: "Servis telefonu",
+    qrHint: "Bu kodu qapının üzərindəki etiketdən oxudaraq zəmanət və servis məlumatına çata bilərsiniz.",
     fullHistoryLocked: "Tam servis tarixçəsi yalnız usta və admin üçün açıqdır.",
   },
 

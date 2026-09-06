@@ -708,7 +708,22 @@ function SummaryStep({
   }
 
   function share() {
-    const url = `${window.location.origin}${r.configuratorFor(product.slug)}?design=${encodeURIComponent(JSON.stringify(selection))}`;
+    const query = new URLSearchParams({
+      p: product.slug,
+      d: JSON.stringify(selection),
+    });
+    const url = `${window.location.origin}${r.configuration(configId)}?${query}`;
+
+    if (navigator.share) {
+      navigator
+        .share({ title: product.name, text: dict.configurator.shareConfiguration, url })
+        .catch(() => copyLink(url));
+      return;
+    }
+    copyLink(url);
+  }
+
+  function copyLink(url: string) {
     navigator.clipboard?.writeText(url).then(
       () => toast(dict.configurator.linkCopied),
       () => toast(url),
@@ -753,7 +768,9 @@ function SummaryStep({
       </div>
 
       <p className="mt-4 text-xs text-stone">
-        Konfiqurasiya ID: <span className="font-mono text-graphite">{configId}</span> — bu brauzerdə saxlanılır. Paylaşma linkində yalnız qapı seçimləri olur.
+        {dict.configurator.configurationId}:{" "}
+        <span className="font-mono text-graphite">{configId}</span> —{" "}
+        {dict.configurator.sharedPrivacy}
       </p>
     </div>
   );

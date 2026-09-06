@@ -319,6 +319,12 @@ export const en: Dictionary = {
     totalThickness: "Total thickness",
     showLayer: "show",
     hideLayer: "hide",
+    configurationId: "Configuration ID",
+    sharedBadge: "Shared design",
+    sharedOpen: "Open in configurator",
+    sharedPrivacy: "This link carries only the door options — no personal data is shared.",
+    sharedInvalid: "Configuration not found",
+    sharedInvalidHint: "The link may be incomplete or outdated. Build your own door in the configurator.",
     layersHint: "Toggle each layer to see how the door is built up.",
   },
 
@@ -516,6 +522,7 @@ export const en: Dictionary = {
     model: "Model",
     warrantyStatus: "Warranty status",
     servicePhone: "Service phone",
+    qrHint: "Scan this code from the label on the door to reach warranty and service details.",
     fullHistoryLocked: "The full service history is available to technicians and admins only.",
   },
 

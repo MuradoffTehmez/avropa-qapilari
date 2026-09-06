@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Lock, Phone, QrCode, ShieldCheck } from "lucide-react";
+import { Lock, Phone, QrCode as QrIcon, ShieldCheck } from "lucide-react";
 
 import { getDictionary, isLocale, locales } from "@/i18n";
 import type { Locale } from "@/types";
@@ -9,6 +9,7 @@ import { formatDate } from "@/lib/utils";
 import { brand } from "@/config/brand";
 import { Badge, Breadcrumbs, Card, DataRow, Notice, Section } from "@/components/ui/primitives";
 import { ButtonLink } from "@/components/ui/Button";
+import { QrCode } from "@/components/ui/QrCode";
 import { doorAssets, getDoorAsset } from "@/mock/account";
 
 export function generateStaticParams() {
@@ -49,7 +50,7 @@ export default async function DoorPassportPage({
           />
           <div className="mt-4 flex items-start gap-4">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center border border-line bg-paper">
-              <QrCode size={26} className="text-gold-500" />
+              <QrIcon size={26} className="text-gold-500" />
             </div>
             <div>
               <h1 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
@@ -90,14 +91,16 @@ export default async function DoorPassportPage({
                       : "Müddət bitib"
                   }
                 />
-                <DataRow
-                  label={dict.service.servicePhone}
-                  value={
-                    <a href={`tel:${brand.contact.phoneHref}`} className="hover:underline">
-                      {brand.contact.phone}
-                    </a>
-                  }
-                />
+                {brand.contact.phone && (
+                  <DataRow
+                    label={dict.service.servicePhone}
+                    value={
+                      <a href={`tel:${brand.contact.phoneHref}`} className="hover:underline">
+                        {brand.contact.phone}
+                      </a>
+                    }
+                  />
+                )}
               </dl>
             </Card>
 
@@ -137,6 +140,19 @@ export default async function DoorPassportPage({
           </div>
 
           <aside className="space-y-4">
+            <Card className="flex flex-col items-center p-5 text-center">
+              <QrCode
+                value={`${brand.siteUrl}${r.doorPassport(asset.serialNumber)}`}
+                size={148}
+                label={`${dict.service.doorPassport} — ${asset.serialNumber}`}
+                className="border border-line"
+              />
+              <p className="mt-3 text-[12px] leading-relaxed text-stone">
+                {dict.service.qrHint}
+              </p>
+              <p className="mt-1 font-mono text-[12px] text-graphite">{asset.serialNumber}</p>
+            </Card>
+
             <Notice tone="info" title="Məxfilik">
               {dict.service.publicNotice}
             </Notice>
@@ -153,12 +169,14 @@ export default async function DoorPassportPage({
                 <ButtonLink href={r.serviceMaintenance} variant="secondary" full>
                   {dict.services.maintenance}
                 </ButtonLink>
-                <a
-                  href={`tel:${brand.contact.phoneHref}`}
-                  className="flex h-11 w-full items-center justify-center gap-2 rounded-[3px] border border-line text-sm font-medium text-ink transition-colors hover:border-mist"
-                >
-                  <Phone size={15} /> {brand.contact.phone}
-                </a>
+                {brand.contact.phone && (
+                  <a
+                    href={`tel:${brand.contact.phoneHref}`}
+                    className="flex h-11 w-full items-center justify-center gap-2 rounded-[3px] border border-line text-sm font-medium text-ink transition-colors hover:border-mist"
+                  >
+                    <Phone size={15} /> {brand.contact.phone}
+                  </a>
+                )}
               </div>
             </Card>
           </aside>
