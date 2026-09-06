@@ -25,6 +25,9 @@ zəmanət idarəçiliyi üçün platforma. Repozitoriya **Mərhələ 2**-dədir:
 | Bot qoruması (Turnstile) | Yoxdur — Cloudflare açarı tələb edir |
 | Şirkət əlaqə məlumatları | Boş — `src/config/brand.ts` faylında doldurulmalıdır |
 
+Fəsil-fəsil icra vəziyyəti: [`docs/PRD-STATUS.md`](docs/PRD-STATUS.md)
+(`npm run prd:status` ilə yenilənir).
+
 Kataloq məzmunu `src/mock/` qovluğundadır və `prisma/seed.ts` bazanı oradan
 doldurur. Test datası hər modeldən bir qeyddən ibarətdir (9 məhsul — hər
 kateqoriyadan biri, 1 sifariş, 1 təmir, 1 zəmanət).

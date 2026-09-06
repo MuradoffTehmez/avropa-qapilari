@@ -12,6 +12,7 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "check:defaults": "tsx scripts/check-defaults.ts",
+    "prd:status": "tsx scripts/prd-status.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
