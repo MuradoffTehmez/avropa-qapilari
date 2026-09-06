@@ -59,6 +59,20 @@ export function useScrolledPast(offset = 8): boolean {
 }
 
 /** Dialog/drawer daxilində fokusu saxlayır və bağlananda əvvəlki elementə qaytarır. */
+/**
+ * Dialoq açılmazdan əvvəl fokusda olan element.
+ *
+ * Modul səviyyəsində saxlanılır: komponent yenidən mount olduqda
+ * (React effektləri təkrar çağırdıqda və ya valideyn ağacı
+ * dəyişdikdə) `useRef` sıfırlanır və bərpa ediləsi element itir.
+ * Eyni anda bir dialoq açıq olduğu üçün tək dəyər kifayətdir.
+ */
+let focusBeforeDialog: HTMLElement | null = null;
+
+/** Dialoq daxilində fokus ala bilən elementlər. */
+const FOCUSABLE =
+  'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 export function useDialogFocus(
   containerRef: RefObject<HTMLElement | null>,
   active: boolean,
@@ -66,13 +80,22 @@ export function useDialogFocus(
   useEffect(() => {
     if (!active) return;
 
-    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    // Yalnız dialoqdan KƏNARDAKI elementi yadda saxlayırıq — əks halda
+    // effektin ikinci çağırışı dialoqun öz sahəsini "əvvəlki fokus"
+    // kimi qeyd edir və bağlananda bərpa ediləsi element qalmır.
+    const current = document.activeElement;
+    if (
+      current instanceof HTMLElement &&
+      current !== document.body &&
+      !containerRef.current?.contains(current)
+    ) {
+      focusBeforeDialog = current;
+    }
+
     const frame = window.requestAnimationFrame(() => {
       const container = containerRef.current;
       if (!container) return;
-      const first = container.querySelector<HTMLElement>(
-        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
-      );
+      const first = container.querySelector<HTMLElement>(FOCUSABLE);
       (first ?? container).focus();
     });
 
@@ -80,11 +103,9 @@ export function useDialogFocus(
       if (event.key !== "Tab") return;
       const container = containerRef.current;
       if (!container) return;
-      const focusable = Array.from(
-        container.querySelectorAll<HTMLElement>(
-          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
-        ),
-      ).filter((element) => !element.hidden && element.getAttribute("aria-hidden") !== "true");
+      const focusable = Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
+        (element) => !element.hidden && element.getAttribute("aria-hidden") !== "true",
+      );
       if (focusable.length === 0) {
         event.preventDefault();
         container.focus();
@@ -105,10 +126,22 @@ export function useDialogFocus(
     return () => {
       window.cancelAnimationFrame(frame);
       document.removeEventListener("keydown", onKeyDown);
-      previous?.focus();
+
+      // Portal sökülərkən brauzer fokusu `body`-yə salır; bərpanı növbəti
+      // tick-ə saxlayırıq ki, o sıfırlamadan sonra işləsin (WCAG 2.4.3).
+      window.setTimeout(() => {
+        const previous = focusBeforeDialog;
+        // Başqa dialoq açılıbsa bərpa etmirik.
+        if (document.querySelector("[role=dialog]")) return;
+        if (previous && previous.isConnected) {
+          previous.focus({ preventScroll: true });
+          focusBeforeDialog = null;
+        }
+      }, 0);
     };
   }, [active, containerRef]);
 }
+
 
 /**
  * localStorage-dakı açarı xarici store kimi oxuyur.

@@ -25,7 +25,7 @@ import { LocaleSwitcher } from "@/components/layout/LocaleSwitcher";
 import { SearchOverlay } from "@/components/layout/SearchOverlay";
 import { useCart, cartCount } from "@/store/cart";
 import { useCompare, useFavorites } from "@/store/lists";
-import { useDialogFocus, useHydrated, useLockBodyScroll, useScrolledPast } from "@/lib/hooks";
+import { useDialogFocus, useEscapeKey, useHydrated, useLockBodyScroll, useScrolledPast } from "@/lib/hooks";
 import { useSession } from "@/store/session";
 import { categories } from "@/mock/taxonomy";
 import { categoryName } from "@/lib/i18n-format";
@@ -35,6 +35,22 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+
+  // Dialoqu açan düymələr. Bağlananda fokus buraya qaytarılır —
+  // overlay komponenti yenidən mount ola bildiyi üçün bərpanı
+  // sabit qalan tetikləyicidən idarə edirik (WCAG 2.4.3).
+  const searchTriggerRef = useRef<HTMLButtonElement>(null);
+  const menuTriggerRef = useRef<HTMLButtonElement>(null);
+
+  /**
+   * Portal söküləndən sonra brauzer fokusu `body`-yə salır. Bərpanı
+   * iki kadr sonraya saxlayırıq ki, həmin sıfırlamadan sonra işləsin.
+   */
+  const restoreFocus = (ref: React.RefObject<HTMLButtonElement | null>) => {
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => ref.current?.focus({ preventScroll: true })),
+    );
+  };
   const mobilePanelRef = useRef<HTMLDivElement>(null);
   const scrolled = useScrolledPast(8);
   const hydrated = useHydrated();
@@ -65,7 +81,13 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
 
   const accountHref = hydrated && user ? r.account : r.login;
 
-  const close = () => setMobileOpen(false);
+  const close = () => {
+    setMobileOpen(false);
+    restoreFocus(menuTriggerRef);
+  };
+
+  // Mobil menyu Escape ilə də bağlanmalıdır (WCAG 2.1.2).
+  useEscapeKey(close, mobileOpen);
 
   return (
     <>
@@ -78,6 +100,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
         <div className="container-page flex h-16 items-center gap-2 sm:gap-4 lg:h-18">
           <button
             type="button"
+            ref={menuTriggerRef}
             onClick={() => setMobileOpen(true)}
             aria-label={dict.actions.menu}
             aria-expanded={mobileOpen}
@@ -124,6 +147,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
           <div className="ml-auto flex items-center gap-0.5 lg:ml-0">
             <button
               type="button"
+              ref={searchTriggerRef}
               onClick={() => setSearchOpen(true)}
               aria-label={dict.actions.search}
               className="flex h-11 w-11 items-center justify-center text-graphite transition-colors hover:text-ink"
@@ -281,7 +305,10 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
 
       <SearchOverlay
         open={searchOpen}
-        onClose={() => setSearchOpen(false)}
+        onClose={() => {
+          setSearchOpen(false);
+          restoreFocus(searchTriggerRef);
+        }}
         locale={locale}
         dict={dict}
       />
