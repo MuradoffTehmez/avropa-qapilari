@@ -312,6 +312,14 @@ export const ru: Dictionary = {
     sizeModifier: "Надбавка за размер",
     finalPrice: "Итоговая цена",
     resetConfig: "Сбросить конфигурацию",
+    layers: "Слои",
+    visualLayers: "Слои",
+    crossSection: "Разрез",
+    baseLayer: "Базовая панель",
+    totalThickness: "Общая толщина",
+    showLayer: "показать",
+    hideLayer: "скрыть",
+    layersHint: "Отключайте слои, чтобы увидеть, как устроена дверь.",
   },
 
   cart: {

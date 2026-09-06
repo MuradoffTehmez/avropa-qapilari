@@ -312,6 +312,14 @@ export const en: Dictionary = {
     sizeModifier: "Size adjustment",
     finalPrice: "Final price",
     resetConfig: "Reset configuration",
+    layers: "Layers",
+    visualLayers: "Layers",
+    crossSection: "Cross-section",
+    baseLayer: "Base panel",
+    totalThickness: "Total thickness",
+    showLayer: "show",
+    hideLayer: "hide",
+    layersHint: "Toggle each layer to see how the door is built up.",
   },
 
   cart: {

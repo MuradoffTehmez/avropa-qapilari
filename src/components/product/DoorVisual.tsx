@@ -22,6 +22,8 @@ export interface DoorVisualProps {
   glass?: GlassKind;
   handle?: HandleKind;
   handleHex?: string;
+  /** Qat görünüşündə dəstəyi gizlətmək üçün */
+  hideHandle?: boolean;
   side?: SideKind;
   smartLock?: boolean;
   viewer?: boolean;
@@ -72,6 +74,7 @@ export function DoorVisual({
   glass = "NONE",
   handle = "INOX",
   handleHex,
+  hideHandle = false,
   side = "RIGHT",
   smartLock = false,
   viewer = false,
@@ -208,7 +211,7 @@ export function DoorVisual({
       ))}
 
       {/* Dəstək */}
-      {handle === "BAR" ? (
+      {hideHandle ? null : handle === "BAR" ? (
         <g>
           <rect
             x={handleX - 3}

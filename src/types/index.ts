@@ -43,6 +43,17 @@ export type DoorMaterial =
 
 export type SurfaceStyle = "MODERN" | "CLASSIC" | "MINIMAL" | "LOFT" | "NEOCLASSIC";
 
+/** Qapının konstruksiya qatı — kəsik görünüşü üçün. */
+export interface ConstructionLayer {
+  id: string;
+  name: string;
+  thicknessMm: number;
+  role: string;
+  color: string;
+  /** Naxış: düz, lifli, hüceyrəli */
+  pattern?: "solid" | "fiber" | "honeycomb" | "metal";
+}
+
 export interface ProductSpec {
   group: string;
   label: string;

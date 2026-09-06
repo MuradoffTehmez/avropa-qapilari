@@ -309,6 +309,14 @@ export const az = {
     sizeModifier: "Ölçü düzəlişi",
     finalPrice: "Yekun qiymət",
     resetConfig: "Konfiqurasiyanı sıfırla",
+    layers: "Qatlar",
+    visualLayers: "Qatlar",
+    crossSection: "Kəsik",
+    baseLayer: "Baza panel",
+    totalThickness: "Ümumi qalınlıq",
+    showLayer: "göstər",
+    hideLayer: "gizlət",
+    layersHint: "Hər qatı ayrıca söndürüb qapının necə qurulduğunu görə bilərsiniz.",
   },
 
   cart: {

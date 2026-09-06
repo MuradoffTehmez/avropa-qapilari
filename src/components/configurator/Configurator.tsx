@@ -3,7 +3,7 @@
 import { useWorkflow } from "@/store/workflow";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, Check, Link2, RotateCcw, Save } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Layers, Link2, RotateCcw, Save, X } from "lucide-react";
 
 import type { Dictionary } from "@/i18n";
 import type {
@@ -21,6 +21,7 @@ import { Badge, Notice } from "@/components/ui/primitives";
 import { Stepper } from "@/components/ui/disclosure";
 import { toast } from "@/components/ui/overlays";
 import { DoorVisual, type GlassKind, type HandleKind } from "@/components/product/DoorVisual";
+import { DoorLayers, type VisualLayer } from "@/components/configurator/DoorLayers";
 import { findOptionValue, optionGroups, standardSizes } from "@/mock/options";
 import { calculatePrice, sizeRangeLabel } from "@/features/pricing/engine";
 import { checkCompatibility, pruneIncompatible } from "@/features/configurator/compatibility";
@@ -46,6 +47,8 @@ export function Configurator({
   );
 
   const [stepIndex, setStepIndex] = useState(0);
+  const [hiddenLayers, setHiddenLayers] = useState<Set<string>>(new Set());
+  const [layersOpen, setLayersOpen] = useState(false);
   const [customSize, setCustomSize] = useState(false);
 
   const [selection, setSelection] = useState<ConfigurationSelection>(() => initialSelection ?? ({
@@ -83,6 +86,15 @@ export function Configurator({
     }));
   }
 
+  function toggleLayer(key: string) {
+    setHiddenLayers((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
+
   function reset() {
     setSelection({
       width: product.defaultWidth,
@@ -91,6 +103,7 @@ export function Configurator({
     });
     setCustomSize(false);
     setStepIndex(0);
+    setHiddenLayers(new Set());
     toast("Konfiqurasiya sıfırlandı");
   }
 
@@ -114,15 +127,16 @@ export function Configurator({
     toast("Konfiqurasiya səbətə əlavə edildi");
   }
 
-  const previewProps = buildPreview(selection, product);
+  const previewProps = buildPreview(selection, product, hiddenLayers);
+  const visualLayers = buildVisualLayers(selection, product, dict);
   if (currentGroup === "INSIDE_COLOR") previewProps.panelHex = findOptionValue(selection.choices.INSIDE_COLOR as string)?.hex ?? previewProps.panelHex;
   const selectedLines = summaryLines(selection);
 
   return (
     <div className="configurator-shell lg:grid lg:min-h-[calc(100dvh-4.5rem)] lg:grid-cols-[1.15fr_1fr]">
       {/* ------------------------------------------------- PREVIEW */}
-      <div className="configurator-preview sticky top-16 z-20 border-b border-line bg-bone lg:top-[4.5rem] lg:h-[calc(100dvh-4.5rem)] lg:border-b-0 lg:border-r">
-        <div className="relative flex h-52 items-center justify-center px-4 py-4 sm:h-72 lg:h-full lg:px-10">
+      <div className="configurator-preview sticky top-16 z-20 flex flex-col border-b border-line bg-bone lg:top-[4.5rem] lg:h-[calc(100dvh-4.5rem)] lg:border-b-0 lg:border-r">
+        <div className="relative flex h-52 shrink-0 items-center justify-center px-4 py-4 sm:h-72 lg:h-auto lg:flex-1 lg:px-10">
           <div className="h-full max-h-[70vh] w-auto">
             <div className="h-full" style={{ aspectRatio: "3 / 4" }}>
               <DoorVisual {...previewProps} />
@@ -139,6 +153,27 @@ export function Configurator({
             </p>
           </div>
 
+          {/* Qat paneli açarı */}
+          <button
+            type="button"
+            onClick={() => setLayersOpen((o) => !o)}
+            aria-expanded={layersOpen}
+            className={cn(
+              "absolute right-3 top-3 flex items-center gap-1.5 border px-2.5 py-1.5 text-[12px] transition-colors sm:right-4 sm:top-4",
+              layersOpen
+                ? "border-ink bg-ink text-paper"
+                : "border-line bg-paper text-graphite hover:border-ink hover:text-ink",
+            )}
+          >
+            {layersOpen ? <X size={13} /> : <Layers size={13} />}
+            {dict.configurator.layers}
+            {hiddenLayers.size > 0 && (
+              <span className="ml-0.5 rounded-full bg-gold-500 px-1.5 text-[10px] font-semibold text-paper">
+                {hiddenLayers.size}
+              </span>
+            )}
+          </button>
+
           <div className="absolute bottom-4 right-4 hidden gap-2 lg:flex">
             <button
               type="button"
@@ -149,6 +184,17 @@ export function Configurator({
             </button>
           </div>
         </div>
+
+        {layersOpen && (
+          <DoorLayers
+            product={product}
+            dict={dict}
+            layers={visualLayers}
+            hidden={hiddenLayers}
+            onToggle={toggleLayer}
+            className="max-h-[45dvh] shrink-0 lg:max-h-[52%]"
+          />
+        )}
       </div>
 
       {/* ------------------------------------------------- OPTIONS */}
@@ -306,7 +352,11 @@ function summaryLines(selection: ConfigurationSelection) {
   return lines;
 }
 
-function buildPreview(selection: ConfigurationSelection, product: Product) {
+function buildPreview(
+  selection: ConfigurationSelection,
+  product: Product,
+  hidden: Set<string> = new Set(),
+) {
   const outside = findOptionValue(selection.choices.OUTSIDE_COLOR as string);
   const glassValue = findOptionValue(selection.choices.GLASS as string);
   const handleValue = findOptionValue(selection.choices.HANDLE as string);
@@ -316,18 +366,74 @@ function buildPreview(selection: ConfigurationSelection, product: Product) {
     ? (selection.choices.ACCESSORY as string[])
     : [];
 
+  const off = (key: string) => hidden.has(key);
+
   return {
-    panelHex: outside?.hex ?? product.panelHexes[0],
+    panelHex: off("OUTSIDE_COLOR") ? "#c7ccd3" : (outside?.hex ?? product.panelHexes[0]),
     style: product.style,
-    glass: (glassValue?.code ?? "NONE") as GlassKind,
+    glass: (off("GLASS") ? "NONE" : (glassValue?.code ?? "NONE")) as GlassKind,
     handle: (handleValue?.code ?? "INOX") as HandleKind,
+    hideHandle: off("HANDLE"),
     side: (opening?.code?.startsWith("LEFT") ? "LEFT" : "RIGHT") as "LEFT" | "RIGHT",
-    smartLock: Boolean(smartLock && smartLock.code !== "NONE"),
-    viewer: accessories.includes("ac-viewer"),
-    houseNumber: accessories.includes("ac-number"),
+    smartLock: !off("SMART_LOCK") && Boolean(smartLock && smartLock.code !== "NONE"),
+    viewer: !off("ACCESSORY") && accessories.includes("ac-viewer"),
+    houseNumber: !off("ACCESSORY") && accessories.includes("ac-number"),
     widthMm: selection.width,
     heightMm: selection.height,
   };
+}
+
+/** Preview-i təşkil edən qatlar — çöl tərəfdən başlayaraq (PRD §50). */
+function buildVisualLayers(
+  selection: ConfigurationSelection,
+  product: Product,
+  dict: Dictionary,
+): VisualLayer[] {
+  const layers: VisualLayer[] = [
+    {
+      key: "BASE",
+      label: dict.configurator.baseLayer,
+      value: `${product.name} · ${selection.width} × ${selection.height} mm`,
+      priceDelta: product.basePrice,
+      swatch: "var(--color-sand)",
+      toggleable: false,
+    },
+  ];
+
+  const order: OptionGroupKey[] = [
+    "OUTSIDE_COLOR",
+    "INSIDE_COLOR",
+    "FRAME",
+    "GLASS",
+    "HANDLE",
+    "LOCK",
+    "SMART_LOCK",
+    "ACCESSORY",
+  ];
+
+  for (const key of order) {
+    if (!product.optionGroups.includes(key)) continue;
+    const raw = selection.choices[key];
+    if (!raw) continue;
+
+    const ids = Array.isArray(raw) ? raw : [raw];
+    const values = ids.map(findOptionValue).filter(Boolean) as NonNullable<
+      ReturnType<typeof findOptionValue>
+    >[];
+    if (values.length === 0) continue;
+    if (values.length === 1 && values[0].code === "NONE") continue;
+
+    layers.push({
+      key,
+      label: dict.configurator.steps[key],
+      value: values.map((v) => v.label).join(", "),
+      priceDelta: values.reduce((sum, v) => sum + v.priceDelta, 0),
+      swatch: values[0].swatch ?? values[0].hex,
+      toggleable: true,
+    });
+  }
+
+  return layers;
 }
 
 /* ------------------------------- steps ------------------------------ */

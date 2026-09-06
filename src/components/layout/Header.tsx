@@ -6,7 +6,6 @@ import { useState } from "react";
 import {
   ChevronRight,
   Heart,
-  Mail,
   Menu,
   Phone,
   Search,
@@ -62,37 +61,6 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
 
   return (
     <>
-      {/* Utility bar — yalnız desktop */}
-      <div className="hidden border-b border-line bg-bone lg:block">
-        <div className="container-page flex h-9 items-center justify-between text-[12px] text-stone">
-          <p className="truncate">
-            {dict.meta.slogan}
-            {brand.contact.workingHours ? ` · ${brand.contact.workingHours}` : ""}
-          </p>
-          <div className="flex items-center gap-4">
-            {brand.contact.phone && (
-              <a
-                href={`tel:${brand.contact.phoneHref}`}
-                className="flex items-center gap-1.5 transition-colors hover:text-ink"
-              >
-                <Phone size={12} />
-                {brand.contact.phone}
-              </a>
-            )}
-            {brand.contact.email && (
-              <a
-                href={`mailto:${brand.contact.email}`}
-                className="flex items-center gap-1.5 transition-colors hover:text-ink"
-              >
-                <Mail size={12} />
-                {brand.contact.email}
-              </a>
-            )}
-            <LocaleSwitcher locale={locale} />
-          </div>
-        </div>
-      </div>
-
       <header
         className={cn(
           "sticky top-0 z-50 border-b bg-paper/95 backdrop-blur-md transition-shadow",
@@ -175,6 +143,9 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
             <HeaderIcon href={r.cart} label={dict.actions.cart} count={count}>
               <ShoppingBag size={19} />
             </HeaderIcon>
+
+            <span aria-hidden className="mx-1 hidden h-5 w-px bg-line sm:block" />
+            <LocaleSwitcher locale={locale} />
           </div>
         </div>
       </header>
