@@ -185,3 +185,38 @@ export function TechnicianControl({
     />
   );
 }
+
+/** İstifadəçinin rolu — server sonuncu admini qorumaq üçün yoxlayır. */
+export function RoleControl({
+  userId,
+  email,
+  role,
+}: {
+  userId: string;
+  email: string;
+  role: string;
+}) {
+  const dict = useDict();
+  const router = useRouter();
+
+  const options = Object.entries(dict.adminUi.roleNames).map(([value, label]) => ({
+    value,
+    label,
+  }));
+
+  return (
+    <Control
+      value={role}
+      options={options}
+      label={`${email} — ${dict.adminUi.labels.function}`}
+      onPick={async (next) => {
+        try {
+          await apiFetch(`/api/admin/users/${userId}`, { method: "PATCH", json: { role: next } });
+          router.refresh();
+        } catch (error) {
+          if (error instanceof ApiRequestError) toast(error.error.message);
+        }
+      }}
+    />
+  );
+}

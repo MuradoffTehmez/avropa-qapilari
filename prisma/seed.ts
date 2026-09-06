@@ -8,7 +8,9 @@ import { PrismaClient } from "@prisma/client";
 import { products } from "../src/mock/products";
 import { brands, categories } from "../src/mock/taxonomy";
 import { allOptionValues, findOptionValue } from "../src/mock/options";
-import { technicians } from "../src/mock/content";
+import { reviews, technicians } from "../src/mock/content";
+import { az } from "../src/i18n/dictionaries/az";
+import { brand } from "../src/config/brand";
 import { hashPassword } from "../src/server/password";
 import { defaultChoices } from "../src/features/configurator/defaults";
 import { pruneIncompatible } from "../src/features/configurator/compatibility";
@@ -24,6 +26,12 @@ async function main() {
   await db.repairRequest.deleteMany();
   await db.measurementRequest.deleteMany();
   await db.quoteRequest.deleteMany();
+  await db.auditLog.deleteMany();
+  await db.setting.deleteMany();
+  await db.seoEntry.deleteMany();
+  await db.contentPage.deleteMany();
+  await db.discount.deleteMany();
+  await db.review.deleteMany();
   await db.payment.deleteMany();
   await db.warranty.deleteMany();
   await db.appointment.deleteMany();
@@ -107,6 +115,7 @@ async function main() {
   }
 
   await seedAccounts();
+  await seedEditorial();
 
   const counts = {
     brands: await db.brand.count(),
@@ -119,6 +128,10 @@ async function main() {
       (await db.repairRequest.count()) +
       (await db.measurementRequest.count()) +
       (await db.quoteRequest.count()),
+    reviews: await db.review.count(),
+    pages: await db.contentPage.count(),
+    seo: await db.seoEntry.count(),
+    settings: await db.setting.count(),
   };
   console.log("Seed tamamlandı:", counts);
 }
@@ -351,6 +364,98 @@ async function nextCounter(prefix: string, year = 2026): Promise<string> {
     update: { value: { increment: 1 } },
   });
   return `${prefix}-${year}-${String(counter.value).padStart(6, "0")}`;
+}
+
+
+/**
+ * Redaksiya qatı: rəylər, məzmun səhifələri, SEO yazıları və
+ * tənzimləmələr.
+ *
+ * Endirim və audit log qəsdən boş qalır — onlar əməliyyat datasıdır və
+ * uydurma qeyd yaradılmır. Audit sətirləri admin əməliyyat etdikcə özü
+ * yaranır.
+ */
+async function seedEditorial() {
+  const product = await db.product.findFirst({ orderBy: { name: "asc" } });
+
+  for (const review of reviews) {
+    const target =
+      (await db.product.findFirst({ where: { name: review.productName } })) ?? product;
+    if (!target) break;
+
+    await db.review.create({
+      data: {
+        // id mock-dakı ilə eynidir: `content.i18n.ts` tərcümələri
+        // məhz bu açarla tapır.
+        id: review.id,
+        productId: target.id,
+        author: review.author,
+        city: review.city,
+        rating: review.rating,
+        text: review.text,
+        status: "APPROVED",
+        verified: review.verified,
+        createdAt: new Date(review.date),
+      },
+    });
+  }
+
+  // Mövcud səhifələr — yol və başlıq saytdakı ilə eynidir.
+  const pages: { path: string; title: string; published: boolean }[] = [
+    { path: "/", title: az.nav.home, published: true },
+    { path: "/haqqimizda", title: az.nav.about, published: true },
+    { path: "/xidmetler", title: az.nav.services, published: true },
+    { path: "/layiheler", title: az.nav.projects, published: true },
+    { path: "/blog", title: az.nav.blog, published: true },
+    { path: "/faq", title: az.nav.faq, published: true },
+    { path: "/elaqe", title: az.nav.contact, published: true },
+    { path: "/legal/privacy", title: az.footer.privacy, published: true },
+    { path: "/legal/terms", title: az.footer.terms, published: true },
+  ];
+
+  for (const page of pages) {
+    await db.contentPage.create({ data: page });
+  }
+
+  // SEO yazıları saytın həqiqətən göndərdiyi meta mətnlərdən doldurulur.
+  const seo: { path: string; title: string; description: string }[] = [
+    { path: "/", title: az.meta.slogan, description: az.meta.description },
+    {
+      path: "/qapilar",
+      title: az.pageMeta.catalog.title,
+      description: az.pageMeta.catalog.description,
+    },
+    {
+      path: "/konfiqurator",
+      title: az.pageMeta.configurator.title,
+      description: az.pageMeta.configurator.description,
+    },
+    {
+      path: "/xidmetler",
+      title: az.pageMeta.services.title,
+      description: az.pageMeta.services.description,
+    },
+  ];
+
+  for (const entry of seo) {
+    await db.seoEntry.create({ data: entry });
+  }
+
+  const settings: Record<string, string> = {
+    siteName: brand.name,
+    currency: "AZN",
+    defaultLocale: "az",
+    locales: "az,en,ru",
+    timeZone: "Asia/Baku",
+    orderPrefix: "ORD",
+    // Boş qalanlar brend konfiqurasiyasından gəlir və uydurulmur.
+    supportPhone: brand.contact.phone,
+    supportEmail: brand.contact.email,
+  };
+
+  for (const [key, value] of Object.entries(settings)) {
+    await db.setting.create({ data: { key, value } });
+  }
 }
 
 main()

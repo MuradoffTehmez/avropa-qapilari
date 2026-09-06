@@ -157,6 +157,11 @@ const reviewTexts: Partial<Record<Locale, Record<string, ReviewText>>> = {
   },
 };
 
+/** Bazadan gələn rəy üçün tərcümə; yoxdursa `undefined`. */
+export function reviewTranslation(id: string, locale: Locale): ReviewText | undefined {
+  return reviewTexts[locale]?.[id];
+}
+
 export function localizedReviews(locale: Locale): Review[] {
   const t = reviewTexts[locale];
   if (!t) return reviews;

@@ -2,15 +2,22 @@ import { AdminSection } from "@/components/admin/AdminSection";
 import { isLocale } from "@/i18n";
 import { currentUser } from "@/server/auth";
 import {
+  adminAnalytics,
   adminAppointments,
+  adminAuditLog,
   adminBrands,
   adminCategories,
+  adminContentPages,
   adminCustomers,
+  adminDiscounts,
   adminMeasurements,
   adminOptionGroups,
   adminOrders,
   adminProducts,
   adminQuotes,
+  adminReviews,
+  adminSeoEntries,
+  adminSettings,
   adminRepairs,
   adminTechnicians,
   adminWarranties,
@@ -51,6 +58,20 @@ async function loadSection(section: string): Promise<AdminData> {
       return { customers: await adminCustomers() };
     case "warranty":
       return { warranties: await adminWarranties() };
+    case "discounts":
+      return { discounts: await adminDiscounts() };
+    case "content":
+      return { contentPages: await adminContentPages() };
+    case "seo":
+      return { seoEntries: await adminSeoEntries() };
+    case "reviews":
+      return { reviews: await adminReviews() };
+    case "audit":
+      return { auditLog: await adminAuditLog() };
+    case "settings":
+      return { settings: await adminSettings() };
+    case "analytics":
+      return { analytics: await adminAnalytics() };
     default:
       return {};
   }

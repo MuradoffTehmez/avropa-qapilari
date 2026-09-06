@@ -2,17 +2,24 @@ import Link from "next/link";
 import { Award, ShieldCheck, Star, Wrench } from "lucide-react";
 
 import type { Dictionary } from "@/i18n";
-import type { Locale } from "@/types";
+import type { Locale, Review } from "@/types";
 import { routes } from "@/lib/routes";
-import { localizedReviews } from "@/mock/content.i18n";
 
 /**
  * Sosial sübut zolağı — kateqoriyalardan dərhal sonra.
  * Rəy və rəqəmlər səhifənin altında qalmasın deyə yuxarı çəkilib.
  */
-export function TrustStrip({ locale, dict }: { locale: Locale; dict: Dictionary }) {
+export function TrustStrip({
+  locale,
+  dict,
+  review,
+}: {
+  locale: Locale;
+  dict: Dictionary;
+  /** Moderasiyadan keçmiş ən son rəy; yoxdursa blok göstərilmir. */
+  review?: Review;
+}) {
   const r = routes(locale);
-  const review = localizedReviews(locale)[0];
 
   const stats = [
     { icon: ShieldCheck, value: "RC2–RC5", label: dict.trust.securityCertified },

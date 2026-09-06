@@ -1,4 +1,5 @@
 import { requireUser } from "@/server/auth";
+import { changeDetail, recordAudit } from "@/server/audit";
 import { db } from "@/server/db";
 import { fail, handle, ok } from "@/server/http";
 import { orderStatusSchema } from "@/server/validation";
@@ -14,7 +15,7 @@ export async function PATCH(
   { params }: { params: Promise<{ number: string }> },
 ) {
   return handle(async () => {
-    await requireUser("ADMIN");
+    const actor = await requireUser("ADMIN");
     const { number } = await params;
     const input = orderStatusSchema.parse(await request.json());
 
@@ -33,6 +34,16 @@ export async function PATCH(
         ? [db.orderStatusHistory.create({ data: { orderId: order.id, status } })]
         : []),
     ]);
+
+    await recordAudit(
+      actor,
+      "order.update",
+      number,
+      changeDetail({
+        status: [order.status, status],
+        paymentStatus: [order.paymentStatus, paymentStatus],
+      }),
+    );
 
     return ok({ number, status, paymentStatus, changed: statusChanged });
   });

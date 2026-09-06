@@ -7,19 +7,26 @@ import { notFound } from "next/navigation";
 import { getDictionary } from "@/i18n";
 import type { Locale } from "@/types";
 import { formatDate, formatDateTime, formatNumber, formatPrice } from "@/lib/utils";
-import { Badge, Card, DataRow, Rating } from "@/components/ui/primitives";
+import { Badge, Card, DataRow, Notice, Rating } from "@/components/ui/primitives";
 
 import { AdminPageHeader, DataTable } from "@/components/admin/DataTable";
+import {
+  ContentTable,
+  DiscountsTable,
+  ReviewsTable,
+  SeoTable,
+  SettingsForm,
+} from "@/components/admin/AdminEditorial";
 import {
   OrderStatusControl,
   PaymentStatusControl,
   RepairStatusControl,
+  RoleControl,
   TechnicianControl,
 } from "@/components/admin/AdminControls";
 import { ProductMedia } from "@/components/product/ProductMedia";
 import { getProduct } from "@/mock/products";
 import { optionLabelById } from "@/mock/options.i18n";
-import { localizedReviews } from "@/mock/content.i18n";
 import {
   categoryNameBySlug,
   countryNameByCode,
@@ -455,35 +462,68 @@ export function AdminSection({
   /* ------------------------------------------------------------- ROLES */
   if (section === "roles") {
     const roleFunctions = ui.roleFunctions;
-    const permissions = [
-      "product.view", "product.create", "product.update", "product.delete",
-      "order.view", "order.update", "repair.assign", "user.manage", "setting.manage",
+
+    // Matris kodda həqiqətən tətbiq olunanı göstərir: `requireUser` və
+    // `hasRole` üç rolu tanıyır, ADMIN hamısını əhatə edir (PRD §93).
+    const matrix = [
+      { fn: roleFunctions.products, admin: ui.fullAccess, technician: ui.noAccess, customer: ui.noAccess },
+      { fn: roleFunctions.orders, admin: ui.fullAccess, technician: ui.noAccess, customer: ui.restrictedAccess },
+      { fn: roleFunctions.repairs, admin: ui.fullAccess, technician: ui.assignedAccess, customer: ui.restrictedAccess },
+      { fn: roleFunctions.customers, admin: ui.fullAccess, technician: ui.noAccess, customer: ui.noAccess },
+      { fn: roleFunctions.finance, admin: ui.fullAccess, technician: ui.noAccess, customer: ui.noAccess },
+      { fn: roleFunctions.roles, admin: ui.fullAccess, technician: ui.noAccess, customer: ui.noAccess },
+      { fn: roleFunctions.settings, admin: ui.fullAccess, technician: ui.noAccess, customer: ui.noAccess },
     ];
-    const matrix: { fn: string; superAdmin: string; admin: string; editor: string; technician: string }[] = [
-      { fn: roleFunctions.products, superAdmin: ui.fullAccess, admin: ui.fullAccess, editor: ui.editAccess, technician: ui.noAccess },
-      { fn: roleFunctions.orders, superAdmin: ui.fullAccess, admin: ui.fullAccess, editor: ui.noAccess, technician: ui.assignedAccess },
-      { fn: roleFunctions.repairs, superAdmin: ui.fullAccess, admin: ui.fullAccess, editor: ui.noAccess, technician: ui.assignedAccess },
-      { fn: roleFunctions.customers, superAdmin: ui.fullAccess, admin: ui.fullAccess, editor: ui.noAccess, technician: ui.restrictedAccess },
-      { fn: roleFunctions.finance, superAdmin: ui.fullAccess, admin: ui.viewAccess, editor: ui.noAccess, technician: ui.noAccess },
-      { fn: roleFunctions.roles, superAdmin: ui.fullAccess, admin: ui.noAccess, editor: ui.noAccess, technician: ui.noAccess },
-      { fn: roleFunctions.settings, superAdmin: ui.fullAccess, admin: ui.noAccess, editor: ui.noAccess, technician: ui.noAccess },
+
+    const permissions = [
+      "order.update",
+      "payment.update",
+      "repair.assign",
+      "measurement.assign",
+      "quote.update",
+      "discount.create",
+      "content.update",
+      "seo.update",
+      "review.moderate",
+      "setting.manage",
+      "user.manage",
     ];
 
     return (
-      <><ActivityFeed section={section} locale={locale} manage />
+      <>
+        <ActivityFeed section={section} locale={locale} manage />
         <AdminPageHeader title={dict.admin.roles} description={ui.rolesDescription} />
 
         <div className="space-y-4">
           <DataTable
-            title={ui.roleMatrix}
+            title={ui.roleUsersTitle}
             minWidth={720}
+            source="server"
+            rows={data.customers ?? []}
+            columns={[
+              { key: "name", header: label.name, render: (u) => <span className="font-medium text-ink">{u.name}</span> },
+              { key: "email", header: dict.common.email, render: (u) => <span className="text-stone">{u.email}</span> },
+              { key: "since", header: label.registration, render: (u) => formatDate(u.since) },
+              {
+                key: "role",
+                header: label.function,
+                render: (u) => <RoleControl userId={u.id} email={u.email} role={u.role} />,
+              },
+            ]}
+          />
+
+          <Notice tone="info">{ui.roleMatrixNote}</Notice>
+
+          <DataTable
+            title={ui.roleMatrix}
+            minWidth={640}
+            source="server"
             rows={matrix}
             columns={[
               { key: "fn", header: label.function, render: (m) => <span className="font-medium text-ink">{m.fn}</span> },
-              { key: "sa", header: "Super Admin", align: "center", render: (m) => m.superAdmin },
-              { key: "a", header: "Admin", align: "center", render: (m) => m.admin },
-              { key: "e", header: "Editor", align: "center", render: (m) => m.editor },
-              { key: "t", header: "Technician", align: "center", render: (m) => m.technician },
+              { key: "a", header: ui.roleNames.ADMIN, align: "center", render: (m) => m.admin },
+              { key: "t", header: ui.roleNames.TECHNICIAN, align: "center", render: (m) => m.technician },
+              { key: "c", header: ui.roleNames.CUSTOMER, align: "center", render: (m) => m.customer },
             ]}
           />
 
@@ -616,59 +656,22 @@ export function AdminSection({
 
   /* ----------------------------------------------------------- REVIEWS */
   if (section === "reviews") {
-    const reviews = localizedReviews(locale);
     return (
-      <><ActivityFeed section={section} locale={locale} manage />
+      <>
+        <ActivityFeed section={section} locale={locale} manage />
         <AdminPageHeader title={dict.admin.reviews} description={ui.reviewsDescription} />
-        <DataTable
-          title={dict.admin.reviews}
-          minWidth={860}
-          rows={reviews}
-          columns={[
-            { key: "author", header: label.author, render: (rv) => <span className="font-medium text-ink">{rv.author}</span> },
-            { key: "product", header: label.product, render: (rv) => rv.productName },
-            { key: "rating", header: label.rating, render: (rv) => <Rating value={rv.rating} /> },
-            { key: "text", header: label.text, render: (rv) => <span className="line-clamp-2 max-w-md text-stone">{rv.text}</span> },
-            { key: "date", header: label.date, render: (rv) => formatDate(rv.date) },
-            {
-              key: "status",
-              header: label.status,
-              render: (rv) => <Badge tone={rv.verified ? "success" : "warning"}>{rv.verified ? ui.verified : ui.pending}</Badge>,
-            },
-          ]}
-        />
+        <ReviewsTable rows={data.reviews ?? []} />
       </>
     );
   }
 
   /* ----------------------------------------------------------- CONTENT */
   if (section === "content") {
-    const pages = [
-      { title: ui.contentPages.home, path: "/", updated: "2026-08-30", published: true },
-      { title: ui.contentPages.about, path: "/haqqimizda", updated: "2026-08-12", published: true },
-      { title: ui.contentPages.services, path: "/xidmetler", updated: "2026-08-22", published: true },
-      { title: ui.contentPages.faq, path: "/faq", updated: "2026-09-01", published: true },
-      { title: ui.contentPages.privacy, path: "/legal/privacy", updated: "2026-07-05", published: false },
-    ];
-
     return (
-      <><ActivityFeed section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.content} action={addButton(ui.newPage)} />
-        <DataTable
-          title={dict.admin.pages}
-          minWidth={640}
-          rows={pages}
-          columns={[
-            { key: "title", header: label.title, render: (p) => <span className="font-medium text-ink">{p.title}</span> },
-            { key: "path", header: label.url, render: (p) => <code className="text-[12px] text-stone">{p.path}</code> },
-            { key: "updated", header: label.updated, render: (p) => formatDate(p.updated) },
-            {
-              key: "status",
-              header: label.status,
-              render: (p) => <Badge tone={p.published ? "success" : "warning"}>{p.published ? ui.published : ui.draft}</Badge>,
-            },
-          ]}
-        />
+      <>
+        <ActivityFeed section={section} locale={locale} manage />
+        <AdminPageHeader title={dict.admin.content} description={ui.contentDescription} />
+        <ContentTable rows={data.contentPages ?? []} />
       </>
     );
   }
@@ -676,10 +679,13 @@ export function AdminSection({
   /* --------------------------------------------------------------- SEO */
   if (section === "seo") {
     return (
-      <><ActivityFeed section={section} locale={locale} manage />
-        <LocalManager section="seo" label={ui.addSeo} />
+      <>
+        <ActivityFeed section={section} locale={locale} manage />
         <AdminPageHeader title={dict.admin.seo} description={ui.seoDescription} />
-        <div className="grid gap-4 lg:grid-cols-2">
+
+        <SeoTable rows={data.seoEntries ?? []} />
+
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
           <Card className="p-5">
             <h2 className="mb-4 text-[13px] font-semibold text-ink">{ui.technicalSeo}</h2>
             <dl>
@@ -710,68 +716,117 @@ export function AdminSection({
 
   /* --------------------------------------------------------- ANALYTICS */
   if (section === "analytics") {
-    const funnel = [
-      { step: ui.funnelSteps.catalog, value: 12480, rate: "100%" },
-      { step: ui.funnelSteps.product, value: 5240, rate: "42%" },
-      { step: ui.funnelSteps.configurator, value: 1980, rate: "16%" },
-      { step: ui.funnelSteps.completed, value: 860, rate: "6.9%" },
-      { step: ui.funnelSteps.cart, value: 520, rate: "4.2%" },
-      { step: ui.funnelSteps.checkout, value: 310, rate: "2.5%" },
-      { step: ui.funnelSteps.order, value: 148, rate: "1.2%" },
-    ];
+    const analytics = data.analytics;
 
     return (
-      <><ActivityFeed section={section} locale={locale} manage />
+      <>
+        <ActivityFeed section={section} locale={locale} manage />
         <AdminPageHeader title={dict.admin.analytics} description={ui.analyticsDescription} />
+
+        {/* Səhifə baxışı toplanmır — burada yalnız bazadakı faktiki
+            qeydlərin nisbəti göstərilir. */}
+        <Notice tone="info" className="mb-4">
+          {ui.analyticsSourceNote}
+        </Notice>
+
         <DataTable
           title={ui.funnelTitle}
           minWidth={560}
-          rows={funnel}
+          source="server"
+          rows={analytics?.funnel ?? []}
           columns={[
-            { key: "step", header: label.step, render: (f) => <span className="font-medium text-ink">{f.step}</span> },
-            { key: "value", header: label.count, align: "right", render: (f) => <span className="tabular-nums">{formatNumber(f.value)}</span> },
-            { key: "rate", header: label.rate, align: "right", render: (f) => <span className="tabular-nums text-stone">{f.rate}</span> },
+            {
+              key: "step",
+              header: label.step,
+              render: (f) => (
+                <span className="font-medium text-ink">
+                  {ui.funnelSteps[f.key as keyof typeof ui.funnelSteps]}
+                </span>
+              ),
+            },
+            {
+              key: "count",
+              header: label.count,
+              align: "right",
+              render: (f) => <span className="tabular-nums">{formatNumber(f.count)}</span>,
+            },
             {
               key: "bar",
               header: "",
               render: (f) => (
                 <span className="block h-2 w-full max-w-[160px] bg-sand">
-                  <span
-                    className="block h-full bg-gold-400"
-                    style={{ width: f.rate }}
-                  />
+                  <span className="block h-full bg-gold-400" style={{ width: `${f.share}%` }} />
                 </span>
               ),
             },
           ]}
         />
+
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
+          <Card className="p-5">
+            <h2 className="mb-4 text-[13px] font-semibold text-ink">{ui.conversionTitle}</h2>
+            <dl>
+              <DataRow
+                label={ui.configurationToOrder}
+                value={percent(analytics?.conversion.configurationToOrder, ui.noData)}
+              />
+              <DataRow
+                label={ui.quoteToOrder}
+                value={percent(analytics?.conversion.quoteToOrder, ui.noData)}
+              />
+            </dl>
+          </Card>
+
+          <Card className="p-5">
+            <h2 className="mb-4 text-[13px] font-semibold text-ink">{ui.monthlyRevenue}</h2>
+            {(analytics?.months.length ?? 0) === 0 ? (
+              <p className="text-[13px] text-stone">{ui.empty}</p>
+            ) : (
+              <dl>
+                {analytics?.months.map((m) => (
+                  <DataRow
+                    key={m.month}
+                    label={m.month}
+                    value={`${formatPrice(m.revenue)} · ${m.orders}`}
+                  />
+                ))}
+              </dl>
+            )}
+          </Card>
+        </div>
       </>
     );
   }
 
   /* ------------------------------------------------------------- AUDIT */
   if (section === "audit") {
-    const logs = [
-      { at: "2026-09-05T09:12:00.000Z", actor: "Super Admin", action: "order.update", target: "ORD-2026-000184", detail: "Status: PROCESSING → MANUFACTURING" },
-      { at: "2026-09-04T16:40:00.000Z", actor: "Admin", action: "repair.assign", target: "REP-2026-000128", detail: "Usta: Əli Məmmədov" },
-      { at: "2026-09-04T11:05:00.000Z", actor: "Editor", action: "product.update", target: "MIL-720", detail: "Təsvir yeniləndi" },
-      { at: "2026-09-03T14:22:00.000Z", actor: "Super Admin", action: "setting.manage", target: "pricing", detail: "Ölçü qaydası əlavə edildi" },
-      { at: "2026-09-02T10:31:00.000Z", actor: "Admin", action: "product.create", target: "SMG-S2", detail: "Yeni məhsul yaradıldı" },
-    ];
-
     return (
-      <><ActivityFeed section={section} locale={locale} manage />
+      <>
+        <ActivityFeed section={section} locale={locale} manage />
         <AdminPageHeader title={dict.admin.auditLogs} description={ui.auditDescription} />
         <DataTable
           title={dict.admin.auditLogs}
-          minWidth={780}
-          rows={logs}
+          minWidth={860}
+          source="server"
+          empty={ui.auditEmpty}
+          rows={data.auditLog ?? []}
           columns={[
-            { key: "at", header: label.time, render: (l) => formatDateTime(l.at) },
-            { key: "actor", header: label.actor, render: (l) => <span className="font-medium text-ink">{l.actor}</span> },
+            { key: "at", header: label.time, render: (l) => formatDateTime(l.createdAt) },
+            {
+              key: "actor",
+              header: label.actor,
+              render: (l) => (
+                <span>
+                  <span className="block font-medium text-ink">{l.actorEmail}</span>
+                  <span className="block text-[11px] uppercase tracking-wider text-stone">
+                    {l.actorRole}
+                  </span>
+                </span>
+              ),
+            },
             { key: "action", header: label.action, render: (l) => <code className="text-[12px] text-graphite">{l.action}</code> },
             { key: "target", header: label.target, render: (l) => <code className="text-[12px] text-stone">{l.target}</code> },
-            { key: "detail", header: label.detail, render: (l) => <span className="text-stone">{l.detail}</span> },
+            { key: "detail", header: label.detail, render: (l) => <span className="text-stone">{l.detail || "—"}</span> },
           ]}
         />
       </>
@@ -781,65 +836,25 @@ export function AdminSection({
   /* ---------------------------------------------------------- SETTINGS */
   if (section === "settings") {
     return (
-      <><ActivityFeed section={section} locale={locale} manage />
-        <LocalManager section="settings" label={ui.editSettings} />
+      <>
+        <ActivityFeed section={section} locale={locale} manage />
         <AdminPageHeader title={dict.admin.settings} description={ui.settingsDescription} />
-        <div className="grid gap-4 lg:grid-cols-2">
-          <Card className="p-5">
-            <h2 className="mb-4 text-[13px] font-semibold text-ink">{ui.general}</h2>
-            <dl>
-              <DataRow label={ui.siteName} value="EuroPorta" />
-              <DataRow label={ui.currency} value="AZN" />
-              <DataRow label={ui.defaultLanguage} value="AZ" />
-              <DataRow label={ui.supportedLanguages} value="AZ / EN / RU" />
-              <DataRow label={ui.timeZone} value="Asia/Baku" />
-            </dl>
-          </Card>
-
-          <Card className="p-5">
-            <h2 className="mb-4 text-[13px] font-semibold text-ink">{ui.plannedIntegrations}</h2>
-            <dl>
-              <DataRow label="Cloudflare D1" value={<Badge tone="warning">{ui.pending}</Badge>} />
-              <DataRow label="Cloudflare R2" value={<Badge tone="warning">{ui.pending}</Badge>} />
-              <DataRow label="Cloudflare Images" value={<Badge tone="warning">{ui.pending}</Badge>} />
-              <DataRow label="Turnstile" value={<Badge tone="warning">{ui.pending}</Badge>} />
-              <DataRow label={ui.paymentProvider} value={<Badge tone="warning">{ui.pending}</Badge>} />
-              <DataRow label={ui.emailQueue} value={<Badge tone="warning">{ui.pending}</Badge>} />
-            </dl>
-          </Card>
-        </div>
-
+        <SettingsForm rows={data.settings ?? []} />
       </>
     );
   }
 
   /* --------------------------------------------------------- DISCOUNTS */
-  const discounts = [
-    { code: "YAZ2026", type: ui.discount.percentage, value: "10%", scope: ui.discount.allCatalog, from: "2026-03-01", to: "2026-04-30", active: false },
-    { code: "SMART200", type: ui.discount.amount, value: "200 AZN", scope: ui.discount.smartDoors, from: "2026-08-01", to: "2026-09-30", active: true },
-    { code: "INSTALL0", type: ui.discount.service, value: ui.discount.freeInstallation, scope: ui.discount.threeDoors, from: "2026-09-01", to: "2026-10-31", active: true },
-  ];
-
   return (
     <>
-      <AdminPageHeader title={dict.admin.discounts} action={addButton(ui.newDiscount)} />
-      <DataTable
-        title={dict.admin.discounts}
-        minWidth={780}
-        rows={discounts}
-        columns={[
-          { key: "code", header: label.code, render: (d) => <code className="text-[12px] font-semibold text-ink">{d.code}</code> },
-          { key: "type", header: label.type, render: (d) => d.type },
-          { key: "value", header: label.value, render: (d) => <span className="font-medium text-ink">{d.value}</span> },
-          { key: "scope", header: label.scope, render: (d) => <span className="text-stone">{d.scope}</span> },
-          { key: "period", header: label.period, render: (d) => `${formatDate(d.from)} – ${formatDate(d.to)}` },
-          {
-            key: "status",
-            header: label.status,
-            render: (d) => <Badge tone={d.active ? "success" : "neutral"}>{d.active ? ui.active : ui.expired}</Badge>,
-          },
-        ]}
-      />
+      <ActivityFeed section={section} locale={locale} manage />
+      <AdminPageHeader title={dict.admin.discounts} description={ui.discountDescription} />
+      <DiscountsTable rows={data.discounts ?? []} />
     </>
   );
+}
+
+/** Faiz göstəricisi; məlumat yoxdursa rəqəm uydurulmur. */
+function percent(value: number | null | undefined, empty: string): string {
+  return value === null || value === undefined ? empty : `${value.toFixed(1)}%`;
 }

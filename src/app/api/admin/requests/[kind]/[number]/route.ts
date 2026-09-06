@@ -1,4 +1,5 @@
 import { requireUser } from "@/server/auth";
+import { changeDetail, recordAudit } from "@/server/audit";
 import { db } from "@/server/db";
 import { fail, handle, ok } from "@/server/http";
 import { requestUpdateSchema } from "@/server/validation";
@@ -21,7 +22,7 @@ export async function PATCH(
   { params }: { params: Promise<{ kind: string; number: string }> },
 ) {
   return handle(async () => {
-    await requireUser("ADMIN");
+    const actor = await requireUser("ADMIN");
     const { kind, number } = await params;
     if (!isKind(kind)) return fail("NOT_FOUND", "Belə müraciət növü yoxdur", 404);
 
@@ -47,6 +48,16 @@ export async function PATCH(
         },
       });
 
+      await recordAudit(
+        actor,
+        input.technicianId !== undefined ? "repair.assign" : "repair.update",
+        number,
+        changeDetail({
+          status: [row.status, updated.status],
+          technicianId: [row.technicianId ?? "—", updated.technicianId ?? "—"],
+        }),
+      );
+
       return ok({ number: updated.number, status: updated.status });
     }
 
@@ -62,6 +73,16 @@ export async function PATCH(
         },
       });
 
+      await recordAudit(
+        actor,
+        input.technicianId !== undefined ? "measurement.assign" : "measurement.update",
+        number,
+        changeDetail({
+          status: [row.status, updated.status],
+          technicianId: [row.technicianId ?? "—", updated.technicianId ?? "—"],
+        }),
+      );
+
       return ok({ number: updated.number, status: updated.status });
     }
 
@@ -72,6 +93,13 @@ export async function PATCH(
       where: { number },
       data: { status: input.status ?? row.status },
     });
+
+    await recordAudit(
+      actor,
+      "quote.update",
+      number,
+      changeDetail({ status: [row.status, updated.status] }),
+    );
 
     return ok({ number: updated.number, status: updated.status });
   });

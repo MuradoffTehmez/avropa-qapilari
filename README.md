@@ -18,6 +18,9 @@ zəmanət idarəçiliyi üçün platforma. Repozitoriya **Mərhələ 2**-dədir:
 | Qiymət | ✅ Yalnız serverdə hesablanır — client-dən gələn məbləğ qəbul edilmir |
 | Kabinet · admin · usta paneli | ✅ Bazadan oxuyur, rol yoxlaması serverdədir |
 | Ödəniş | Provayder abstraksiyası hazırdır; real provayder qoşulmayıb |
+| Admin paneli (21 bölmə) | ✅ Hamısı bazadan oxuyur; audit log yazılır |
+| Rəy moderasiyası | ✅ Yalnız təsdiqlənmiş rəy saytda görünür |
+| Analitika | Qismən — səhifə baxışı toplanmır, göstəricilər bazadakı qeydlərdəndir |
 | Fayl yükləmə (təmir foto/video) | Yoxdur — R2 qurulumu tələb edir |
 | Bot qoruması (Turnstile) | Yoxdur — Cloudflare açarı tələb edir |
 | Şirkət əlaqə məlumatları | Boş — `src/config/brand.ts` faylında doldurulmalıdır |
@@ -118,7 +121,15 @@ Bütün cavablar eyni formadadır: uğurda `{ data }`, xətada
 | `GET/PATCH /api/account/profile`, `/addresses`, `POST /api/account/password` | Kabinet |
 | `PATCH /api/admin/orders/[number]` | Sifariş və ödəniş vəziyyəti |
 | `PATCH /api/admin/requests/[kind]/[number]` | Status və usta təyinatı |
+| `GET/POST/PATCH/DELETE /api/admin/discounts` | Promo kodlar |
+| `GET/POST/PATCH/DELETE /api/admin/content` | Məzmun səhifələri |
+| `GET/POST/PATCH/DELETE /api/admin/seo` | Meta başlıq və təsvirlər |
+| `PATCH/DELETE /api/admin/reviews/[id]` | Rəy moderasiyası |
+| `GET/PATCH /api/admin/settings` | Sayt tənzimləmələri |
+| `PATCH /api/admin/users/[id]` | Rol dəyişməsi |
 | `PATCH /api/technician/jobs/[number]` | Ustanın öz işi |
+
+Bütün admin yazma əməliyyatları `AuditLog` cədvəlinə yazılır (PRD §128).
 
 ---
 

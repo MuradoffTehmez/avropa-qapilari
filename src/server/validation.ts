@@ -182,3 +182,49 @@ export const technicianJobSchema = z.object({
   resolution: z.string().trim().min(10, "Ən azı 10 simvol yazın").optional(),
   usedParts: z.string().trim().max(500).optional(),
 });
+
+export const discountSchema = z.object({
+  code: z
+    .string()
+    .trim()
+    .min(3, "Kod ən azı 3 simvol olmalıdır")
+    .max(32)
+    .regex(/^[A-Z0-9-]+$/, "Yalnız böyük hərf, rəqəm və defis"),
+  name: z.string().trim().min(2, "Ad tələb olunur").max(80),
+  type: z.enum(["PERCENTAGE", "AMOUNT", "SERVICE"], "Belə endirim növü yoxdur"),
+  value: z.number().int().min(0, "Dəyər mənfi ola bilməz").max(100000),
+  scope: z.string().trim().max(80).default("ALL"),
+  startsAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Tarix YYYY-MM-DD formatında olmalıdır"),
+  endsAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Tarix YYYY-MM-DD formatında olmalıdır"),
+  active: z.boolean().default(true),
+});
+
+export const contentPageSchema = z.object({
+  path: z.string().trim().regex(/^\/[a-z0-9/-]*$/, "Yol / ilə başlamalıdır"),
+  title: z.string().trim().min(2, "Başlıq tələb olunur").max(120),
+  body: z.string().max(20000).default(""),
+  published: z.boolean().default(false),
+});
+
+export const seoEntrySchema = z.object({
+  path: z.string().trim().regex(/^\/[a-z0-9/-]*$/, "Yol / ilə başlamalıdır"),
+  title: z.string().trim().min(2, "Başlıq tələb olunur").max(70, "70 simvoldan uzun olmamalıdır"),
+  description: z
+    .string()
+    .trim()
+    .max(160, "160 simvoldan uzun olmamalıdır")
+    .default(""),
+  canonical: z.string().trim().max(300).optional(),
+});
+
+export const reviewStatusSchema = z.object({
+  status: z.enum(["PENDING", "APPROVED", "REJECTED"], "Belə status yoxdur"),
+});
+
+export const settingsSchema = z.object({
+  values: z.record(z.string(), z.string().max(300)),
+});
+
+export const roleSchema = z.object({
+  role: z.enum(["CUSTOMER", "TECHNICIAN", "ADMIN"], "Belə rol yoxdur"),
+});

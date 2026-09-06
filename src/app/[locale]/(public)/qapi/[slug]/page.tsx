@@ -36,7 +36,8 @@ import { StickyBuyBar } from "@/components/product/StickyBuyBar";
 import { ProductCard } from "@/components/product/ProductCard";
 import { getProduct, getRelatedProducts, products } from "@/mock/products";
 import { getBrand, getCategory } from "@/mock/taxonomy";
-import { localizedFaq, localizedReviews } from "@/mock/content.i18n";
+import { localizedFaq } from "@/mock/content.i18n";
+import { publishedReviews } from "@/server/reviews";
 import { optionGroups } from "@/mock/options";
 import { optionText } from "@/mock/options.i18n";
 import { categoryName, materialName, priceFrom, productDescription, productShort, styleName } from "@/lib/i18n-format";
@@ -70,6 +71,12 @@ export async function generateMetadata({
   };
 }
 
+/**
+ * Səhifə statik qurulur, amma rəylər bazadan gəlir — moderasiya
+ * dəyişikliyi bir dəqiqə ərzində özü görünsün deyə ISR.
+ */
+export const revalidate = 60;
+
 export default async function ProductPage({
   params,
 }: {
@@ -86,7 +93,8 @@ export default async function ProductPage({
   const category = getCategory(product.categorySlug);
   const productBrand = getBrand(product.brandSlug);
   const related = getRelatedProducts(product);
-  const productReviews = localizedReviews(locale).filter((rv) => rv.productName === product.name);
+  const allReviews = await publishedReviews(locale);
+  const productReviews = allReviews.filter((rv) => rv.productName === product.name);
 
   const specGroups = Array.from(new Set(product.specs.map((s) => s.group)));
 
@@ -95,7 +103,7 @@ export default async function ProductPage({
     <>
       <JsonLd
         data={[
-          productSchema(product, productBrand, localizedReviews(locale), locale, dict),
+          productSchema(product, productBrand, allReviews, locale, dict),
           breadcrumbSchema([
             { label: dict.nav.home, href: r.home },
             { label: dict.catalog.title, href: r.doors },

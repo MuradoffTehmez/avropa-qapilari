@@ -115,6 +115,7 @@ model Product {
 
   orderItems     OrderItem[]
   configurations Configuration[]
+  reviews        Review[]
 
   @@index([categoryId])
   @@index([brandId])
@@ -431,4 +432,94 @@ model Payment {
 
   @@index([orderId])
   @@index([status])
+}
+
+/* ------------------------------- Endirim ------------------------------- */
+
+model Discount {
+  id         String   @id @default(cuid())
+  code       String   @unique
+  name       String
+  // PERCENTAGE (faiz) | AMOUNT (AZN) | SERVICE (pulsuz xidmət)
+  type       String
+  value      Int      @default(0)
+  // ALL | CATEGORY:<slug> | PRODUCT:<slug>
+  scope      String   @default("ALL")
+  startsAt   String
+  endsAt     String
+  active     Boolean  @default(true)
+  usageCount Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@index([active])
+}
+
+/* -------------------------------- Məzmun ------------------------------- */
+
+model ContentPage {
+  id        String   @id @default(cuid())
+  // Locale prefiksi olmadan yol: "/haqqimizda"
+  path      String   @unique
+  title     String
+  body      String   @default("")
+  published Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
+
+/* --------------------------------- SEO --------------------------------- */
+
+model SeoEntry {
+  id          String   @id @default(cuid())
+  path        String   @unique
+  title       String
+  description String   @default("")
+  canonical   String?
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+}
+
+/* --------------------------------- Rəy --------------------------------- */
+
+model Review {
+  id        String   @id @default(cuid())
+  productId String
+  author    String
+  city      String   @default("")
+  rating    Int      @default(5)
+  text      String
+  // PENDING | APPROVED | REJECTED — yalnız APPROVED saytda görünür
+  status    String   @default("PENDING")
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([status])
+}
+
+/* ------------------------------ Audit log ------------------------------ */
+
+// Admin əməliyyatlarının izi (PRD §128). Yazılır, silinmir.
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actorEmail String
+  actorRole  String
+  action     String
+  target     String
+  detail     String   @default("")
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([action])
+}
+
+/* ----------------------------- Tənzimləmə ------------------------------ */
+
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
 }

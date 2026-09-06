@@ -22,7 +22,8 @@ import { TrustStrip } from "@/components/home/TrustStrip";
 import { ProcessSection } from "@/components/home/ProcessSection";
 import { categories, brands } from "@/mock/taxonomy";
 import { getFeaturedProducts } from "@/mock/products";
-import { localizedFaq, localizedProjects, localizedReviews } from "@/mock/content.i18n";
+import { localizedFaq, localizedProjects } from "@/mock/content.i18n";
+import { publishedReviews } from "@/server/reviews";
 import { categoryName, countryName } from "@/lib/i18n-format";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { FaqScroller } from "@/components/home/FaqScroller";
@@ -34,6 +35,12 @@ import {
   websiteSchema,
 } from "@/lib/structured-data";
 
+/**
+ * Səhifə statik qurulur, amma rəylər bazadan gəlir — moderasiya
+ * dəyişikliyi bir dəqiqə ərzində özü görünsün deyə ISR.
+ */
+export const revalidate = 60;
+
 export default async function HomePage({
   params,
 }: {
@@ -43,6 +50,9 @@ export default async function HomePage({
   const locale = (isLocale(raw) ? raw : "az") as Locale;
   const dict = getDictionary(locale);
   const r = routes(locale);
+
+  // Yalnız moderasiyadan keçmiş rəylər göstərilir.
+  const reviews = await publishedReviews(locale);
 
   const featured = getFeaturedProducts(8);
   const featuredCategories = categories.filter((c) => c.featured);
@@ -170,7 +180,7 @@ export default async function HomePage({
         </Reveal>
       </Section>
 
-      <TrustStrip locale={locale} dict={dict} />
+      <TrustStrip locale={locale} dict={dict} review={reviews[0]} />
 
       {/* ------------------------------------------------ CONFIGURATOR */}
       <Section tone="bone" className="border-y border-line">
@@ -248,7 +258,7 @@ export default async function HomePage({
         <Reveal className="container-page">
           <SectionHeading eyebrow={dict.home.eyebrowReviews} title={dict.home.reviewsTitle} text={dict.home.reviewsText} />
           <div className="grid gap-3 sm:gap-4 lg:grid-cols-3">
-            {localizedReviews(locale).slice(0, 3).map((rv) => (
+            {reviews.slice(0, 3).map((rv) => (
               <figure key={rv.id} className="flex flex-col border border-line bg-paper p-5">
                 <Rating value={rv.rating} />
                 <blockquote className="mt-4 flex-1 text-[14px] leading-relaxed text-graphite">

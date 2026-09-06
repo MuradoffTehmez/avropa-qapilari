@@ -518,4 +518,197 @@ export interface AdminData {
   technicians?: AdminTechnicianRow[];
   customers?: AdminCustomerRow[];
   warranties?: AdminWarrantyRow[];
+  discounts?: AdminDiscountRow[];
+  contentPages?: AdminContentRow[];
+  seoEntries?: AdminSeoRow[];
+  reviews?: AdminReviewRow[];
+  auditLog?: AdminAuditRow[];
+  settings?: AdminSettingRow[];
+  analytics?: AdminAnalytics;
 }
+
+/* ------------------------- Qalan admin bölmələri ----------------------- */
+
+export interface AdminDiscountRow {
+  id: string;
+  code: string;
+  name: string;
+  type: string;
+  value: number;
+  scope: string;
+  startsAt: string;
+  endsAt: string;
+  active: boolean;
+  usageCount: number;
+}
+
+export async function adminDiscounts(): Promise<AdminDiscountRow[]> {
+  const rows = await db.discount.findMany({ orderBy: { createdAt: "desc" } });
+  return rows.map((d) => ({
+    id: d.id,
+    code: d.code,
+    name: d.name,
+    type: d.type,
+    value: d.value,
+    scope: d.scope,
+    startsAt: d.startsAt,
+    endsAt: d.endsAt,
+    active: d.active,
+    usageCount: d.usageCount,
+  }));
+}
+
+export interface AdminContentRow {
+  id: string;
+  path: string;
+  title: string;
+  published: boolean;
+  updatedAt: string;
+}
+
+export async function adminContentPages(): Promise<AdminContentRow[]> {
+  const rows = await db.contentPage.findMany({ orderBy: { path: "asc" } });
+  return rows.map((p) => ({
+    id: p.id,
+    path: p.path,
+    title: p.title,
+    published: p.published,
+    updatedAt: p.updatedAt.toISOString(),
+  }));
+}
+
+export interface AdminSeoRow {
+  id: string;
+  path: string;
+  title: string;
+  description: string;
+  canonical: string;
+  updatedAt: string;
+}
+
+export async function adminSeoEntries(): Promise<AdminSeoRow[]> {
+  const rows = await db.seoEntry.findMany({ orderBy: { path: "asc" } });
+  return rows.map((e) => ({
+    id: e.id,
+    path: e.path,
+    title: e.title,
+    description: e.description,
+    canonical: e.canonical ?? "",
+    updatedAt: e.updatedAt.toISOString(),
+  }));
+}
+
+export interface AdminReviewRow {
+  id: string;
+  author: string;
+  productName: string;
+  rating: number;
+  text: string;
+  status: string;
+  verified: boolean;
+  createdAt: string;
+}
+
+export async function adminReviews(): Promise<AdminReviewRow[]> {
+  const rows = await db.review.findMany({
+    include: { product: true },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return rows.map((rv) => ({
+    id: rv.id,
+    author: rv.author,
+    productName: rv.product.name,
+    rating: rv.rating,
+    text: rv.text,
+    status: rv.status,
+    verified: rv.verified,
+    createdAt: rv.createdAt.toISOString(),
+  }));
+}
+
+export interface AdminAuditRow {
+  id: string;
+  createdAt: string;
+  actorEmail: string;
+  actorRole: string;
+  action: string;
+  target: string;
+  detail: string;
+}
+
+export async function adminAuditLog(limit = 200): Promise<AdminAuditRow[]> {
+  const rows = await db.auditLog.findMany({
+    orderBy: { createdAt: "desc" },
+    take: limit,
+  });
+
+  return rows.map((l) => ({
+    id: l.id,
+    createdAt: l.createdAt.toISOString(),
+    actorEmail: l.actorEmail,
+    actorRole: l.actorRole,
+    action: l.action,
+    target: l.target,
+    detail: l.detail,
+  }));
+}
+
+export interface AdminSettingRow {
+  key: string;
+  value: string;
+  updatedAt: string;
+}
+
+export async function adminSettings(): Promise<AdminSettingRow[]> {
+  const rows = await db.setting.findMany({ orderBy: { key: "asc" } });
+  return rows.map((s) => ({
+    key: s.key,
+    value: s.value,
+    updatedAt: s.updatedAt.toISOString(),
+  }));
+}
+
+/**
+ * Analitika — bazadakı faktiki qeydlərdən.
+ *
+ * Səhifə baxışı sayğacı yoxdur (PRD §126 hadisə toplama qatı hələ
+ * qurulmayıb), ona görə burada yalnız real biznes göstəriciləri var:
+ * konfiqurasiya → təklif → sifariş dönüşümü və aylıq dövriyyə.
+ */
+export async function adminAnalytics() {
+  const [configurations, quotes, orders, repairs, measurements, monthly] = await Promise.all([
+    db.configuration.count(),
+    db.quoteRequest.count(),
+    db.order.count(),
+    db.repairRequest.count(),
+    db.measurementRequest.count(),
+    db.order.findMany({ select: { createdAt: true, total: true }, orderBy: { createdAt: "asc" } }),
+  ]);
+
+  const byMonth = new Map<string, { orders: number; revenue: number }>();
+  for (const order of monthly) {
+    const key = order.createdAt.toISOString().slice(0, 7);
+    const current = byMonth.get(key) ?? { orders: 0, revenue: 0 };
+    byMonth.set(key, { orders: current.orders + 1, revenue: current.revenue + order.total });
+  }
+
+  const top = Math.max(configurations, quotes, orders, repairs, measurements, 1);
+
+  return {
+    funnel: [
+      { key: "configurations", count: configurations },
+      { key: "quotes", count: quotes },
+      { key: "orders", count: orders },
+      { key: "repairs", count: repairs },
+      { key: "measurements", count: measurements },
+    ].map((row) => ({ ...row, share: Math.round((row.count / top) * 100) })),
+    conversion: {
+      configurationToOrder: configurations > 0 ? (orders / configurations) * 100 : null,
+      quoteToOrder: quotes > 0 ? (orders / quotes) * 100 : null,
+    },
+    months: [...byMonth.entries()].map(([month, v]) => ({ month, ...v })).reverse(),
+  };
+}
+
+export type AdminAnalytics = Awaited<ReturnType<typeof adminAnalytics>>;
