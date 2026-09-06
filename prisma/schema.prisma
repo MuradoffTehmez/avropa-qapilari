@@ -23,6 +23,8 @@ model User {
   // scrypt hash — açıq mətn heç vaxt saxlanılmır (PRD §89)
   password  String
   role      String   @default("CUSTOMER") // CUSTOMER | TECHNICIAN | ADMIN
+  language  String   @default("az")
+  marketingConsent Boolean @default(true)
   createdAt DateTime @default(now())
 
   sessions       Session[]
@@ -31,6 +33,10 @@ model User {
   repairs        RepairRequest[]
   measurements   MeasurementRequest[]
   quotes         QuoteRequest[]
+  addresses      Address[]
+  warranties     Warranty[]
+  appointments   Appointment[]
+  resetTokens    PasswordResetToken[]
 
   @@index([role])
 }
@@ -168,14 +174,20 @@ model Order {
   discount Int @default(0)
   total    Int
 
+  // Ödəniş provayderdən asılı olmayan vəziyyət (src/server/payments.ts)
+  paymentStatus   String @default("PENDING") // PENDING | AUTHORIZED | PAID | FAILED | REFUNDED
+  paymentProvider String @default("MANUAL")
+
   // Təkrar göndərişin qarşısını alır (PRD §137)
   idempotencyKey String? @unique
 
   createdAt DateTime @default(now())
 
-  user    User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
-  items   OrderItem[]
-  history OrderStatusHistory[]
+  user       User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items      OrderItem[]
+  history    OrderStatusHistory[]
+  payments   Payment[]
+  warranties Warranty[]
 
   @@index([userId])
   @@index([status])
@@ -226,11 +238,16 @@ model RepairRequest {
   name        String
   phone       String
   status      String   @default("NEW")
+  scheduledAt String?
+  estimatedCost Int?
+  technicianId  String?
   createdAt   DateTime @default(now())
 
-  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user       User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  technician Technician? @relation(fields: [technicianId], references: [id], onDelete: SetNull)
 
   @@index([status])
+  @@index([technicianId])
 }
 
 model MeasurementRequest {
@@ -246,11 +263,14 @@ model MeasurementRequest {
   phone        String
   note         String?
   status       String   @default("NEW")
+  technicianId String?
   createdAt    DateTime @default(now())
 
-  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user       User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  technician Technician? @relation(fields: [technicianId], references: [id], onDelete: SetNull)
 
   @@index([status])
+  @@index([technicianId])
 }
 
 model QuoteRequest {
@@ -279,4 +299,130 @@ model QuoteRequest {
 model Counter {
   key   String @id
   value Int    @default(0)
+}
+
+/* ---------------------------- Parol bərpası ---------------------------- */
+
+// Token bazada yalnız SHA-256 hash kimi qalır — sessiya ilə eyni prinsip.
+// Bir dəfəlikdir: istifadə olunanda `usedAt` doldurulur (PRD §89).
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/* -------------------------------- Ünvan -------------------------------- */
+
+model Address {
+  id        String   @id @default(cuid())
+  userId    String
+  label     String
+  city      String
+  district  String?
+  street    String   @default("")
+  building  String   @default("")
+  apartment String   @default("")
+  floor     String   @default("")
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/* -------------------------------- Usta --------------------------------- */
+
+model Technician {
+  id             String  @id @default(cuid())
+  name           String
+  phone          String  @default("")
+  // JSON massiv: ixtisas açarları və xidmət bölgələri
+  specialization String  @default("[]")
+  serviceAreas   String  @default("[]")
+  rating         Float   @default(0)
+  completedJobs  Int     @default(0)
+  status         String  @default("AVAILABLE") // AVAILABLE | BUSY | OFF
+  // Panelə giriş üçün istifadəçi hesabı (rol: TECHNICIAN)
+  userId         String? @unique
+
+  repairs      RepairRequest[]
+  measurements MeasurementRequest[]
+  appointments Appointment[]
+}
+
+/* ------------------------------- Görüş --------------------------------- */
+
+model Appointment {
+  id           String   @id @default(cuid())
+  // Bağlı olduğu müraciətin nömrəsi: MSR-2026-000001 və s.
+  reference    String
+  type         String // MEASUREMENT | INSTALLATION | REPAIR | MAINTENANCE | CONSULTATION
+  date         String // YYYY-MM-DD — saat qurşağı çevrilməsi olmasın deyə mətn
+  startTime    String
+  endTime      String
+  address      String
+  status       String   @default("SCHEDULED") // SCHEDULED | CONFIRMED | DONE | CANCELLED
+  userId       String?
+  technicianId String?
+  createdAt    DateTime @default(now())
+
+  user       User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  technician Technician? @relation(fields: [technicianId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([technicianId])
+  @@index([date])
+}
+
+/* ------------------------------ Zəmanət -------------------------------- */
+
+model Warranty {
+  id               String  @id @default(cuid())
+  number           String  @unique
+  serialNumber     String  @unique
+  productName      String
+  orderId          String?
+  userId           String?
+  installationDate String
+  startDate        String
+  endDate          String
+  coverage         String?
+  status           String  @default("ACTIVE") // ACTIVE | EXPIRED | VOID
+
+  order Order? @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  user  User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([orderId])
+}
+
+/* ------------------------------- Ödəniş -------------------------------- */
+
+// Provayderdən asılı olmayan ödəniş qeydi. Real provayder qoşulanda
+// yalnız `src/server/payments.ts`-dəki adapter dəyişir, sxem yox.
+model Payment {
+  id          String   @id @default(cuid())
+  orderId     String
+  provider    String // MANUAL | ...
+  status      String   @default("PENDING")
+  amount      Int
+  currency    String   @default("AZN")
+  // Provayderin öz əməliyyat nömrəsi
+  reference   String   @unique
+  redirectUrl String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([status])
 }

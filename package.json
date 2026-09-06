@@ -11,6 +11,7 @@
     "db:seed": "prisma db seed",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
+    "check:defaults": "tsx scripts/check-defaults.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

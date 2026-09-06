@@ -5,6 +5,7 @@ import type { Locale } from "@/types";
 import { routes } from "@/lib/routes";
 import { Breadcrumbs, Skeleton } from "@/components/ui/primitives";
 import { SharedConfiguration } from "@/components/configurator/SharedConfiguration";
+import { db } from "@/server/db";
 
 export async function generateMetadata({
   params,
@@ -31,6 +32,23 @@ export default async function SharedConfigurationPage({
   const dict = getDictionary(locale);
   const r = routes(locale);
 
+  // Kod bazada varsa seçimlər və məbləğ serverdən gəlir; yoxdursa
+  // komponent köhnə sorğu-parametrli linki oxumağa çalışır.
+  const record = await db.configuration.findUnique({
+    where: { code },
+    include: { product: true },
+  });
+
+  const saved = record
+    ? {
+        productSlug: record.product.slug,
+        width: record.width,
+        height: record.height,
+        choices: JSON.parse(record.choices) as Record<string, string | string[]>,
+        total: record.total,
+      }
+    : null;
+
   return (
     <>
       <div className="border-b border-line bg-bone">
@@ -53,7 +71,7 @@ export default async function SharedConfigurationPage({
           </div>
         }
       >
-        <SharedConfiguration code={code} locale={locale} dict={dict} />
+        <SharedConfiguration code={code} locale={locale} dict={dict} saved={saved} />
       </Suspense>
     </>
   );

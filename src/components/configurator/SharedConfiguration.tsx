@@ -26,26 +26,45 @@ import { useCart } from "@/store/cart";
  * Paylaşılan konfiqurasiya səhifəsi (PRD §57).
  * Link yalnız qapı seçimlərini daşıyır — şəxsi məlumat ötürülmür.
  */
+/** Serverdə saxlanmış konfiqurasiya — `/api/configurations/:code`-un nəticəsi. */
+export interface SavedConfiguration {
+  productSlug: string;
+  width: number;
+  height: number;
+  choices: Record<string, string | string[]>;
+  total: number;
+}
+
 export function SharedConfiguration({
   code,
   locale,
   dict,
+  saved,
 }: {
   code: string;
   locale: Locale;
   dict: Dictionary;
+  /** Kod bazada tapılıbsa seçimlər və məbləğ serverdən gəlir. */
+  saved?: SavedConfiguration | null;
 }) {
   const params = useSearchParams();
   const r = routes(locale);
   const add = useCart((s) => s.add);
 
-  const slug = params.get("p") ?? "";
+  // Köhnə paylaşma linkləri seçimləri sorğu parametrində daşıyırdı;
+  // yeni linklər yalnız kod daşıyır və serverdən oxunur.
+  const slug = saved?.productSlug ?? params.get("p") ?? "";
   const raw = params.get("d") ?? undefined;
 
   const product = slug ? getProduct(slug) : undefined;
   const selection = useMemo(
-    () => (product ? parseSharedDesign(raw, product) : undefined),
-    [product, raw],
+    () =>
+      product
+        ? saved
+          ? { width: saved.width, height: saved.height, choices: saved.choices }
+          : parseSharedDesign(raw, product)
+        : undefined,
+    [product, raw, saved],
   );
 
   if (!product || !selection) {
@@ -63,7 +82,11 @@ export function SharedConfiguration({
     );
   }
 
-  const price = calculatePrice(product, selection, { locale, dict });
+  // Saxlanmış konfiqurasiyada məbləği server hesablayıb (PRD §130);
+  // yalnız köhnə linklərdə client hesablamasına düşürük.
+  const price = saved
+    ? { ...calculatePrice(product, selection, { locale, dict }), total: saved.total }
+    : calculatePrice(product, selection, { locale, dict });
   const preview = buildPreview(selection, product);
   const lines = summaryLines(selection, locale, dict);
 

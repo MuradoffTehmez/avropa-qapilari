@@ -33,9 +33,13 @@ import { DoorLayers, type VisualLayer } from "@/components/configurator/DoorLaye
 import { findOptionValue, optionGroups, standardSizes } from "@/mock/options";
 import { optionLabel, optionText } from "@/mock/options.i18n";
 import { calculatePrice, sizeRangeLabel } from "@/features/pricing/engine";
+import { toBreakdown } from "@/features/pricing/labels";
+import { useServerPrice } from "@/components/configurator/useServerPrice";
 import { checkCompatibility, pruneIncompatible } from "@/features/configurator/compatibility";
+import { defaultChoices } from "@/features/configurator/defaults";
 import { useCart } from "@/store/cart";
 import { useSession } from "@/store/session";
+import { ApiRequestError, apiFetch } from "@/lib/api";
 
 export function Configurator({
   product,
@@ -61,15 +65,29 @@ export function Configurator({
   const [layersOpen, setLayersOpen] = useState(false);
   const [customSize, setCustomSize] = useState(false);
 
-  const [selection, setSelection] = useState<ConfigurationSelection>(() => initialSelection ?? ({
-    width: product.defaultWidth,
-    height: product.defaultHeight,
-    choices: defaultChoices(product),
-  }));
+  // Başlanğıc seçim də uyğunluq qaydalarından keçirilir: bəzi qruplarda
+  // (məsələn şüşə naxışı) bütün dəyərlər ilkin şərt tələb edir, ona görə
+  // təmizlənməsə server sorğunu INCOMPATIBLE kimi rədd edir.
+  const [selection, setSelection] = useState<ConfigurationSelection>(() =>
+    pruneIncompatible(
+      initialSelection ?? {
+        width: product.defaultWidth,
+        height: product.defaultHeight,
+        choices: defaultChoices(product),
+      },
+      findOptionValue,
+    ),
+  );
 
-  const price = useMemo(
+  // Client hesablaması yalnız server cavabı gələnə qədər göstərilir.
+  const estimate = useMemo(
     () => calculatePrice(product, selection, { locale, dict }),
     [product, selection, locale, dict],
+  );
+  const server = useServerPrice(product.slug, selection);
+  const price = useMemo(
+    () => (server.price ? toBreakdown(server.price, locale, dict) : estimate),
+    [server.price, estimate, locale, dict],
   );
   const currentGroup = steps[stepIndex];
   const isSummary = stepIndex >= steps.length;
@@ -109,11 +127,16 @@ export function Configurator({
   }
 
   function reset() {
-    setSelection({
-      width: product.defaultWidth,
-      height: product.defaultHeight,
-      choices: defaultChoices(product),
-    });
+    setSelection(
+      pruneIncompatible(
+        {
+          width: product.defaultWidth,
+          height: product.defaultHeight,
+          choices: defaultChoices(product),
+        },
+        findOptionValue,
+      ),
+    );
     setCustomSize(false);
     setStepIndex(0);
     setHiddenLayers(new Set());
@@ -291,14 +314,30 @@ export function Configurator({
               </Notice>
             )}
 
+            {server.error && (
+              <Notice tone="warning" className="mb-3">
+                {dict.configurator.priceUnavailable}
+              </Notice>
+            )}
+
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-[11px] uppercase tracking-[0.14em] text-stone">
                   {dict.configurator.finalPrice}
                 </p>
-                <p className="text-2xl font-semibold tracking-tight tabular-nums text-ink">
+                <p
+                  className={cn(
+                    "text-2xl font-semibold tracking-tight tabular-nums text-ink transition-opacity",
+                    server.pending && "opacity-55",
+                  )}
+                  aria-busy={server.pending}
+                  aria-live="polite"
+                >
                   {formatPrice(price.total)}
                 </p>
+                <span className="sr-only">
+                  {server.pending ? dict.configurator.priceChecking : ""}
+                </span>
               </div>
 
               <div className="flex gap-2">
@@ -328,43 +367,6 @@ export function Configurator({
 }
 
 /* ------------------------------------------------------------------ */
-
-function defaultChoices(product: Product): ConfigurationSelection["choices"] {
-  const choices: ConfigurationSelection["choices"] = {};
-
-  for (const key of product.optionGroups) {
-    if (key === "SIZE") continue;
-    const group = optionGroups[key];
-
-    if (group.multi) {
-      choices[key] = [];
-      continue;
-    }
-
-    // Xarici rəng üçün məhsulun öz palitrasına uyğun dəyəri seçirik
-    // Panel naxışı məhsulun öz stilindən başlayır
-    if (key === "PANEL_STYLE") {
-      const match = group.values.find((v) => v.code === product.style);
-      if (match) {
-        choices[key] = match.id;
-        continue;
-      }
-    }
-
-    if (key === "OUTSIDE_COLOR") {
-      const match = group.values.find((v) => v.hex === product.panelHexes[0]);
-      if (match) {
-        choices[key] = match.id;
-        continue;
-      }
-    }
-
-    const first = group.values.find((v) => v.priceDelta === 0 && !v.requires) ?? group.values[0];
-    if (first) choices[key] = first.id;
-  }
-
-  return choices;
-}
 
 /** Səbətə yazılan snapshot: qrup açarı + option id (dil-müstəqil). */
 export function snapshotKeys(selection: ConfigurationSelection) {
@@ -787,33 +789,65 @@ function SummaryStep({
   const r = routes(locale);
   const router = useRouter();
   const user = useSession((s) => s.user);
-  const [configId] = useState(() => `CFG-26-${uid().toUpperCase()}`);
+  const [configId, setConfigId] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  /**
+   * Konfiqurasiyanı serverdə saxlayır. Nömrəni və yekun məbləği server
+   * verir — client hesablaması burada da qəbul edilmir (PRD §130).
+   */
+  async function persist(): Promise<string | null> {
+    if (configId) return configId;
+
+    try {
+      const saved = await apiFetch<{ code: string; total: number }>("/api/configurations", {
+        method: "POST",
+        json: {
+          productSlug: product.slug,
+          width: selection.width,
+          height: selection.height,
+          choices: selection.choices,
+        },
+      });
+
+      setConfigId(saved.code);
+      useWorkflow.getState().save({
+        id: saved.code,
+        productSlug: product.slug,
+        productName: product.name,
+        selection,
+        total: saved.total,
+        date: new Date().toISOString(),
+      });
+      return saved.code;
+    } catch (error) {
+      if (error instanceof ApiRequestError) toast(dict.configurator.saveFailed);
+      return null;
+    }
+  }
 
   /** Saxlanmış konfiqurasiya kabinetdə görünür — giriş tələb olunur. */
-  function save() {
+  async function save() {
     if (!user) {
       toast(dict.configurator.saveNeedsAccount);
       router.push(`${r.login}?next=${encodeURIComponent(r.configuratorFor(product.slug))}`);
       return;
     }
 
-    useWorkflow.getState().save({
-      id: configId,
-      productSlug: product.slug,
-      productName: product.name,
-      selection,
-      total: calculatePrice(product, selection, { locale, dict }).total,
-      date: new Date().toISOString(),
-    });
-    toast(dict.configurator.configurationSaved);
+    setBusy(true);
+    const code = await persist();
+    setBusy(false);
+    if (code) toast(dict.configurator.configurationSaved);
   }
 
-  function share() {
-    const query = new URLSearchParams({
-      p: product.slug,
-      d: JSON.stringify(selection),
-    });
-    const url = `${window.location.origin}${r.configuration(configId)}?${query}`;
+  /** Paylaşma linki koda bağlıdır — seçimlər URL-də daşınmır (PRD §57). */
+  async function share() {
+    setBusy(true);
+    const code = await persist();
+    setBusy(false);
+    if (!code) return;
+
+    const url = `${window.location.origin}${r.configuration(code)}`;
 
     if (navigator.share) {
       navigator
@@ -857,10 +891,10 @@ function SummaryStep({
       </dl>
 
       <div className="mt-6 flex flex-wrap gap-2">
-        <Button variant="secondary" size="sm" onClick={save}>
+        <Button variant="secondary" size="sm" onClick={() => void save()} disabled={busy}>
           <Save size={15} /> {dict.configurator.saveConfiguration}
         </Button>
-        <Button variant="secondary" size="sm" onClick={share}>
+        <Button variant="secondary" size="sm" onClick={() => void share()} disabled={busy}>
           <Link2 size={15} /> {dict.configurator.shareConfiguration}
         </Button>
         <ButtonLink href={r.cart} variant="ghost" size="sm" className="border border-line">
@@ -869,8 +903,12 @@ function SummaryStep({
       </div>
 
       <p className="mt-4 text-xs text-stone">
-        {dict.configurator.configurationId}:{" "}
-        <span className="font-mono text-graphite">{configId}</span> —{" "}
+        {configId && (
+          <>
+            {dict.configurator.configurationId}:{" "}
+            <span className="font-mono text-graphite">{configId}</span> —{" "}
+          </>
+        )}
         {dict.configurator.sharedPrivacy}
       </p>
     </div>
