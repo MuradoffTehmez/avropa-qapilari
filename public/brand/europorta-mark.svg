@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56" width="512" height="512" role="img" aria-label="EuroPorta">
+  <title>EuroPorta</title>
+  <defs>
+    <linearGradient id="ep-gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e8c17a"/>
+      <stop offset="42%" stop-color="#d3a54f"/>
+      <stop offset="100%" stop-color="#8f6529"/>
+    </linearGradient>
+    <linearGradient id="ep-gold-flat" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#d3a54f"/>
+      <stop offset="50%" stop-color="#e8c17a"/>
+      <stop offset="100%" stop-color="#a87c33"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Xarici portal -->
+  <path d="M28 2.5 46.5 13v33.5h-37V13z" fill="#0b1d34" stroke="url(#ep-gold)" stroke-width="3" stroke-linejoin="round"/>
+
+  <!-- Daxili çərçivə -->
+  <path d="M28 12.5 39 18.7v27.8H17V18.7z" fill="#ffffff" stroke="url(#ep-gold-flat)" stroke-width="2.4" stroke-linejoin="round"/>
+
+  <!-- Açıq qapı qanadı -->
+  <path d="M27.4 19.6 36.6 22v24.5h-9.2z" fill="#0b1d34"/>
+  <path d="M27.4 19.6 36.6 22" stroke="#071322" stroke-width="0.8"/>
+
+  <!-- Bar dəstək -->
+  <rect x="29.1" y="28" width="1.7" height="11" rx="0.85" fill="url(#ep-gold-flat)"/>
+
+  <!-- Pilləli baza -->
+  <rect x="15" y="46.5" width="26" height="2.6" fill="url(#ep-gold-flat)"/>
+  <rect x="11" y="49.1" width="34" height="2.6" fill="url(#ep-gold)"/>
+  <rect x="6.5" y="51.7" width="43" height="2.8" rx="0.6" fill="url(#ep-gold-flat)"/>
+</svg>
