@@ -18,6 +18,7 @@ import { findOptionValue } from "@/mock/options";
 import { optionLabel } from "@/mock/options.i18n";
 import { parseSharedDesign } from "@/features/configurator/shared";
 import { calculatePrice } from "@/features/pricing/engine";
+import { snapshotKeys } from "@/components/configurator/Configurator";
 import { materialName, productShort, styleName } from "@/lib/i18n-format";
 import { useCart } from "@/store/cart";
 
@@ -86,7 +87,7 @@ export function SharedConfiguration({
       snapshot: {
         width: selection!.width,
         height: selection!.height,
-        lines: lines.map((l) => ({ group: l.group, value: l.value })),
+        lines: snapshotKeys(selection!),
       },
     });
     toast(dict.actions.addToCart);

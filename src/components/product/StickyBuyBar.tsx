@@ -60,7 +60,7 @@ export function StickyBuyBar({
       snapshot: {
         width: product.defaultWidth,
         height: product.defaultHeight,
-        lines: [{ group: dict.configurator.baseLayer, value: dict.configurator.standardSizes }],
+        lines: [{ group: "BASE", value: dict.configurator.standardSizes }],
       },
     });
     toast(dict.actions.addToCart);

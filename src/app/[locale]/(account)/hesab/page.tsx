@@ -110,7 +110,7 @@ export default async function AccountDashboardPage({
               <div>
                 <p className="font-mono text-[13px] text-graphite">{o.number}</p>
                 <p className="mt-0.5 text-[13px] text-stone">
-                  {formatDate(o.createdAt)} · {o.itemCount} məhsul
+                  {formatDate(o.createdAt)} · {o.itemCount} {dict.cart.itemCount}
                 </p>
               </div>
               <div className="flex items-center gap-4">

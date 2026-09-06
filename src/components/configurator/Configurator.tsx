@@ -132,7 +132,7 @@ export function Configurator({
       snapshot: {
         width: selection.width,
         height: selection.height,
-        lines: summaryLines(selection, locale, dict),
+        lines: snapshotKeys(selection),
       },
     });
     toast(dict.configurator.addedToCart);
@@ -356,6 +356,18 @@ function defaultChoices(product: Product): ConfigurationSelection["choices"] {
   }
 
   return choices;
+}
+
+/** Səbətə yazılan snapshot: qrup açarı + option id (dil-müstəqil). */
+export function snapshotKeys(selection: ConfigurationSelection) {
+  const lines: { group: string; value: string }[] = [];
+  for (const [key, raw] of Object.entries(selection.choices)) {
+    if (!raw) continue;
+    const ids = (Array.isArray(raw) ? raw : [raw]).filter((id) => findOptionValue(id));
+    if (ids.length === 0) continue;
+    for (const id of ids) lines.push({ group: key, value: id });
+  }
+  return lines;
 }
 
 function summaryLines(

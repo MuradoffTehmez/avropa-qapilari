@@ -27,6 +27,7 @@ import {
   warranties,
 } from "@/mock/account";
 import { technicians } from "@/mock/content";
+import { snapshotLine } from "@/mock/options.i18n";
 
 const sections = [
   "orders",
@@ -93,14 +94,16 @@ export default async function AccountSectionPage({
                     <div className="min-w-0">
                       <p className="text-[14px] font-medium text-ink">{item.productName}</p>
                       <p className="text-[12px] text-stone">
-                        {item.sku} · {item.snapshot.width}×{item.snapshot.height} mm · {item.quantity} əd.
+                        {item.sku} · {item.snapshot.width}×{item.snapshot.height} mm · {item.quantity} {dict.common.piece}
                       </p>
                       <ul className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[12px] text-graphite">
-                        {item.snapshot.lines.map((l) => (
-                          <li key={l.group}>
-                            <span className="text-stone">{l.group}:</span> {l.value}
-                          </li>
-                        ))}
+                        {item.snapshot.lines
+                          .map((l) => snapshotLine(l, locale, dict))
+                          .map((l) => (
+                            <li key={l.group}>
+                              <span className="text-stone">{l.group}:</span> {l.value}
+                            </li>
+                          ))}
                       </ul>
                     </div>
                   </div>
@@ -307,8 +310,8 @@ export default async function AccountSectionPage({
 
             <dl className="mt-4 border-t border-line pt-3">
               <DataRow label={dict.warranty.serialNumber} value={w.serialNumber} />
-              <DataRow label="Sifariş" value={w.orderNumber} />
-              <DataRow label="Quraşdırma" value={formatDate(w.installationDate)} />
+              <DataRow label={dict.warranty.historySale} value={w.orderNumber} />
+              <DataRow label={dict.warranty.historyInstallation} value={formatDate(w.installationDate)} />
               <DataRow label={dict.warranty.validUntil} value={formatDate(w.endDate)} />
               <DataRow
                 label={dict.warranty.coverage}

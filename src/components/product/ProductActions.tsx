@@ -47,7 +47,7 @@ export function ProductActions({
       snapshot: {
         width: product.defaultWidth,
         height: product.defaultHeight,
-        lines: [{ group: "Konfiqurasiya", value: "Standart (bazis)" }],
+        lines: [{ group: "BASE", value: dict.configurator.standardSizes }],
       },
     });
     toast(dict.actions.addedToCart);

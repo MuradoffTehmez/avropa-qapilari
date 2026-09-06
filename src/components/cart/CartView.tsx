@@ -5,6 +5,7 @@ import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/types";
 import { routes } from "@/lib/routes";
+import { snapshotLine } from "@/mock/options.i18n";
 import { formatPrice } from "@/lib/utils";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card, EmptyState, Notice, Skeleton } from "@/components/ui/primitives";
@@ -91,11 +92,13 @@ export function CartView({ locale, dict }: { locale: Locale; dict: Dictionary })
 
               {/* konfiqurasiya snapshot-u */}
               <ul className="mt-2.5 flex flex-wrap gap-x-4 gap-y-0.5 text-[12px] text-graphite">
-                {item.snapshot.lines.map((line) => (
-                  <li key={line.group}>
-                    <span className="text-stone">{line.group}:</span> {line.value}
-                  </li>
-                ))}
+                {item.snapshot.lines
+                  .map((line) => snapshotLine(line, locale, dict))
+                  .map((line) => (
+                    <li key={line.group}>
+                      <span className="text-stone">{line.group}:</span> {line.value}
+                    </li>
+                  ))}
               </ul>
 
               <div className="mt-auto flex flex-wrap items-end justify-between gap-3 pt-4">
