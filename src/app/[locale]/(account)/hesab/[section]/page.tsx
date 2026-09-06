@@ -1,12 +1,18 @@
 import { NotificationSettings } from "@/components/account/NotificationSettings";
-import { LocalManager } from "@/components/admin/LocalManager";
 import { ActivityFeed } from "@/components/account/ActivityFeed";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { MapPin, Sliders } from "lucide-react";
+import {
+  CalendarClock,
+  Package,
+  Ruler,
+  ShieldCheck,
+  Sliders,
+  Wrench,
+} from "lucide-react";
 
-import { getDictionary, isLocale, locales } from "@/i18n";
+import { getDictionary, isLocale } from "@/i18n";
 import type { Locale } from "@/types";
 import { routes } from "@/lib/routes";
 import { formatDate, formatDateTime, formatPrice, monthShort } from "@/lib/utils";
@@ -17,19 +23,21 @@ import { OrderStatusPill, RepairStatusPill } from "@/components/account/StatusPi
 import { DoorVisual } from "@/components/product/DoorVisual";
 import { ProductMedia } from "@/components/product/ProductMedia";
 import { ProfileForm } from "@/components/account/ProfileForm";
+import { AddressManager } from "@/components/account/AddressManager";
+import { currentUser } from "@/server/auth";
+import { db } from "@/server/db";
 import {
-  addresses,
-  appointments,
-  measurements,
-  orders,
-  quotes,
-  repairRequests,
-  savedConfigurations,
-  warranties,
-} from "@/mock/account";
-import { technicians } from "@/mock/content";
+  userAddresses,
+  userAppointments,
+  userConfigurations,
+  userMeasurements,
+  userOrders,
+  userQuotes,
+  userRepairs,
+  userWarranties,
+} from "@/server/account";
 import { snapshotLine } from "@/mock/options.i18n";
-import { products } from "@/mock/products";
+import { getProduct } from "@/mock/products";
 
 const sections = [
   "orders",
@@ -43,10 +51,6 @@ const sections = [
 ] as const;
 
 type Section = (typeof sections)[number];
-
-export function generateStaticParams() {
-  return locales.flatMap((locale) => sections.map((section) => ({ locale, section })));
-}
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
@@ -62,11 +66,27 @@ export default async function AccountSectionPage({
 
   if (!sections.includes(section as Section)) notFound();
 
+  // Sessiya yoxdursa layout-dakı `AuthGuard` giriş ekranını göstərir;
+  // burada heç nə oxumuruq ki, başqasının datası sızmasın (PRD §93).
+  const user = await currentUser();
+  if (!user) return null;
+
   /* ------------------------------------------------------------ ORDERS */
   if (section === "orders") {
+    const [orders, quotes] = await Promise.all([userOrders(user.id), userQuotes(user.id)]);
+
     return (
       <div className="space-y-4"><ActivityFeed section={section} locale={locale} />
         <h2 className="text-xl font-semibold tracking-tight text-ink">{dict.account.orders}</h2>
+
+        {orders.length === 0 && (
+          <EmptyState
+            icon={<Package size={30} />}
+            title={dict.account.noOrders}
+            text={dict.accountUi.noOrdersHint}
+            action={<ButtonLink href={r.doors}>{dict.nav.doors}</ButtonLink>}
+          />
+        )}
 
         {orders.map((o) => (
           <Card key={o.id} className="overflow-hidden">
@@ -86,7 +106,7 @@ export default async function AccountSectionPage({
             <div className="grid gap-6 p-4 lg:grid-cols-[1.4fr_1fr]">
               <div className="space-y-3">
                 {o.items.map((item) => {
-                  const product = products.find((candidate) => candidate.id === item.productId);
+                  const product = getProduct(item.productSlug);
                   return <div key={item.id} className="flex gap-3">
                     <Link
                       href={r.product(item.productSlug)}
@@ -143,12 +163,9 @@ export default async function AccountSectionPage({
                   <p className="text-[12px] text-stone">{formatDate(q.createdAt)}</p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Badge tone={q.status === "SENT" ? "gold" : "info"}>{q.status === "SENT" ? dict.accountUi.quoteSent : q.status}</Badge>
-                  {q.amount && (
-                    <span className="text-[15px] font-semibold tabular-nums text-ink">
-                      {formatPrice(q.amount)}
-                    </span>
-                  )}
+                  <Badge tone={q.status === "SENT" ? "gold" : "info"}>
+                    {q.status === "SENT" ? dict.accountUi.quoteSent : q.status}
+                  </Badge>
                 </div>
               </Card>
             ))}
@@ -160,6 +177,8 @@ export default async function AccountSectionPage({
 
   /* ---------------------------------------------------- CONFIGURATIONS */
   if (section === "configurations") {
+    const savedConfigurations = await userConfigurations(user.id);
+
     return (
       <div className="space-y-4"><ActivityFeed section={section} locale={locale} />
         <h2 className="text-xl font-semibold tracking-tight text-ink">
@@ -174,7 +193,9 @@ export default async function AccountSectionPage({
               <div>
                 <p className="font-mono text-[12px] text-stone">{c.id}</p>
                 <p className="mt-1 text-[15px] font-medium text-ink">{c.productName}</p>
-                <p className="mt-0.5 text-[13px] text-stone">1200 × 2100 · {dict.catalog.colors.anthraciteWood} · Smart Lock X2</p>
+                <p className="mt-0.5 text-[13px] text-stone">
+                  {c.width} × {c.height} mm
+                </p>
                 <p className="mt-1 text-[12px] text-mist">{formatDate(c.date)}</p>
               </div>
               <div className="flex items-center gap-3">
@@ -194,6 +215,11 @@ export default async function AccountSectionPage({
 
   /* ----------------------------------------------------------- REPAIRS */
   if (section === "repairs") {
+    const [repairRequests, measurements] = await Promise.all([
+      userRepairs(user.id),
+      userMeasurements(user.id),
+    ]);
+
     return (
       <div className="space-y-4"><ActivityFeed section={section} locale={locale} />
         <div className="flex items-center justify-between">
@@ -202,6 +228,10 @@ export default async function AccountSectionPage({
             {dict.actions.callTechnician}
           </ButtonLink>
         </div>
+
+        {repairRequests.length === 0 && (
+          <EmptyState icon={<Wrench size={30} />} title={dict.account.noRepairs} />
+        )}
 
         {repairRequests.map((rp) => (
           <Card key={rp.id} className="p-4">
@@ -232,6 +262,10 @@ export default async function AccountSectionPage({
         <h2 className="pt-4 text-xl font-semibold tracking-tight text-ink">
           {dict.admin.measurements}
         </h2>
+        {measurements.length === 0 && (
+          <EmptyState icon={<Ruler size={30} />} title={dict.accountUi.noMeasurements} />
+        )}
+
         {measurements.map((m) => (
           <Card key={m.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
             <div>
@@ -253,14 +287,19 @@ export default async function AccountSectionPage({
 
   /* ------------------------------------------------------ APPOINTMENTS */
   if (section === "appointments") {
+    const appointments = await userAppointments(user.id);
+
     return (
       <div className="space-y-4"><ActivityFeed section={section} locale={locale} />
         <h2 className="text-xl font-semibold tracking-tight text-ink">
           {dict.account.appointments}
         </h2>
 
+        {appointments.length === 0 && (
+          <EmptyState icon={<CalendarClock size={30} />} title={dict.accountUi.noAppointments} />
+        )}
+
         {appointments.map((a) => {
-          const tech = technicians.find((t) => t.id === a.technicianId);
           return (
             <Card key={a.id} className="flex flex-wrap items-center justify-between gap-4 p-4">
               <div className="flex items-center gap-4">
@@ -277,7 +316,11 @@ export default async function AccountSectionPage({
                     {a.startTime} – {a.endTime}
                   </p>
                   <p className="text-[13px] text-stone">{a.address}</p>
-                  {tech && <p className="mt-0.5 text-[13px] text-graphite">{dict.accountUi.technician}: {tech.name}</p>}
+                  {a.technicianName && (
+                    <p className="mt-0.5 text-[13px] text-graphite">
+                      {dict.accountUi.technician}: {a.technicianName}
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="text-right">
@@ -293,11 +336,17 @@ export default async function AccountSectionPage({
 
   /* -------------------------------------------------------- WARRANTIES */
   if (section === "warranties") {
+    const warranties = await userWarranties(user.id);
+
     return (
       <div className="space-y-4"><ActivityFeed section={section} locale={locale} />
         <h2 className="text-xl font-semibold tracking-tight text-ink">
           {dict.account.warranties}
         </h2>
+
+        {warranties.length === 0 && (
+          <EmptyState icon={<ShieldCheck size={30} />} title={dict.account.noWarranties} />
+        )}
 
         {warranties.map((w) => (
           <Card key={w.id} className="p-5">
@@ -338,35 +387,12 @@ export default async function AccountSectionPage({
 
   /* --------------------------------------------------------- ADDRESSES */
   if (section === "addresses") {
-    return (
-      <div className="space-y-4"><ActivityFeed section={section} locale={locale} />
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold tracking-tight text-ink">
-            {dict.account.addresses}
-          </h2>
-          <LocalManager section="addresses" label={dict.accountUi.newAddress} />
-        </div>
+    const addresses = await userAddresses(user.id);
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          {addresses.map((a) => (
-            <Card key={a.id} className="p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-start gap-2.5">
-                  <MapPin size={16} className="mt-0.5 shrink-0 text-gold-500" />
-                  <div>
-                    <p className="text-[15px] font-medium text-ink">{a.id === "ad-1" ? dict.accountUi.homeAddress : a.label}</p>
-                    <p className="mt-1 text-[13px] leading-relaxed text-stone">
-                      {[a.city, a.district, a.street, a.building, a.apartment && `${dict.accountUi.apartment} ${a.apartment}`]
-                        .filter(Boolean)
-                        .join(", ")}
-                    </p>
-                  </div>
-                </div>
-                {a.isDefault && <Badge tone="outline">{dict.accountUi.defaultAddress}</Badge>}
-              </div>
-            </Card>
-          ))}
-        </div>
+    return (
+      <div className="space-y-4">
+        <ActivityFeed section={section} locale={locale} />
+        <AddressManager dict={dict} initial={addresses} />
       </div>
     );
   }
@@ -375,5 +401,18 @@ export default async function AccountSectionPage({
   if (section === "notifications") return <NotificationSettings />;
 
   /* ----------------------------------------------------------- PROFILE */
-  return <ProfileForm dict={dict} />;
+  const profile = await db.user.findUniqueOrThrow({ where: { id: user.id } });
+
+  return (
+    <ProfileForm
+      dict={dict}
+      profile={{
+        name: profile.name,
+        email: profile.email,
+        phone: profile.phone ?? "",
+        language: profile.language,
+        marketingConsent: profile.marketingConsent,
+      }}
+    />
+  );
 }

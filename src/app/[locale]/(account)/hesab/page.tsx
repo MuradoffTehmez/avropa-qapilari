@@ -8,8 +8,14 @@ import { routes } from "@/lib/routes";
 import { formatDate, formatPrice } from "@/lib/utils";
 import { Card, Stat } from "@/components/ui/primitives";
 import { OrderStatusPill, RepairStatusPill } from "@/components/account/StatusPill";
-import { appointments, orders, repairRequests, warranties } from "@/mock/account";
-import { technicians } from "@/mock/content";
+import { currentUser } from "@/server/auth";
+import {
+  accountSummary,
+  userAppointments,
+  userOrders,
+  userRepairs,
+  userWarranties,
+} from "@/server/account";
 
 export async function generateMetadata({
   params,
@@ -36,27 +42,32 @@ export default async function AccountDashboardPage({
   const dict = getDictionary(locale);
   const r = routes(locale);
 
-  const activeOrders = orders.filter(
-    (o) => o.status !== "COMPLETED" && o.status !== "CANCELLED",
-  );
-  const activeRepairs = repairRequests.filter(
-    (rp) => rp.status !== "COMPLETED" && rp.status !== "CANCELLED",
-  );
+  // Sessiya yoxdursa layout-dakı `AuthGuard` giriş ekranını göstərir.
+  const user = await currentUser();
+  if (!user) return null;
+
+  const [summary, orders, repairRequests, warranties, appointments] = await Promise.all([
+    accountSummary(user.id),
+    userOrders(user.id),
+    userRepairs(user.id),
+    userWarranties(user.id),
+    userAppointments(user.id),
+  ]);
 
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <Card className="p-5">
-          <Stat label={dict.account.orders} value={orders.length} hint={`${activeOrders.length} ${dict.accountUi.active}`} />
+          <Stat label={dict.account.orders} value={summary.orders} hint={`${summary.activeOrders} ${dict.accountUi.active}`} />
         </Card>
         <Card className="p-5">
-          <Stat label={dict.account.repairs} value={repairRequests.length} hint={`${activeRepairs.length} ${dict.accountUi.active}`} />
+          <Stat label={dict.account.repairs} value={summary.repairs} hint={`${summary.activeRepairs} ${dict.accountUi.active}`} />
         </Card>
         <Card className="p-5">
-          <Stat label={dict.account.warranties} value={warranties.length} hint={dict.account.activeWarranties} />
+          <Stat label={dict.account.warranties} value={summary.warranties} hint={dict.account.activeWarranties} />
         </Card>
         <Card className="p-5">
-          <Stat label={dict.account.appointments} value={appointments.length} hint={dict.account.plannedAppointments} />
+          <Stat label={dict.account.appointments} value={summary.appointments} hint={dict.account.plannedAppointments} />
         </Card>
       </div>
 
@@ -70,7 +81,6 @@ export default async function AccountDashboardPage({
         />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {appointments.map((a) => {
-            const tech = technicians.find((t) => t.id === a.technicianId);
             return (
               <Card key={a.id} className="p-4">
                 <p className="text-[11px] uppercase tracking-[0.14em] text-gold-600">
@@ -84,7 +94,11 @@ export default async function AccountDashboardPage({
                   {formatDate(a.date)} · {a.startTime}
                 </p>
                 <p className="mt-1 text-[13px] text-stone">{a.address}</p>
-                {tech && <p className="mt-2 text-[13px] text-graphite">{dict.accountUi.technician}: {tech.name}</p>}
+                {a.technicianName && (
+                  <p className="mt-2 text-[13px] text-graphite">
+                    {dict.accountUi.technician}: {a.technicianName}
+                  </p>
+                )}
                 <p className="mt-2 font-mono text-[11px] text-mist">{a.reference}</p>
               </Card>
             );
@@ -159,7 +173,7 @@ export default async function AccountDashboardPage({
           label={dict.actions.viewAll}
         />
         <div className="grid gap-3 sm:grid-cols-2">
-          {warranties.map((w) => (
+          {warranties.slice(0, 4).map((w) => (
             <Card key={w.id} className="p-4">
               <div className="flex items-start justify-between gap-3">
                 <div>

@@ -80,3 +80,35 @@ export const loginSchema = z.object({
   email: z.email("E-poçt düzgün deyil"),
   password: z.string().min(1, "Parol tələb olunur"),
 });
+
+export const profileSchema = z.object({
+  name: z.string().trim().min(2, "Ad ən azı 2 simvol olmalıdır"),
+  phone: z.string().trim().optional(),
+  language: z.enum(["az", "en", "ru"]),
+  marketingConsent: z.boolean(),
+});
+
+export const addressSchema = z.object({
+  label: z.string().trim().min(1, "Ad tələb olunur").max(60),
+  city: z.string().trim().min(2, "Şəhər seçilməlidir"),
+  district: z.string().trim().max(80).optional(),
+  street: z.string().trim().max(120).optional(),
+  building: z.string().trim().max(40).optional(),
+  apartment: z.string().trim().max(40).optional(),
+  floor: z.string().trim().max(20).optional(),
+  isDefault: z.boolean().optional(),
+});
+
+export const passwordChangeSchema = z.object({
+  current: z.string().min(1, "Cari parol tələb olunur"),
+  next: z.string().min(8, "Parol ən azı 8 simvol olmalıdır"),
+});
+
+export const passwordResetRequestSchema = z.object({
+  email: z.email("E-poçt düzgün deyil"),
+});
+
+export const passwordResetSchema = z.object({
+  token: z.string().min(10, "Token düzgün deyil"),
+  password: z.string().min(8, "Parol ən azı 8 simvol olmalıdır"),
+});
