@@ -32,6 +32,10 @@ export function countryName(brand: Brand, dict: Dictionary): string {
   return dict.taxonomy.countries[brand.country as keyof Dictionary["taxonomy"]["countries"]] ?? brand.country;
 }
 
+export function countryNameByCode(code: string, dict: Dictionary): string {
+  return dict.taxonomy.countries[code as keyof Dictionary["taxonomy"]["countries"]] ?? code;
+}
+
 /** Kateqoriya təsviri — dilə uyğun. */
 export function categoryDescription(category: Category, dict: Dictionary): string {
   const key = category.slug as keyof Dictionary["taxonomy"]["categoryDescriptions"];

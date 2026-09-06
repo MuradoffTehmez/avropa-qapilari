@@ -13,7 +13,6 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     // Prisma-nın generasiya etdiyi client — bizim yazdığımız kod deyil.
-    "src/generated/**",
   ]),
 ]);
 

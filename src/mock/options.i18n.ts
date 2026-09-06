@@ -351,6 +351,11 @@ export function optionLabel(value: OptionValue, locale: Locale): string {
   return texts[locale]?.[value.id]?.label ?? value.label;
 }
 
+/** Yalnız id məlum olanda (məsələn baza sətri) tərcüməni tapır. */
+export function optionLabelById(id: string, locale: Locale, fallback: string): string {
+  return texts[locale]?.[id]?.label ?? fallback;
+}
+
 /* --------------------- səbət / sifariş snapshot-u ---------------------- */
 
 /**

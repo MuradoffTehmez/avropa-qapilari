@@ -10,24 +10,22 @@ import { formatDate, formatDateTime, formatNumber, formatPrice } from "@/lib/uti
 import { Badge, Card, DataRow, Rating } from "@/components/ui/primitives";
 
 import { AdminPageHeader, DataTable } from "@/components/admin/DataTable";
-import { OrderStatusPill, RepairStatusPill } from "@/components/account/StatusPill";
-import { ProductMedia } from "@/components/product/ProductMedia";
-import { products } from "@/mock/products";
-import { brands, categories } from "@/mock/taxonomy";
-import { optionGroups } from "@/mock/options";
-import { optionText } from "@/mock/options.i18n";
-import { technicians } from "@/mock/content";
-import { localizedReviews } from "@/mock/content.i18n";
-import { categoryName, countryName, materialName, specializationName } from "@/lib/i18n-format";
 import {
-  appointments,
-  accountUser,
-  measurements,
-  orders,
-  quotes,
-  repairRequests,
-  warranties,
-} from "@/mock/account";
+  OrderStatusControl,
+  RepairStatusControl,
+  TechnicianControl,
+} from "@/components/admin/AdminControls";
+import { ProductMedia } from "@/components/product/ProductMedia";
+import { getProduct } from "@/mock/products";
+import { optionLabelById } from "@/mock/options.i18n";
+import { localizedReviews } from "@/mock/content.i18n";
+import {
+  categoryNameBySlug,
+  countryNameByCode,
+  materialName,
+  specializationName,
+} from "@/lib/i18n-format";
+import type { AdminData } from "@/server/admin";
 
 const sections = [
   "products",
@@ -55,7 +53,16 @@ const sections = [
 
 type Section = (typeof sections)[number];
 
-export function AdminSection({ locale, section }: { locale: Locale; section: string }) {
+export function AdminSection({
+  locale,
+  section,
+  data,
+}: {
+  locale: Locale;
+  section: string;
+  /** Bazadan gələn sətirlər; bölməyə uyğun sahə doldurulur. */
+  data: AdminData;
+}) {
   const dict = getDictionary(locale);
   const ui = dict.adminUi;
   const label = ui.labels;
@@ -65,16 +72,19 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
 
   /* ---------------------------------------------------------- PRODUCTS */
   if (section === "products") {
+    const products = data.products ?? [];
+
     return (
       <><ActivityFeed section={section} locale={locale} manage />
         <AdminPageHeader
           title={dict.admin.products}
-          description={`${products.length} ${ui.modelUnit} · ${categories.length} ${ui.categoryUnit}`}
+          description={`${products.length} ${ui.modelUnit}`}
           action={addButton(ui.newProduct)}
         />
         <DataTable
           title={dict.admin.products}
           minWidth={900}
+          source="server"
           rows={products}
           columns={[
             {
@@ -83,7 +93,7 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
               render: (p) => (
                 <div className="flex items-center gap-3">
                   <span className="aspect-3/4 w-9 shrink-0 overflow-hidden border border-line bg-bone">
-                    <ProductMedia product={p} sizes="36px" />
+                    <ProductMedia product={getProduct(p.slug)!} sizes="36px" />
                   </span>
                   <span>
                     <span className="block font-medium text-ink">{p.name}</span>
@@ -97,18 +107,14 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
               header: label.category,
               render: (p) => (
                 <span className="text-graphite">
-                  {categories.find((c) => c.slug === p.categorySlug) ? categoryName(categories.find((c) => c.slug === p.categorySlug)!, dict) : "—"}
+                  {categoryNameBySlug(p.categorySlug, dict, p.categorySlug)}
                 </span>
               ),
             },
             {
               key: "brand",
               header: label.brand,
-              render: (p) => (
-                <span className="text-graphite">
-                  {brands.find((b) => b.slug === p.brandSlug)?.name}
-                </span>
-              ),
+              render: (p) => <span className="text-graphite">{p.brandName}</span>,
             },
             { key: "material", header: label.material, render: (p) => materialName(p.material, dict) },
             { key: "security", header: label.securityClass, render: (p) => p.securityClass },
@@ -144,17 +150,12 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
         <DataTable
           title={dict.admin.categories}
           minWidth={640}
-          rows={categories}
+          source="server"
+          rows={data.categories ?? []}
           columns={[
-            { key: "name", header: label.name, render: (c) => <span className="font-medium text-ink">{categoryName(c, dict)}</span> },
+            { key: "name", header: label.name, render: (c) => <span className="font-medium text-ink">{categoryNameBySlug(c.slug, dict, c.name)}</span> },
             { key: "slug", header: "Slug", render: (c) => <code className="text-[12px] text-stone">{c.slug}</code> },
             { key: "count", header: label.product, align: "right", render: (c) => c.productCount },
-            {
-              key: "featured",
-              header: label.homePage,
-              align: "center",
-              render: (c) => (c.featured ? <Badge tone="success">{dict.common.yes}</Badge> : <span className="text-mist">—</span>),
-            },
           ]}
         />
       </>
@@ -169,17 +170,13 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
         <DataTable
           title={dict.admin.brands}
           minWidth={640}
-          rows={brands}
+          source="server"
+          rows={data.brands ?? []}
           columns={[
             { key: "name", header: label.name, render: (b) => <span className="font-medium text-ink">{b.name}</span> },
-            { key: "country", header: dict.adminUi.fields.country, render: (b) => countryName(b, dict) },
+            { key: "country", header: dict.adminUi.fields.country, render: (b) => countryNameByCode(b.country, dict) },
             { key: "founded", header: label.founded, align: "right", render: (b) => b.founded },
-            {
-              key: "count",
-              header: label.model,
-              align: "right",
-              render: (b) => products.filter((p) => p.brandSlug === b.slug).length,
-            },
+            { key: "count", header: label.model, align: "right", render: (b) => b.productCount },
           ]}
         />
       </>
@@ -188,7 +185,7 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
 
   /* ------------------------------------------------------ CONFIGURATOR */
   if (section === "configurator") {
-    const groups = Object.values(optionGroups).filter((g) => g.values.length > 0);
+    const groups = data.optionGroups ?? [];
     return (
       <><ActivityFeed section={section} locale={locale} manage />
         <AdminPageHeader
@@ -199,10 +196,11 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
         <div className="space-y-4">
           {groups.map((g) => (
             <DataTable
-              key={g.key}
-              title={`${dict.configurator.steps[g.key]} · ${g.key}`}
-              description={dict.configurator.hints[g.key]}
+              key={g.groupKey}
+              title={`${dict.configurator.steps[g.groupKey]} · ${g.groupKey}`}
+              description={dict.configurator.hints[g.groupKey]}
               minWidth={720}
+              source="server"
               rows={g.values}
               columns={[
                 {
@@ -213,10 +211,12 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
                       {v.hex && (
                         <span
                           className="h-5 w-5 shrink-0 rounded-[2px] border border-line"
-                          style={{ background: v.swatch ?? v.hex }}
+                          style={{ background: v.hex }}
                         />
                       )}
-                      <span className="font-medium text-ink">{optionText(v, locale).label}</span>
+                      <span className="font-medium text-ink">
+                        {optionLabelById(v.id, locale, v.label)}
+                      </span>
                     </span>
                   ),
                 },
@@ -235,8 +235,8 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
                   key: "rules",
                   header: label.compatibility,
                   render: (v) =>
-                    v.requires?.length ? (
-                      <Badge tone="warning">{ui.requires}: {v.requires.length}</Badge>
+                    v.requiresCount > 0 ? (
+                      <Badge tone="warning">{ui.requires}: {v.requiresCount}</Badge>
                     ) : (
                       <span className="text-mist">—</span>
                     ),
@@ -253,11 +253,15 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   if (section === "orders") {
     return (
       <><ActivityFeed section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.orders} description={`${orders.length} ${ui.orderUnit}`} />
+        <AdminPageHeader
+          title={dict.admin.orders}
+          description={`${(data.orders ?? []).length} ${ui.orderUnit}`}
+        />
         <DataTable
           title={dict.admin.orders}
           minWidth={860}
-          rows={orders}
+          source="server"
+          rows={data.orders ?? []}
           columns={[
             { key: "number", header: label.number, render: (o) => <code className="text-[12px] text-graphite">{o.number}</code> },
             { key: "date", header: label.date, render: (o) => formatDate(o.createdAt) },
@@ -273,7 +277,7 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
             {
               key: "status",
               header: label.status,
-              render: (o) => <OrderStatusPill status={o.status} label={dict.orderStatus[o.status]} />,
+              render: (o) => <OrderStatusControl number={o.number} status={o.status} />,
             },
             {
               key: "total",
@@ -295,19 +299,14 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
         <DataTable
           title={dict.admin.quotes}
           minWidth={720}
-          rows={quotes}
+          source="server"
+          rows={data.quotes ?? []}
           columns={[
             { key: "number", header: label.number, render: (q) => <code className="text-[12px] text-graphite">{q.number}</code> },
             { key: "date", header: label.date, render: (q) => formatDate(q.createdAt) },
             { key: "customer", header: label.customer, render: (q) => q.customerName },
             { key: "subject", header: label.subject, render: (q) => <span className="text-ink">{q.subject}</span> },
             { key: "status", header: label.status, render: (q) => <Badge tone="gold">{q.status === "SENT" ? dict.accountUi.quoteSent : q.status}</Badge> },
-            {
-              key: "amount",
-              header: label.amount,
-              align: "right",
-              render: (q) => (q.amount ? formatPrice(q.amount) : <span className="text-mist">—</span>),
-            },
           ]}
         />
       </>
@@ -322,7 +321,8 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
         <DataTable
           title={dict.admin.repairs}
           minWidth={900}
-          rows={repairRequests}
+          source="server"
+          rows={data.repairs ?? []}
           columns={[
             { key: "number", header: label.number, render: (rp) => <code className="text-[12px] text-graphite">{rp.number}</code> },
             { key: "date", header: label.date, render: (rp) => formatDate(rp.createdAt) },
@@ -332,12 +332,19 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
             {
               key: "tech",
               header: label.technician,
-              render: (rp) => rp.technician ?? <Badge tone="warning">{ui.unassigned}</Badge>,
+              render: (rp) => (
+                <TechnicianControl
+                  kind="repair"
+                  number={rp.number}
+                  technicianId={rp.technicianId}
+                  technicians={data.technicians ?? []}
+                />
+              ),
             },
             {
               key: "status",
               header: label.status,
-              render: (rp) => <RepairStatusPill status={rp.status} label={dict.repairStatus[rp.status]} />,
+              render: (rp) => <RepairStatusControl number={rp.number} status={rp.status} />,
             },
           ]}
         />
@@ -353,14 +360,26 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
         <DataTable
           title={dict.admin.measurements}
           minWidth={800}
-          rows={measurements}
+          source="server"
+          rows={data.measurements ?? []}
           columns={[
             { key: "number", header: label.number, render: (m) => <code className="text-[12px] text-graphite">{m.number}</code> },
             { key: "property", header: label.object, render: (m) => dict.measurement.property[m.propertyType] },
             { key: "doors", header: label.door, align: "center", render: (m) => m.doorCount },
             { key: "address", header: dict.common.address, render: (m) => <span className="text-stone">{m.address}</span> },
             { key: "date", header: label.date, render: (m) => formatDate(m.preferredDate) },
-            { key: "tech", header: label.technician, render: (m) => m.technician ?? "—" },
+            {
+              key: "tech",
+              header: label.technician,
+              render: (m) => (
+                <TechnicianControl
+                  kind="measurement"
+                  number={m.number}
+                  technicianId={m.technicianId}
+                  technicians={data.technicians ?? []}
+                />
+              ),
+            },
             { key: "status", header: label.status, render: (m) => <Badge tone="gold">{m.status === "SCHEDULED" ? dict.accountUi.statuses.scheduled : m.status}</Badge> },
           ]}
         />
@@ -379,16 +398,13 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
         <DataTable
           title={dict.admin.appointments}
           minWidth={800}
-          rows={appointments}
+          source="server"
+          rows={data.appointments ?? []}
           columns={[
             { key: "date", header: label.date, render: (a) => formatDate(a.date) },
             { key: "time", header: label.time, render: (a) => `${a.startTime} – ${a.endTime}` },
             { key: "type", header: label.type, render: (a) => <Badge tone="info">{a.type === "REPAIR" ? dict.services.repair : a.type === "MEASUREMENT" ? dict.services.measurement : dict.services.installation}</Badge> },
-            {
-              key: "tech",
-              header: label.technician,
-              render: (a) => technicians.find((t) => t.id === a.technicianId)?.name ?? "—",
-            },
+            { key: "tech", header: label.technician, render: (a) => a.technician ?? "—" },
             { key: "address", header: dict.common.address, render: (a) => <span className="text-stone">{a.address}</span> },
             { key: "ref", header: label.reference, render: (a) => <code className="text-[12px] text-graphite">{a.reference}</code> },
             { key: "status", header: label.status, render: (a) => <Badge tone="gold">{a.status === "CONFIRMED" ? dict.accountUi.statuses.confirmed : dict.accountUi.statuses.scheduled}</Badge> },
@@ -406,7 +422,8 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
         <DataTable
           title={dict.admin.technicians}
           minWidth={860}
-          rows={technicians}
+          source="server"
+          rows={data.technicians ?? []}
           columns={[
             { key: "name", header: label.name, render: (t) => <span className="font-medium text-ink">{t.name}</span> },
             { key: "phone", header: dict.common.phone, render: (t) => t.phone },
@@ -484,12 +501,7 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
 
   /* --------------------------------------------------------- CUSTOMERS */
   if (section === "customers") {
-    const customers = [
-      { name: `${accountUser.name} ${accountUser.surname}`, email: accountUser.email, phone: accountUser.phone, orders: 3, total: 5180, since: accountUser.memberSince },
-      { name: "Nigar Abbasova", email: "nigar@example.com", phone: "+994 55 111 11 11", orders: 1, total: 1860, since: "2026-03-14" },
-      { name: "Kamran Səfərov", email: "kamran@example.com", phone: "+994 70 222 22 22", orders: 2, total: 4720, since: "2025-08-02" },
-      { name: "Elvin Məmmədov", email: "elvin@example.com", phone: "+994 50 333 33 33", orders: 1, total: 2340, since: "2026-06-30" },
-    ];
+    const customers = data.customers ?? [];
 
     return (
       <><ActivityFeed section={section} locale={locale} manage />
@@ -497,6 +509,7 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
         <DataTable
           title={dict.admin.customers}
           minWidth={800}
+          source="server"
           rows={customers}
           columns={[
             { key: "name", header: label.name, render: (c) => <span className="font-medium text-ink">{c.name}</span> },
@@ -518,19 +531,17 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
 
   /* --------------------------------------------------------- INVENTORY */
   if (section === "inventory") {
-    const stock = products.slice(0, 10).map((p, i) => ({
-      product: p,
-      onHand: p.inStock ? 12 - i : 0,
-      reserved: p.inStock ? Math.max(0, 4 - i) : 0,
-      threshold: 3,
-    }));
+    // Anbar sayı üçün ayrıca model yoxdur; hazırda yalnız məhsulun
+    // `inStock` bayrağı bazadadır, ona görə cədvəl həmin vəziyyəti göstərir.
+    const stock = (data.products ?? []).map((p) => ({ product: p, inStock: p.inStock }));
 
     return (
       <><ActivityFeed section={section} locale={locale} manage />
         <AdminPageHeader title={dict.admin.inventory} description={ui.inventoryDescription} />
         <DataTable
           title={dict.admin.stock}
-          minWidth={780}
+          minWidth={640}
+          source="server"
           rows={stock}
           columns={[
             {
@@ -543,25 +554,24 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
                 </span>
               ),
             },
-            { key: "onHand", header: label.onHand, align: "right", render: (s) => <span className="tabular-nums">{s.onHand}</span> },
-            { key: "reserved", header: label.reserved, align: "right", render: (s) => <span className="tabular-nums text-stone">{s.reserved}</span> },
             {
-              key: "available",
-              header: label.available,
-              align: "right",
-              render: (s) => <span className="font-medium tabular-nums text-ink">{s.onHand - s.reserved}</span>,
+              key: "category",
+              header: label.category,
+              render: (s) => (
+                <span className="text-graphite">
+                  {categoryNameBySlug(s.product.categorySlug, dict, s.product.categorySlug)}
+                </span>
+              ),
             },
             {
               key: "state",
               header: label.state,
               align: "center",
               render: (s) =>
-                s.onHand === 0 ? (
-                  <Badge tone="neutral">{ui.toOrder}</Badge>
-                ) : s.onHand - s.reserved <= s.threshold ? (
-                  <Badge tone="danger">{ui.lowStock}</Badge>
+                s.inStock ? (
+                  <Badge tone="success">{ui.available}</Badge>
                 ) : (
-                  <Badge tone="success">{ui.normal}</Badge>
+                  <Badge tone="neutral">{ui.toOrder}</Badge>
                 ),
             },
           ]}
@@ -578,13 +588,14 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
         <DataTable
           title={dict.admin.warranty}
           minWidth={860}
-          rows={warranties}
+          source="server"
+          rows={data.warranties ?? []}
           columns={[
             { key: "number", header: label.number, render: (w) => <code className="text-[12px] text-graphite">{w.number}</code> },
             { key: "serial", header: label.serial, render: (w) => <code className="text-[12px] text-ink">{w.serialNumber}</code> },
             { key: "product", header: label.product, render: (w) => w.productName },
             { key: "order", header: label.orders, render: (w) => <code className="text-[12px] text-stone">{w.orderNumber}</code> },
-            { key: "install", header: label.installation, render: (w) => formatDate(w.installationDate) },
+            { key: "install", header: label.installation, render: (w) => formatDate(w.startDate) },
             { key: "end", header: label.end, render: (w) => formatDate(w.endDate) },
             {
               key: "status",

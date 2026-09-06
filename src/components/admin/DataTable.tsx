@@ -27,6 +27,7 @@ export function DataTable<T>({
   actions,
   minWidth = 720,
   empty,
+  source = "local",
 }: {
   title: string;
   description?: string;
@@ -35,18 +36,24 @@ export function DataTable<T>({
   actions?: ReactNode;
   minWidth?: number;
   empty?: string;
+  /**
+   * "server" — sətirlər bazadan gəlir: lokal yaddaşdakı redaktə
+   * nüsxəsi işlədilmir, əks halda köhnə dəyər real datanı örtərdi.
+   */
+  source?: "local" | "server";
 }) {
   const dict = useDict();
   const state = useTables();
   const hydrated = useHydrated();
-  const data = hydrated && state.tables[title] ? state.tables[title] as T[] : rows;
+  const local = source === "local";
+  const data = local && hydrated && state.tables[title] ? (state.tables[title] as T[]) : rows;
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(0);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [draft, setDraft] = useState<Record<string, unknown>>({});
   const filtered = data.map((row, index) => ({ row, index })).filter(({ row }) => JSON.stringify(row).toLowerCase().includes(query.toLowerCase()));
   const visible = filtered.slice(page * 8, page * 8 + 8);
-  const editable = !/audit|əməliyyatların|konversiya|permission|icazə|RBAC/i.test(title);
+  const editable = local && !/audit|əməliyyatların|konversiya|permission|icazə|RBAC/i.test(title);
   return (
     <Card>
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3.5 sm:px-5">

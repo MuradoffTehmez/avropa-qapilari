@@ -46,6 +46,11 @@ const localizedSegments: { from: string; to: string; locale: "en" | "ru" }[] = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
+  // Prisma client server tərəfdə xarici paket kimi qalır — əks halda
+  // Turbopack onun dinamik fayl girişini görüb bütün layihəni
+  // (public/ daxil) server bundle-una trace edir.
+  serverExternalPackages: ["@prisma/client"],
+
   // Dev göstəricisi mobil düymələri örtür
   devIndicators: false,
 

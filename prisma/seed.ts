@@ -4,7 +4,7 @@
  * Mənbə `src/mock/` qovluğudur — beləliklə backend qoşulandan sonra da
  * sayt eyni məzmunu göstərir və heç bir səhifə boşalmır.
  */
-import { PrismaClient } from "../src/generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import { products } from "../src/mock/products";
 import { brands, categories } from "../src/mock/taxonomy";
 import { allOptionValues, findOptionValue } from "../src/mock/options";

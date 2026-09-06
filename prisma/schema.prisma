@@ -3,9 +3,11 @@
 // SQLite seçilib, çünki Cloudflare D1 SQLite üzərindədir: eyni sxem
 // lokal inkişafda da, D1-də də işləyir (PRD §8, §9).
 
+// Standart yerə (node_modules/@prisma/client) generasiya olunur:
+// belə olduqda Next onu `serverExternalPackages` ilə bundle-dan kənarda
+// saxlayır və Turbopack bütün layihəni trace etmir.
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {

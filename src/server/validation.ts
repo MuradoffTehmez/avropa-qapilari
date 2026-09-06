@@ -112,3 +112,54 @@ export const passwordResetSchema = z.object({
   token: z.string().min(10, "Token düzgün deyil"),
   password: z.string().min(8, "Parol ən azı 8 simvol olmalıdır"),
 });
+
+/* --------------------------- Admin əməliyyatları ----------------------- */
+
+export const ORDER_STATUSES = [
+  "DRAFT",
+  "PENDING_PAYMENT",
+  "PAID",
+  "CONFIRMED",
+  "PROCESSING",
+  "MANUFACTURING",
+  "READY",
+  "SHIPPED",
+  "DELIVERED",
+  "INSTALLATION_SCHEDULED",
+  "INSTALLED",
+  "COMPLETED",
+  "CANCELLED",
+  "REFUNDED",
+] as const;
+
+export const REQUEST_STATUSES = [
+  "NEW",
+  "REVIEWING",
+  "QUOTE_REQUIRED",
+  "WAITING_CUSTOMER",
+  "CONFIRMED",
+  "SCHEDULED",
+  "TECHNICIAN_ASSIGNED",
+  "ON_THE_WAY",
+  "IN_PROGRESS",
+  "WAITING_FOR_PART",
+  "PRICED",
+  "SENT",
+  "ACCEPTED",
+  "REJECTED",
+  "EXPIRED",
+  "CONVERTED",
+  "COMPLETED",
+  "CANCELLED",
+] as const;
+
+export const orderStatusSchema = z.object({
+  status: z.enum(ORDER_STATUSES, "Belə sifariş statusu yoxdur"),
+});
+
+export const requestUpdateSchema = z.object({
+  status: z.enum(REQUEST_STATUSES, "Belə status yoxdur").optional(),
+  technicianId: z.string().nullable().optional(),
+  scheduledAt: z.string().optional(),
+  estimatedCost: z.number().int().min(0).optional(),
+});

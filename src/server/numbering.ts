@@ -1,4 +1,4 @@
-import type { Prisma } from "@/generated/prisma";
+import type { Prisma } from "@prisma/client";
 
 /**
  * Ardıcıl public nömrələr: ORD-2026-000001 (PRD §62).

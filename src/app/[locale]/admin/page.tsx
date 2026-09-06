@@ -6,10 +6,15 @@ import type { Locale } from "@/types";
 import { formatDate, formatDateLong, formatPrice } from "@/lib/utils";
 import { Card } from "@/components/ui/primitives";
 import { OrderStatusPill, RepairStatusPill } from "@/components/account/StatusPill";
-import { orders, repairRequests, appointments, measurements } from "@/mock/account";
-import { products } from "@/mock/products";
-import { optionGroups } from "@/mock/options";
-import { optionText } from "@/mock/options.i18n";
+import { currentUser } from "@/server/auth";
+import {
+  adminDashboard,
+  adminMeasurements,
+  adminOrders,
+  adminRepairs,
+  adminTopOptions,
+  adminTopProducts,
+} from "@/server/admin";
 
 /** admin dashboard KPI. */
 export default async function AdminDashboardPage({
@@ -21,25 +26,40 @@ export default async function AdminDashboardPage({
   const locale = (isLocale(raw) ? raw : "az") as Locale;
   const dict = getDictionary(locale);
 
+  // Səlahiyyət yoxdursa `AdminBoundary` kilid ekranını göstərir.
+  const user = await currentUser();
+  if (user?.role !== "ADMIN") return null;
+
+  const [stats, orders, repairRequests, measurements, topDoors, topColors, topLocks] =
+    await Promise.all([
+      adminDashboard(),
+      adminOrders(),
+      adminRepairs(),
+      adminMeasurements(),
+      adminTopProducts(),
+      adminTopOptions("OUTSIDE_COLOR"),
+      adminTopOptions("LOCK"),
+    ]);
+
+  // Bütün göstəricilər bazadan gəlir; müqayisə üçün əvvəlki ay
+  // yoxdursa faiz göstərilmir.
   const kpis = [
-    { label: dict.admin.kpi.todayRevenue, value: formatPrice(4820), delta: 12.4 },
-    { label: dict.admin.kpi.monthRevenue, value: formatPrice(126400), delta: 8.1 },
-    { label: dict.admin.kpi.orders, value: "38", delta: 5.2 },
-    { label: dict.admin.kpi.aov, value: formatPrice(3326), delta: -2.7 },
+    { label: dict.admin.kpi.todayRevenue, value: formatPrice(stats.dayRevenue), delta: null },
+    {
+      label: dict.admin.kpi.monthRevenue,
+      value: formatPrice(stats.monthRevenue),
+      delta: stats.monthDelta,
+    },
+    { label: dict.admin.kpi.orders, value: String(stats.orders), delta: null },
+    { label: dict.admin.kpi.aov, value: formatPrice(stats.averageOrder), delta: null },
   ];
 
   const operational = [
-    { label: dict.admin.kpi.pendingOrders, value: 6, tone: "warning" as const },
-    { label: dict.admin.kpi.newRepairs, value: 3, tone: "info" as const },
-    { label: dict.admin.kpi.activeRepairs, value: 8, tone: "gold" as const },
-    { label: dict.admin.kpi.pendingInstallations, value: 4, tone: "info" as const },
-    { label: dict.admin.kpi.appointmentsToday, value: appointments.length, tone: "success" as const },
-    { label: dict.admin.kpi.lowStock, value: 5, tone: "danger" as const },
+    { label: dict.admin.kpi.pendingOrders, value: stats.pendingOrders },
+    { label: dict.admin.kpi.newRepairs, value: stats.newRepairs },
+    { label: dict.admin.kpi.activeRepairs, value: stats.activeRepairs },
+    { label: dict.admin.kpi.appointmentsToday, value: stats.todayAppointments },
   ];
-
-  const topDoors = products.slice(0, 5);
-  const topColors = optionGroups.OUTSIDE_COLOR.values.slice(0, 5);
-  const topLocks = optionGroups.LOCK.values;
 
   return (
     <div className="space-y-6">
@@ -61,22 +81,24 @@ export default async function AdminDashboardPage({
             <p className="mt-2 text-[1.75rem] font-semibold tracking-tight tabular-nums text-ink">
               {k.value}
             </p>
-            <p
-              className={
-                k.delta >= 0
-                  ? "mt-1.5 flex items-center gap-1 text-[12px] font-medium text-success"
-                  : "mt-1.5 flex items-center gap-1 text-[12px] font-medium text-danger"
-              }
-            >
-              {k.delta >= 0 ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
-              {Math.abs(k.delta)}% {dict.adminUi.comparedToLastMonth}
-            </p>
+            {k.delta !== null && (
+              <p
+                className={
+                  k.delta >= 0
+                    ? "mt-1.5 flex items-center gap-1 text-[12px] font-medium text-success"
+                    : "mt-1.5 flex items-center gap-1 text-[12px] font-medium text-danger"
+                }
+              >
+                {k.delta >= 0 ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
+                {Math.abs(Math.round(k.delta))}% {dict.adminUi.comparedToLastMonth}
+              </p>
+            )}
           </Card>
         ))}
       </div>
 
       {/* Operational */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {operational.map((o) => (
           <Card key={o.label} className="p-4">
             <p className="text-[2rem] font-semibold leading-none tabular-nums text-ink">{o.value}</p>
@@ -177,25 +199,21 @@ export default async function AdminDashboardPage({
       <div className="grid gap-4 lg:grid-cols-3">
         <TopList
           title={dict.admin.topDoors}
-          items={topDoors.map((p, i) => ({
+          empty={dict.adminUi.empty}
+          items={topDoors.map((p) => ({
             label: p.name,
-            value: `${48 - i * 7} ${dict.adminUi.saleUnit}`,
+            value: `${p.quantity} ${dict.adminUi.saleUnit}`,
           }))}
         />
         <TopList
           title={dict.admin.topColors}
-          items={topColors.map((c, i) => ({
-            label: optionText(c, locale).label,
-            value: `${34 - i * 5}%`,
-            hex: c.hex,
-          }))}
+          empty={dict.adminUi.empty}
+          items={topColors.map((c) => ({ label: c.label, value: `${c.share}%`, hex: c.hex ?? undefined }))}
         />
         <TopList
           title={dict.admin.topLocks}
-          items={topLocks.map((l, i) => ({
-            label: optionText(l, locale).label,
-            value: `${42 - i * 11}%`,
-          }))}
+          empty={dict.adminUi.empty}
+          items={topLocks.map((l) => ({ label: l.label, value: `${l.share}%` }))}
         />
       </div>
 
@@ -251,15 +269,18 @@ export default async function AdminDashboardPage({
 function TopList({
   title,
   items,
+  empty,
 }: {
   title: string;
   items: { label: string; value: string; hex?: string }[];
+  empty: string;
 }) {
   return (
     <Card>
       <div className="border-b border-line px-5 py-3.5">
         <h2 className="text-[13px] font-semibold text-ink">{title}</h2>
       </div>
+      {items.length === 0 && <p className="px-5 py-8 text-center text-[13px] text-stone">{empty}</p>}
       <ul className="divide-y divide-line">
         {items.map((item, i) => (
           <li key={item.label} className="flex items-center justify-between gap-3 px-5 py-2.5">
