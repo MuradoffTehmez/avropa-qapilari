@@ -38,7 +38,7 @@ import { getProduct, getRelatedProducts, products } from "@/mock/products";
 import { getBrand, getCategory } from "@/mock/taxonomy";
 import { localizedFaq, localizedReviews } from "@/mock/content.i18n";
 import { optionGroups } from "@/mock/options";
-import { materialName, priceFrom, styleName } from "@/lib/i18n-format";
+import { categoryName, materialName, priceFrom, productDescription, productShort, styleName } from "@/lib/i18n-format";
 
 export function generateStaticParams() {
   return locales.flatMap((locale) => products.map((p) => ({ locale, slug: p.slug })));
@@ -47,18 +47,20 @@ export function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { locale, slug } = await params;
   const product = getProduct(slug);
   if (!product) return {};
 
+  const dict = getDictionary(isLocale(locale) ? locale : "az");
+
   return {
     title: product.name,
-    description: product.shortDescription,
+    description: productShort(product, dict),
     openGraph: {
       title: `${product.name} — ${brand.name}`,
-      description: product.shortDescription,
+      description: productShort(product, dict),
     },
   };
 }
@@ -89,7 +91,7 @@ export default async function ProductPage({
     "@type": "Product",
     name: product.name,
     sku: product.sku,
-    description: product.shortDescription,
+    description: productShort(product, dict),
     brand: { "@type": "Brand", name: productBrand?.name ?? brand.name },
     aggregateRating: {
       "@type": "AggregateRating",
@@ -157,7 +159,7 @@ export default async function ProductPage({
           </div>
 
           <p className="mt-5 text-[15px] leading-relaxed text-graphite">
-            {product.shortDescription}
+            {productShort(product, dict)}
           </p>
 
           <div className="mt-6 flex items-end gap-3 border-y border-line py-5">
@@ -178,16 +180,16 @@ export default async function ProductPage({
 
           <div className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3 text-[13px] sm:grid-cols-3">
             {product.securityClass !== "—" && (
-              <KeySpec icon={ShieldCheck} label="Təhlükəsizlik" value={product.securityClass} />
+              <KeySpec icon={ShieldCheck} label={dict.product.security} value={product.securityClass} />
             )}
-            <KeySpec icon={Volume2} label="Səs izolyasiyası" value={`${product.soundInsulationDb} dB`} />
+            <KeySpec icon={Volume2} label={dict.product.soundInsulation} value={`${product.soundInsulationDb} dB`} />
             <KeySpec icon={Package} label="Material" value={materialName(product.material, dict)} />
-            {product.fireRating && <KeySpec icon={Flame} label="Yanğın" value={product.fireRating} />}
-            <KeySpec icon={Award} label="Zəmanət" value={`${product.warrantyYears} il`} />
+            {product.fireRating && <KeySpec icon={Flame} label={dict.product.fireRating} value={product.fireRating} />}
+            <KeySpec icon={Award} label={dict.product.warrantyPeriod} value={`${product.warrantyYears} ${dict.common.years}`} />
             <KeySpec
               icon={Truck}
-              label="Çatdırılma"
-              value={`${product.deliveryDays[0]}–${product.deliveryDays[1]} gün`}
+              label={dict.product.delivery}
+              value={`${product.deliveryDays[0]}–${product.deliveryDays[1]} ${dict.common.days}`}
             />
           </div>
 
@@ -200,14 +202,14 @@ export default async function ProductPage({
           <div className="mt-6 space-y-2 border-t border-line pt-5 text-[13px] text-stone">
             <p className="flex items-center gap-2">
               <Ruler size={14} className="text-gold-500" />
-              Pulsuz ölçü xidməti —{" "}
+              {dict.product.freeMeasurement}{" "}
               <Link href={r.measurement} className="text-gold-600 underline-offset-2 hover:underline">
-                usta çağır
+                {dict.product.freeMeasurementLink}
               </Link>
             </p>
             <p className="flex items-center gap-2">
               <Hammer size={14} className="text-gold-500" />
-              Sertifikatlı quraşdırma 120 AZN-dən
+              {dict.product.certifiedInstallation}
             </p>
           </div>
         </div>
@@ -223,24 +225,26 @@ export default async function ProductPage({
               content: (
                 <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr]">
                   <div className="max-w-2xl space-y-4 text-[15px] leading-relaxed text-graphite">
-                    <p>{product.description}</p>
+                    <p>{productDescription(product, dict)}</p>
                     <p>
-                      Model {styleName(product.style, dict).toLowerCase()} stildə hazırlanıb və{" "}
-                      {category?.name.toLowerCase()} qrupuna aiddir. Konfiquratorda xarici və daxili
-                      rəngi ayrıca seçmək, kilid sistemini gücləndirmək və smart lock əlavə etmək
-                      mümkündür.
+                      {dict.product.styleAndCategory
+                        .replace("{style}", styleName(product.style, dict).toLowerCase())
+                        .replace(
+                          "{category}",
+                          category ? categoryName(category, dict).toLowerCase() : "",
+                        )}
                     </p>
                   </div>
                   <Card className="h-fit p-5">
                     <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-stone">
-                      Qısa məlumat
+                      {dict.product.quickFacts}
                     </h3>
                     <dl>
                       <DataRow label={dict.product.brand} value={productBrand?.name ?? "—"} />
-                      <DataRow label="Kolleksiya" value={product.collection} />
-                      <DataRow label="Stil" value={styleName(product.style, dict)} />
+                      <DataRow label={dict.product.collection} value={product.collection} />
+                      <DataRow label={dict.product.style} value={styleName(product.style, dict)} />
                       <DataRow label={dict.product.availability} value={product.inStock ? dict.common.inStock : dict.common.madeToOrder} />
-                      <DataRow label={dict.product.warrantyPeriod} value={`${product.warrantyYears} il`} />
+                      <DataRow label={dict.product.warrantyPeriod} value={`${product.warrantyYears} ${dict.common.years}`} />
                     </dl>
                   </Card>
                 </div>
@@ -280,22 +284,22 @@ export default async function ProductPage({
                     <p className="text-2xl font-semibold tracking-tight text-ink">
                       {formatDimensions(product.defaultWidth, product.defaultHeight)}
                     </p>
-                    <p className="mt-2 text-[13px] text-stone">Anbarda saxlanılan ölçü.</p>
+                    <p className="mt-2 text-[13px] text-stone">{dict.product.stockSize}</p>
                   </Card>
                   <Card className="p-5">
                     <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-stone">
-                      Fərdi ölçü aralığı
+                      {dict.product.customSizeRange}
                     </h3>
                     <dl>
-                      <DataRow label="En" value={`${product.minWidth}–${product.maxWidth} mm`} />
-                      <DataRow label="Hündürlük" value={`${product.minHeight}–${product.maxHeight} mm`} />
+                      <DataRow label={dict.product.width} value={`${product.minWidth}–${product.maxWidth} mm`} />
+                      <DataRow label={dict.product.height} value={`${product.minHeight}–${product.maxHeight} mm`} />
                     </dl>
                     <p className="mt-3 text-[13px] text-stone">
-                      Aralıqdan kənar ölçülər üçün{" "}
+                      {dict.product.outOfRangeBefore}{" "}
                       <Link href={r.quote} className="text-gold-600 underline-offset-2 hover:underline">
-                        fərdi qiymət təklifi
+                        {dict.product.outOfRangeLink}
                       </Link>{" "}
-                      tələb olunur.
+                      {dict.product.outOfRangeAfter}
                     </p>
                   </Card>
                 </div>

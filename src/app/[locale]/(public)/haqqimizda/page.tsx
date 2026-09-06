@@ -4,6 +4,7 @@ import { Award, Factory, Users, Wrench } from "lucide-react";
 import { getDictionary, isLocale } from "@/i18n";
 import type { Locale } from "@/types";
 import { routes } from "@/lib/routes";
+import { brandDescription } from "@/lib/i18n-format";
 import { Breadcrumbs, Section, SectionHeading, Stat } from "@/components/ui/primitives";
 import { ButtonLink } from "@/components/ui/Button";
 import { brands } from "@/mock/taxonomy";
@@ -106,7 +107,7 @@ export default async function AboutPage({
                   <h3 className="text-[16px] font-semibold tracking-tight text-ink">{b.name}</h3>
                   <span className="text-[11px] uppercase tracking-[0.14em] text-stone">{b.country}</span>
                 </div>
-                <p className="mt-2 text-[13px] leading-relaxed text-stone">{b.description}</p>
+                <p className="mt-2 text-[13px] leading-relaxed text-stone">{brandDescription(b, dict)}</p>
                 <p className="mt-3 text-xs text-mist">{b.founded}-ci ildən</p>
               </div>
             ))}

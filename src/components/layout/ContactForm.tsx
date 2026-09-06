@@ -7,17 +7,8 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/primitives";
 import { Field, Input, Select, Textarea } from "@/components/ui/form";
 
-const subjects = [
-  "Məhsul haqqında sual",
-  "Qiymət təklifi",
-  "Ölçü sifarişi",
-  "Təmir müraciəti",
-  "Zəmanət",
-  "Əməkdaşlıq",
-  "Digər",
-];
-
 export function ContactForm({ dict }: { dict: Dictionary }) {
+  const subjects = dict.common.contactSubjects;
   const [form, setForm] = useState({ name: "", phone: "", email: "", subject: subjects[0], message: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [sent, setSent] = useState(false);
@@ -43,7 +34,7 @@ export function ContactForm({ dict }: { dict: Dictionary }) {
     return (
       <Card className="flex flex-col items-center justify-center p-10 text-center">
         <CheckCircle2 size={40} className="text-success" />
-        <h2 className="mt-4 text-xl font-semibold tracking-tight text-ink">Mesajınız göndərildi</h2>
+        <h2 className="mt-4 text-xl font-semibold tracking-tight text-ink">{dict.common.messageSent}</h2>
         <p className="mt-2 max-w-sm text-[14px] text-stone">
           Operatorumuz 1 iş günü ərzində sizinlə əlaqə saxlayacaq.
         </p>
@@ -53,7 +44,7 @@ export function ContactForm({ dict }: { dict: Dictionary }) {
 
   return (
     <form onSubmit={submit}>
-      <h2 className="mb-5 text-lg font-semibold tracking-tight text-ink">Bizə yazın</h2>
+      <h2 className="mb-5 text-lg font-semibold tracking-tight text-ink">{dict.common.writeToUs}</h2>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label={dict.common.name} required error={errors.name}>

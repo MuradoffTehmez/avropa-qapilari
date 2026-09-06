@@ -52,7 +52,7 @@ export function MeasurementForm({ locale, dict }: { locale: Locale; dict: Dictio
     if (Object.keys(next).length > 0) return;
 
     const reference = createReference("MSR");
-    useWorkflow.getState().add({ id: reference, kind: "measurements", title: "Ölçü sifarişi", detail: `${form.doorCount} qapı · ${form.city}, ${form.street} · ${form.date} ${form.slot}` });
+    useWorkflow.getState().add({ id: reference, kind: "measurements", title: dict.measurement.title, detail: `${form.doorCount} qapı · ${form.city}, ${form.street} · ${form.date} ${form.slot}` });
     setSubmitted(reference);
   }
 
@@ -68,7 +68,7 @@ export function MeasurementForm({ locale, dict }: { locale: Locale; dict: Dictio
             {dict.measurement.successText}
           </p>
           <div className="mt-6 border border-line bg-bone px-5 py-4">
-            <p className="text-[11px] uppercase tracking-[0.16em] text-stone">Sifariş nömrəsi</p>
+            <p className="text-[11px] uppercase tracking-[0.16em] text-stone">{dict.measurement.orderNumber}</p>
             <p className="mt-1 font-mono text-lg font-semibold text-ink">{submitted}</p>
           </div>
           <div className="mt-7 flex flex-wrap justify-center gap-2">
@@ -89,7 +89,7 @@ export function MeasurementForm({ locale, dict }: { locale: Locale; dict: Dictio
     >
       <div className="space-y-8">
         <section>
-          <h2 className="mb-4 text-lg font-semibold tracking-tight text-ink">Əlaqə</h2>
+          <h2 className="mb-4 text-lg font-semibold tracking-tight text-ink">{dict.measurement.contact}</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label={dict.common.name} required error={errors.name}>
               <Input value={form.name} onChange={(e) => set("name", e.target.value)} />
@@ -186,7 +186,7 @@ export function MeasurementForm({ locale, dict }: { locale: Locale; dict: Dictio
               <Textarea
                 value={form.notes}
                 onChange={(e) => set("notes", e.target.value)}
-                placeholder="Hansı otaqlar, xüsusi tələblər…"
+                placeholder={dict.measurement.notePlaceholder}
               />
             </Field>
           </div>

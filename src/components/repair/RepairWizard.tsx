@@ -34,14 +34,19 @@ const stepIds = [
 
 type StepId = (typeof stepIds)[number];
 
-const doorTypes = [
-  { id: "entrance", label: "Giriş qapısı", hint: "Mənzil və ya ev girişi" },
-  { id: "villa", label: "Villa qapısı", hint: "Xarici giriş" },
-  { id: "interior", label: "Otaq qapısı", hint: "İnteryer" },
-  { id: "glass", label: "Şüşəli qapı", hint: "Şüşə və ya alüminium" },
-  { id: "metal", label: "Metal qapı", hint: "Texniki otaq, anbar" },
-  { id: "other", label: "Digər", hint: "" },
-];
+const doorTypes = ["entrance", "villa", "interior", "glass", "metal", "other"] as const;
+
+type DoorTypeId = (typeof doorTypes)[number];
+
+function doorTypeLabel(id: string, dict: Dictionary): string {
+  const t = dict.repair.doorTypes;
+  return id in t ? t[id as DoorTypeId] : "—";
+}
+
+function doorTypeHint(id: string, dict: Dictionary): string | undefined {
+  const key = `${id}Hint` as keyof Dictionary["repair"]["doorTypes"];
+  return dict.repair.doorTypes[key];
+}
 
 const timeSlots = ["09:00 – 12:00", "12:00 – 15:00", "15:00 – 18:00", "18:00 – 20:00"];
 
@@ -96,10 +101,10 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
   function validate(id: StepId): boolean {
     const next: Partial<Record<keyof RepairForm, string>> = {};
 
-    if (id === "problem" && !form.category) next.category = "Problemi seçin";
-    if (id === "doorType" && !form.doorType) next.doorType = "Qapı növünü seçin";
+    if (id === "problem" && !form.category) next.category = dict.repair.selectProblem;
+    if (id === "doorType" && !form.doorType) next.doorType = dict.repair.selectDoorType;
     if (id === "describe" && form.description.trim().length < 10)
-      next.description = "Ən azı 10 simvol yazın";
+      next.description = dict.quote.minChars;
     if (id === "address") {
       if (!form.street.trim()) next.street = dict.errors.required;
       if (!form.building.trim()) next.building = dict.errors.required;
@@ -120,7 +125,7 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
 
     if (id === "confirm") {
       const reference = createReference("REP");
-    useWorkflow.getState().add({ id: reference, kind: "repairs", title: "Qapı təmiri", detail: `${form.description} · ${form.city}, ${form.street} ${form.building} · ${form.date} ${form.slot}` });
+    useWorkflow.getState().add({ id: reference, kind: "repairs", title: dict.repair.title, detail: `${form.description} · ${form.city}, ${form.street} ${form.building} · ${form.date} ${form.slot}` });
     setSubmitted(reference);
       return;
     }
@@ -196,29 +201,29 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
           <div>
             <StepTitle title={dict.repair.doorTypeQuestion} />
             <div className="grid gap-2 sm:grid-cols-2">
-              {doorTypes.map((t) => (
+              {doorTypes.map((id) => (
                 <RadioCard
-                  key={t.id}
+                  key={id}
                   name="doorType"
-                  label={t.label}
-                  description={t.hint}
-                  checked={form.doorType === t.id}
-                  onChange={() => set("doorType", t.id)}
+                  label={doorTypeLabel(id, dict)}
+                  description={doorTypeHint(id, dict)}
+                  checked={form.doorType === id}
+                  onChange={() => set("doorType", id)}
                 />
               ))}
             </div>
             {errors.doorType && <p className="mt-2 text-xs text-danger">{errors.doorType}</p>}
 
             <div className="mt-6 max-w-md">
-              <Field label="Qapı bizdən alınıb?">
+              <Field label={dict.repair.boughtFromUs}>
                 <Select
                   value={form.boughtFromUs}
                   onChange={(e) => set("boughtFromUs", e.target.value)}
                 >
-                  <option value="unknown">Bilmirəm</option>
-                  <option value="yes">Bəli — zəmanət altındadır</option>
-                  <option value="expired">Bəli — zəmanət bitib</option>
-                  <option value="no">Xeyr, başqa yerdən alınıb</option>
+                  <option value="unknown">{dict.repair.boughtUnknown}</option>
+                  <option value="yes">{dict.repair.boughtYesWarranty}</option>
+                  <option value="expired">{dict.repair.boughtYesExpired}</option>
+                  <option value="no">{dict.repair.boughtNo}</option>
                 </Select>
               </Field>
             </div>
@@ -246,7 +251,7 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
 
             <label className="flex cursor-pointer flex-col items-center justify-center border border-dashed border-line bg-bone/50 px-6 py-10 text-center transition-colors hover:border-mist">
               <ImageIcon size={26} className="text-mist" />
-              <span className="mt-3 text-sm font-medium text-ink">Fayl seçin</span>
+              <span className="mt-3 text-sm font-medium text-ink">{dict.repair.chooseFile}</span>
               <span className="mt-1 text-xs text-stone">{dict.repair.mediaHint}</span>
               <input
                 type="file"
@@ -271,7 +276,7 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
                     <button
                       type="button"
                       onClick={() => set("files", form.files.filter((_, x) => x !== i))}
-                      aria-label="Faylı sil"
+                      aria-label={dict.repair.removeFile}
                       className="shrink-0 text-stone hover:text-danger"
                     >
                       <X size={14} />
@@ -328,7 +333,7 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
                   onChange={(e) => set("date", e.target.value)}
                 />
               </Field>
-              <Field label="Saat aralığı">
+              <Field label={dict.repair.timeSlot}>
                 <Select value={form.slot} onChange={(e) => set("slot", e.target.value)}>
                   {timeSlots.map((s) => (
                     <option key={s}>{s}</option>
@@ -370,8 +375,8 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
             <StepTitle title={dict.repair.confirmQuestion} />
             <Card className="divide-y divide-line">
               <Row label="Problem" value={form.category ? dict.repair.categories[form.category] : "—"} />
-              <Row label="Qapı növü" value={doorTypes.find((t) => t.id === form.doorType)?.label ?? "—"} />
-              <Row label="Təsvir" value={form.description || "—"} />
+              <Row label={dict.repair.steps.doorType} value={doorTypeLabel(form.doorType, dict)} />
+              <Row label={dict.repair.steps.describe} value={form.description || "—"} />
               <Row label="Fayllar" value={form.files.length ? `${form.files.length} fayl` : "—"} />
               <Row
                 label={dict.common.address}
@@ -380,7 +385,7 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
                   .join(", ")}
               />
               <Row label="Tarix" value={`${form.date} · ${form.slot}`} />
-              <Row label="Əlaqə" value={`${form.name} · ${form.phone}`} />
+              <Row label={dict.repair.steps.contact} value={`${form.name} · ${form.phone}`} />
             </Card>
 
           </div>
@@ -404,15 +409,15 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
           <div className="flex items-center gap-2.5">
             <DoorOpen size={18} className="text-gold-500" />
             <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-stone">
-              Müraciət
+              {dict.repair.request}
             </h2>
           </div>
 
           <dl className="mt-4 space-y-2.5 text-[13px]">
             <Mini label="Problem" value={form.category ? dict.repair.categories[form.category] : "—"} />
-            <Mini label="Qapı" value={doorTypes.find((t) => t.id === form.doorType)?.label ?? "—"} />
+            <Mini label={dict.repair.door} value={doorTypeLabel(form.doorType, dict)} />
             <Mini label="Tarix" value={form.date || "—"} />
-            <Mini label="Ünvan" value={form.street ? `${form.city}, ${form.street}` : "—"} />
+            <Mini label={dict.repair.steps.address} value={form.street ? `${form.city}, ${form.street}` : "—"} />
           </dl>
 
           <div className="mt-5 border-t border-line pt-4 text-[13px] text-stone">

@@ -53,9 +53,9 @@ export default async function ConfiguratorIndexPage({
       <Section className="!pt-10">
         <div className="container-page">
           <SectionHeading
-            eyebrow="Addım 1"
+            eyebrow={dict.configurator.step1}
             title={dict.configurator.chooseModel}
-            text="Konfiqurasiyaya başlamaq üçün model seçin. Sonrakı addımlarda ölçü, rəng, kilid və aksesuarları seçəcəksiniz."
+            text={dict.configurator.chooseModelText}
           />
 
           <div className="mb-8 flex flex-wrap gap-2">

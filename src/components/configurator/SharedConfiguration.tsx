@@ -18,7 +18,7 @@ import { findOptionValue } from "@/mock/options";
 import { optionLabel } from "@/mock/options.i18n";
 import { parseSharedDesign } from "@/features/configurator/shared";
 import { calculatePrice } from "@/features/pricing/engine";
-import { materialName, styleName } from "@/lib/i18n-format";
+import { materialName, productShort, styleName } from "@/lib/i18n-format";
 import { useCart } from "@/store/cart";
 
 /**
@@ -124,7 +124,7 @@ export function SharedConfiguration({
           <p className="mt-1.5 font-mono text-[13px] text-stone">{code}</p>
 
           <p className="mt-4 text-[15px] leading-relaxed text-graphite">
-            {product.shortDescription}
+            {productShort(product, dict)}
           </p>
 
           <dl className="mt-6 border-t border-line">

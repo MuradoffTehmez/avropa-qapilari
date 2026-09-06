@@ -38,12 +38,12 @@ export function QuoteForm({ locale, dict }: { locale: Locale; dict: Dictionary }
     const next: Record<string, string> = {};
     if (!form.name.trim()) next.name = dict.errors.required;
     if (form.phone.replace(/\D/g, "").length < 9) next.phone = dict.errors.invalidPhone;
-    if (form.message.trim().length < 10) next.message = "Ən azı 10 simvol yazın";
+    if (form.message.trim().length < 10) next.message = dict.quote.minChars;
 
     setErrors(next);
     if (Object.keys(next).length > 0) return;
     const reference = createReference("QTE");
-    useWorkflow.getState().add({ id: reference, kind: "quotes", title: "Qiymət təklifi", detail: `${form.message} · ${form.quantity} ədəd · ${form.width} × ${form.height} mm` });
+    useWorkflow.getState().add({ id: reference, kind: "quotes", title: dict.quote.title, detail: `${form.message} · ${form.quantity} ədəd · ${form.width} × ${form.height} mm` });
     setSubmitted(reference);
   }
 
@@ -57,7 +57,7 @@ export function QuoteForm({ locale, dict }: { locale: Locale; dict: Dictionary }
           </h1>
           <p className="mt-3 text-[15px] text-stone">{dict.quote.successText}</p>
           <div className="mt-6 border border-line bg-bone px-5 py-4">
-            <p className="text-[11px] uppercase tracking-[0.16em] text-stone">Sorğu nömrəsi</p>
+            <p className="text-[11px] uppercase tracking-[0.16em] text-stone">{dict.quote.requestNumber}</p>
             <p className="mt-1 font-mono text-lg font-semibold text-ink">{submitted}</p>
           </div>
           <ButtonLink href={r.home} variant="secondary" className="mt-7">
@@ -94,7 +94,7 @@ export function QuoteForm({ locale, dict }: { locale: Locale; dict: Dictionary }
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Model" className="sm:col-span-2">
             <Select value={form.product} onChange={(e) => set("product", e.target.value)}>
-              <option value="">Model seçilməyib / bilmirəm</option>
+              <option value="">{dict.quote.noModel}</option>
               {products.map((p) => (
                 <option key={p.id} value={p.slug}>
                   {p.name} ({p.sku})
@@ -110,7 +110,7 @@ export function QuoteForm({ locale, dict }: { locale: Locale; dict: Dictionary }
               onChange={(e) => set("width", e.target.value)}
             />
           </Field>
-          <Field label="Hündürlük (mm)">
+          <Field label={dict.quote.heightMm}>
             <Input
               type="number"
               inputMode="numeric"
@@ -134,7 +134,7 @@ export function QuoteForm({ locale, dict }: { locale: Locale; dict: Dictionary }
             rows={6}
             value={form.message}
             onChange={(e) => set("message", e.target.value)}
-            placeholder="Obyekt, tələblər, rəng, kilid sistemi, quraşdırma ehtiyacı…"
+            placeholder={dict.quote.messagePlaceholder}
           />
         </Field>
 
@@ -148,7 +148,7 @@ export function QuoteForm({ locale, dict }: { locale: Locale; dict: Dictionary }
           <div className="flex items-center gap-2.5">
             <FileText size={18} className="text-gold-500" />
             <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-stone">
-              Nə vaxt lazımdır?
+              {dict.quote.whenNeeded}
             </h2>
           </div>
           <ul className="mt-4 space-y-3 text-[13.5px] leading-relaxed text-graphite">

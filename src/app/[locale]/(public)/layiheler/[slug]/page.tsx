@@ -75,7 +75,7 @@ export default async function ProjectPage({
 
             <dl className="mt-6 border-t border-line">
               <DataRow label="Model" value={project.doorModel} />
-              <DataRow label="Rəng" value={project.color} />
+              <DataRow label={dict.common.color} value={project.color} />
               <DataRow label="Layihə növü" value={project.category} />
               <DataRow label="İl" value={project.year} />
             </dl>

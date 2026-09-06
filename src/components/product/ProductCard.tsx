@@ -11,7 +11,7 @@ import { ProductMedia } from "@/components/product/ProductMedia";
 import { useCompare, useFavorites } from "@/store/lists";
 import { useHydrated } from "@/lib/hooks";
 import { toast } from "@/components/ui/overlays";
-import { materialName, priceFrom } from "@/lib/i18n-format";
+import { materialName, priceFrom, productShort } from "@/lib/i18n-format";
 
 export function ProductCard({
   product,
@@ -107,7 +107,7 @@ export function ProductCard({
             <p className="text-[11px] uppercase tracking-[0.14em] text-stone">{product.sku}</p>
             <h3 className="mt-1 text-[15px] font-medium text-ink sm:text-base">{product.name}</h3>
             <p className="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-stone">
-              {product.shortDescription}
+              {productShort(product, dict)}
             </p>
             <div className="mt-3 hidden flex-wrap gap-x-4 gap-y-1 text-xs text-graphite sm:flex">
               <span>{materialName(product.material, dict)}</span>

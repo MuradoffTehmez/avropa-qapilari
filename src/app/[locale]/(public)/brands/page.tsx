@@ -8,7 +8,7 @@ import { routes } from "@/lib/routes";
 import { Breadcrumbs, Section } from "@/components/ui/primitives";
 import { brands } from "@/mock/taxonomy";
 import { products } from "@/mock/products";
-import { countryName } from "@/lib/i18n-format";
+import { brandDescription, countryName } from "@/lib/i18n-format";
 
 export async function generateMetadata({
   params,
@@ -63,7 +63,7 @@ export default async function BrandsPage({
                     {countryName(b, dict)}
                   </span>
                 </div>
-                <p className="mt-3 flex-1 text-[14px] leading-relaxed text-stone">{b.description}</p>
+                <p className="mt-3 flex-1 text-[14px] leading-relaxed text-stone">{brandDescription(b, dict)}</p>
                 <div className="mt-5 flex items-center justify-between border-t border-line pt-4">
                   <span className="text-[13px] text-graphite">
                     {count} model · {b.founded}-ci ildən

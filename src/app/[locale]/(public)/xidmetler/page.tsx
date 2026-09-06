@@ -41,7 +41,7 @@ export default async function ServicesPage({
       href: r.serviceMeasurement,
       cta: dict.actions.bookMeasurement,
       ctaHref: r.measurement,
-      price: "Sifarişlə pulsuz",
+      price: dict.services.priceMeasurement,
     },
     {
       icon: Truck,
@@ -50,7 +50,7 @@ export default async function ServicesPage({
       href: r.services,
       cta: dict.actions.details,
       ctaHref: r.services,
-      price: "40 AZN-dən",
+      price: dict.services.priceDelivery,
     },
     {
       icon: Hammer,
@@ -59,7 +59,7 @@ export default async function ServicesPage({
       href: r.serviceInstallation,
       cta: dict.actions.details,
       ctaHref: r.serviceInstallation,
-      price: "120 AZN-dən",
+      price: dict.services.priceInstallation,
     },
     {
       icon: Wrench,
@@ -68,7 +68,7 @@ export default async function ServicesPage({
       href: r.serviceRepair,
       cta: dict.actions.callTechnician,
       ctaHref: r.repair,
-      price: "Diaqnostika 25 AZN",
+      price: dict.services.priceRepair,
     },
     {
       icon: RefreshCw,
@@ -77,7 +77,7 @@ export default async function ServicesPage({
       href: r.serviceMaintenance,
       cta: dict.actions.details,
       ctaHref: r.serviceMaintenance,
-      price: "60 AZN-dən",
+      price: dict.services.priceMaintenance,
     },
     {
       icon: Award,
@@ -86,7 +86,7 @@ export default async function ServicesPage({
       href: r.services,
       cta: dict.actions.details,
       ctaHref: r.faq,
-      price: "3–10 il",
+      price: dict.services.priceWarranty,
     },
   ];
 
@@ -126,8 +126,8 @@ export default async function ServicesPage({
           <div>
             <SectionHeading
               invert
-              title="Prosesi bilmirsiniz? Biz aparaq."
-              text="Ölçüdən quraşdırmaya, zəmanətdən təmirə qədər bütün mərhələni tək kanaldan idarə edirik."
+              title={dict.services.ctaTitle}
+              text={dict.services.ctaText}
               className="!mb-0"
             />
           </div>

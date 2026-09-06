@@ -184,6 +184,20 @@ export const en: Dictionary = {
     categoriesLabel: "Categories",
     brandsLabel: "Brands",
     productsLabel: "Products",
+    contactSubjects: [
+      "Question about a product",
+      "Request a quote",
+      "Book a measurement",
+      "Repair request",
+      "Warranty",
+      "Partnership",
+      "Other",
+    ],
+    writeToUs: "Write to us",
+    messageSent: "Your message has been sent",
+    color: "Colour",
+    sections: "Sections",
+    noAnswerFound: "Didn't find your answer?",
   },
 
   home: {
@@ -237,6 +251,14 @@ export const en: Dictionary = {
     warrantyText: "Warranty registered to a serial number with a full service history.",
     maintenance: "Maintenance",
     maintenanceText: "Periodic inspection, adjustment and lubrication.",
+    priceMeasurement: "Free with an order",
+    priceDelivery: "from 40 AZN",
+    priceInstallation: "from 120 AZN",
+    priceRepair: "Diagnosis 25 AZN",
+    priceMaintenance: "from 60 AZN",
+    priceWarranty: "3–10 years",
+    ctaTitle: "Not sure how it works? Leave it to us.",
+    ctaText: "From measurement to installation, from warranty to repair — we run every stage through one channel.",
   },
 
   serviceDetail: {
@@ -511,6 +533,48 @@ export const en: Dictionary = {
       "Polşa": "Poland",
       "Çexiya": "Czechia",
     },
+    categoryDescriptions: {
+      "giris-qapilari":
+        "Multi-layer steel construction for apartment and house entrances, RC2–RC4 security classes and high sound insulation.",
+      "villa-qapilari":
+        "Large, thermally insulated exterior entrance doors built to withstand the weather.",
+      "otaq-qapilari":
+        "Solid wood, MDF and glazed solutions for interiors — in minimalist and classical lines.",
+      "tehlukesizlik-qapilari":
+        "Certified armoured doors in classes RC4–RC5 with multipoint locking systems.",
+      "smart-qapilar":
+        "Electronic locking systems controlled by fingerprint, code, card and mobile app.",
+      "shuseli-qapilar":
+        "Light-transmitting interior and office solutions with tempered and lacobel glass panels.",
+      "metal-qapilar":
+        "Functional metal doors for utility rooms, storage and entrance blocks.",
+      "yangin-qapilari":
+        "Fire-resistant security doors certified to EI30–EI90.",
+    },
+    brandDescriptions: {
+      "milano-porte":
+        "Premium entrance doors from the Italian school of design. Multi-layer construction and hand-finished surfaces.",
+      nordheim:
+        "German engineering: high thermal figures, RC4 certification and a 10-year warranty.",
+      "vienna-tur":
+        "Specialists in neoclassical interior doors and solid wood craftsmanship.",
+      aurea: "Modern minimalism, concealed hinges and full-height panels.",
+      belveder: "European-made entrance doors chosen for their price-to-quality balance.",
+      lumia: "Glass and aluminium structures for offices and loft interiors.",
+    },
+    productShort: {
+      "MIL-720": "Multi-layer steel construction, 42 dB sound insulation and RC3 certification.",
+      "NOR-900": "A thermal figure of 0.79 W/m²K, RC4 certification and a 10-year warranty.",
+      "VIE-210": "Solid oak, hand-milled patterning and a classical profile.",
+      "AUR-100": "Full-height panel, concealed frame and magnetic lock.",
+      "BEL-520": "Two independent locking systems, an armoured plate and an anti-drill cylinder.",
+      "SMG-S1": "Factory-fitted Smart Lock X2 with fingerprint and mobile app control.",
+      "LUM-150": "Black aluminium grid and clear glass — the classic of loft interiors.",
+      "MTL-040": "A simple, durable metal door for utility rooms and storage.",
+      "MTL-060": "An EI60-certified fire door, compatible with a panic bar.",
+    },
+    productLong:
+      "The {name} is built to European manufacturing standards and is supplied to order with your choice of colour, size, lock, handle and accessories. Every parameter you pick in the configurator is reflected in the final price in real time.",
   },
 
   sort: {
@@ -554,6 +618,25 @@ export const en: Dictionary = {
     removedFromFavorites: "Removed from favourites",
     removedFromCompare: "Removed from comparison",
     compareFull: "You can compare up to 4 products",
+    security: "Security",
+    soundInsulation: "Sound insulation",
+    fireRating: "Fire rating",
+    delivery: "Delivery",
+    collection: "Collection",
+    style: "Style",
+    quickFacts: "At a glance",
+    stockSize: "The size we keep in stock.",
+    customSizeRange: "Custom size range",
+    width: "Width",
+    height: "Height",
+    outOfRangeBefore: "Sizes outside this range need a",
+    outOfRangeLink: "custom quote",
+    outOfRangeAfter: "",
+    freeMeasurement: "Free measurement service —",
+    freeMeasurementLink: "book a technician",
+    certifiedInstallation: "Certified installation from 120 AZN",
+    styleAndCategory:
+      "This model is made in the {style} style and belongs to the {category} group. In the configurator you can pick the exterior and interior colour separately, upgrade the locking system and add a smart lock.",
   },
 
   configurator: {
@@ -650,6 +733,9 @@ export const en: Dictionary = {
     sharedInvalid: "Configuration not found",
     sharedInvalidHint: "The link may be incomplete or outdated. Build your own door in the configurator.",
     layersHint: "Toggle each layer to see how the door is built up.",
+    step1: "Step 1",
+    chooseModelText:
+      "Pick a model to start configuring. In the next steps you will choose the size, colour, lock and accessories.",
   },
 
   cart: {
@@ -740,6 +826,33 @@ export const en: Dictionary = {
       DAMAGED_PANEL: "Damaged panel",
       OTHER: "Other",
     },
+    doorTypes: {
+      entrance: "Entrance door",
+      entranceHint: "Apartment or house entrance",
+      villa: "Villa door",
+      villaHint: "Exterior entrance",
+      interior: "Interior door",
+      interiorHint: "Inside the home",
+      glass: "Glazed door",
+      glassHint: "Glass or aluminium",
+      metal: "Metal door",
+      metalHint: "Utility room, storage",
+      other: "Other",
+    },
+    selectProblem: "Select the problem",
+    selectDoorType: "Select the door type",
+    boughtFromUs: "Was the door bought from us?",
+    boughtUnknown: "I do not know",
+    boughtYesWarranty: "Yes — still under warranty",
+    boughtYesExpired: "Yes — warranty expired",
+    boughtNo: "No, bought elsewhere",
+    chooseFile: "Choose a file",
+    removeFile: "Remove file",
+    timeSlot: "Time slot",
+    request: "Request",
+    door: "Door",
+    diagnosticNote:
+      "The diagnosis is carried out at your address. The call-out costs 25 AZN — if you order the repair, that amount is deducted from the total.",
   },
 
   measurement: {
@@ -758,6 +871,15 @@ export const en: Dictionary = {
     },
     successTitle: "Measurement request received",
     successText: "We will contact you to confirm the arrival time.",
+    orderNumber: "Order number",
+    contact: "Contact",
+    notePlaceholder: "Which rooms, any special requirements…",
+    facts: [
+      "The technician comes to your address and takes exact measurements of the opening.",
+      "Wall thickness, frame depth and opening direction are recorded.",
+      "Matching models and a price range are proposed on the spot.",
+      "The measurement is free when you place an order.",
+    ],
   },
 
   quote: {
@@ -767,6 +889,19 @@ export const en: Dictionary = {
     message: "Message",
     successTitle: "Your request has been sent",
     successText: "We will prepare a quote within 24 hours.",
+    requestNumber: "Request number",
+    noModel: "No model selected / not sure",
+    heightMm: "Height (mm)",
+    widthMm: "Width (mm)",
+    whenNeeded: "When do you need it?",
+    messagePlaceholder: "The property, requirements, colour, lock system, installation needs…",
+    minChars: "Please write at least 10 characters",
+    useCases: [
+      "Custom sizes outside the standard range.",
+      "Bulk orders (5+ doors).",
+      "Non-standard colour, veneer or stained glass.",
+      "Commercial properties and project supply.",
+    ],
   },
 
   account: {

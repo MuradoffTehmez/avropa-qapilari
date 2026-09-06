@@ -66,7 +66,7 @@ export default async function ProjectsPage({
                     <dd className="font-medium text-ink">{p.doorModel}</dd>
                   </div>
                   <div className="flex justify-between py-1">
-                    <dt className="text-stone">Rəng</dt>
+                    <dt className="text-stone">{dict.common.color}</dt>
                     <dd className="font-medium text-ink">{p.color}</dd>
                   </div>
                 </dl>

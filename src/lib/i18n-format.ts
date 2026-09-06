@@ -1,5 +1,5 @@
 import type { Dictionary } from "@/i18n";
-import type { Brand, Category, DoorMaterial, Locale, SurfaceStyle } from "@/types";
+import type { Brand, Category, DoorMaterial, Locale, Product, SurfaceStyle } from "@/types";
 import { formatPrice } from "@/lib/utils";
 
 /**
@@ -30,4 +30,27 @@ export function styleName(style: SurfaceStyle, dict: Dictionary): string {
 
 export function countryName(brand: Brand, dict: Dictionary): string {
   return dict.taxonomy.countries[brand.country as keyof Dictionary["taxonomy"]["countries"]] ?? brand.country;
+}
+
+/** Kateqoriya təsviri — dilə uyğun. */
+export function categoryDescription(category: Category, dict: Dictionary): string {
+  const key = category.slug as keyof Dictionary["taxonomy"]["categoryDescriptions"];
+  return dict.taxonomy.categoryDescriptions[key] ?? category.description;
+}
+
+/** Brend təsviri — dilə uyğun. */
+export function brandDescription(brand: Brand, dict: Dictionary): string {
+  const key = brand.slug as keyof Dictionary["taxonomy"]["brandDescriptions"];
+  return dict.taxonomy.brandDescriptions[key] ?? brand.description;
+}
+
+/** Məhsulun qısa təsviri — dilə uyğun. */
+export function productShort(product: Product, dict: Dictionary): string {
+  const key = product.sku as keyof Dictionary["taxonomy"]["productShort"];
+  return dict.taxonomy.productShort[key] ?? product.shortDescription;
+}
+
+/** Məhsulun tam təsviri: qısa təsvir + ümumi mətn. */
+export function productDescription(product: Product, dict: Dictionary): string {
+  return `${productShort(product, dict)} ${dict.taxonomy.productLong.replace("{name}", product.name)}`;
 }

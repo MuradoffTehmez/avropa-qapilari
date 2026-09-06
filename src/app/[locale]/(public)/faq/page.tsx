@@ -65,7 +65,7 @@ export default async function FaqPage({
         <div className="container-page grid gap-10 lg:grid-cols-[1fr_2fr] lg:gap-16">
           <div className="lg:sticky lg:top-24 lg:h-fit">
             <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-stone">
-              Bölmələr
+              {dict.common.sections}
             </p>
             <ul className="space-y-2 text-[14px] text-graphite">
               {groups.map((g) => (
@@ -74,7 +74,7 @@ export default async function FaqPage({
             </ul>
 
             <div className="mt-8 border border-line bg-bone p-5">
-              <p className="text-[14px] font-medium text-ink">Cavab tapmadınız?</p>
+              <p className="text-[14px] font-medium text-ink">{dict.common.noAnswerFound}</p>
               <p className="mt-1.5 text-[13px] text-stone">Operatorumuz kömək edəcək.</p>
               <ButtonLink href={r.contact} size="sm" className="mt-4">
                 {dict.nav.contact}

@@ -182,6 +182,20 @@ export const az = {
     categoriesLabel: "Kateqoriyalar",
     brandsLabel: "Brendlər",
     productsLabel: "Məhsullar",
+    contactSubjects: [
+      "Məhsul haqqında sual",
+      "Qiymət təklifi",
+      "Ölçü sifarişi",
+      "Təmir müraciəti",
+      "Zəmanət",
+      "Əməkdaşlıq",
+      "Digər",
+    ],
+    writeToUs: "Bizə yazın",
+    messageSent: "Mesajınız göndərildi",
+    color: "Rəng",
+    sections: "Bölmələr",
+    noAnswerFound: "Cavab tapmadınız?",
   },
 
   home: {
@@ -234,6 +248,14 @@ export const az = {
     warrantyText: "Serial nömrə ilə qeydə alınmış zəmanət və tam servis tarixçəsi.",
     maintenance: "Baxım",
     maintenanceText: "Dövri texniki baxış, tənzimləmə və yağlama.",
+    priceMeasurement: "Sifarişlə pulsuz",
+    priceDelivery: "40 AZN-dən",
+    priceInstallation: "120 AZN-dən",
+    priceRepair: "Diaqnostika 25 AZN",
+    priceMaintenance: "60 AZN-dən",
+    priceWarranty: "3–10 il",
+    ctaTitle: "Prosesi bilmirsiniz? Biz aparaq.",
+    ctaText: "Ölçüdən quraşdırmaya, zəmanətdən təmirə qədər bütün mərhələni tək kanaldan idarə edirik.",
   },
 
   serviceDetail: {
@@ -508,6 +530,48 @@ export const az = {
       "Polşa": "Polşa",
       "Çexiya": "Çexiya",
     },
+    categoryDescriptions: {
+      "giris-qapilari":
+        "Mənzil və ev girişləri üçün çoxqatlı metal konstruksiya, RC2–RC4 təhlükəsizlik sinfi və yüksək səs izolyasiyası.",
+      "villa-qapilari":
+        "Böyük ölçülü, termo-izolyasiyalı və hava şəraitinə davamlı xarici giriş qapıları.",
+      "otaq-qapilari":
+        "İnteryer üçün massiv ağac, MDF və şüşəli həllər — minimalist və klassik xətlərdə.",
+      "tehlukesizlik-qapilari":
+        "RC4–RC5 sinifli, çoxnöqtəli kilid sistemli və sertifikatlı zirehli qapılar.",
+      "smart-qapilar":
+        "Barmaq izi, kod, kart və mobil tətbiq ilə idarə olunan elektron kilid sistemləri.",
+      "shuseli-qapilar":
+        "Tempered və lakobel şüşə panelli, işıq keçirən interyer və ofis həlləri.",
+      "metal-qapilar":
+        "Texniki otaqlar, anbar və giriş blokları üçün funksional metal qapılar.",
+      "yangin-qapilari":
+        "EI30–EI90 sertifikatlı, yanğına davamlı təhlükəsizlik qapıları.",
+    },
+    brandDescriptions: {
+      "milano-porte":
+        "İtalyan dizayn məktəbinin premium giriş qapıları. Çoxqatlı konstruksiya və əl işi finiş.",
+      nordheim:
+        "Alman mühəndisliyi: yüksək termo göstəricilər, RC4 sertifikatı və 10 il zəmanət.",
+      "vienna-tur":
+        "Neoklassik interyer qapıları və massiv ağac emalında ixtisaslaşma.",
+      aurea: "Müasir minimalizm, gizli menteşələr və tam hündürlüklü panellər.",
+      belveder: "Qiymət/keyfiyyət balansı ilə seçilən Avropa istehsalı giriş qapıları.",
+      lumia: "Şüşə və alüminium konstruksiyalar, ofis və loft interyerləri üçün.",
+    },
+    productShort: {
+      "MIL-720": "Çoxqatlı polad konstruksiya, 42 dB səs izolyasiyası və RC3 sertifikatı.",
+      "NOR-900": "0.79 W/m²K termo göstərici, RC4 sertifikatı və 10 il zəmanət.",
+      "VIE-210": "Massiv palıd, əl işi freze naxış və klassik profil.",
+      "AUR-100": "Tam hündürlüklü panel, gizli çərçivə və maqnit kilid.",
+      "BEL-520": "İki müstəqil kilid sistemi, zirehli plitə və anti-drill silindr.",
+      "SMG-S1": "Zavod quraşdırmalı Smart Lock X2, barmaq izi və mobil tətbiq nəzarəti.",
+      "LUM-150": "Qara alüminium şəbəkə və şəffaf şüşə — loft interyerlərin klassiki.",
+      "MTL-040": "Texniki otaq və anbarlar üçün sadə, davamlı metal qapı.",
+      "MTL-060": "EI60 sertifikatlı, anti-panik bar ilə uyğun yanğın qapısı.",
+    },
+    productLong:
+      "{name} modeli Avropa istehsal standartlarına uyğun hazırlanır və sifariş əsasında rəng, ölçü, kilid, dəstək və aksesuar konfiqurasiyası ilə təchiz olunur. Konfiquratorda seçdiyiniz hər parametr yekun qiymətə real vaxtda əks olunur.",
   },
 
   sort: {
@@ -551,6 +615,25 @@ export const az = {
     removedFromFavorites: "Favorilərdən çıxarıldı",
     removedFromCompare: "Müqayisədən çıxarıldı",
     compareFull: "Müqayisədə maksimum 4 məhsul ola bilər",
+    security: "Təhlükəsizlik",
+    soundInsulation: "Səs izolyasiyası",
+    fireRating: "Yanğın",
+    delivery: "Çatdırılma",
+    collection: "Kolleksiya",
+    style: "Stil",
+    quickFacts: "Qısa məlumat",
+    stockSize: "Anbarda saxlanılan ölçü.",
+    customSizeRange: "Fərdi ölçü aralığı",
+    width: "En",
+    height: "Hündürlük",
+    outOfRangeBefore: "Aralıqdan kənar ölçülər üçün",
+    outOfRangeLink: "fərdi qiymət təklifi",
+    outOfRangeAfter: "tələb olunur.",
+    freeMeasurement: "Pulsuz ölçü xidməti —",
+    freeMeasurementLink: "usta çağır",
+    certifiedInstallation: "Sertifikatlı quraşdırma 120 AZN-dən",
+    styleAndCategory:
+      "Model {style} stildə hazırlanıb və {category} qrupuna aiddir. Konfiquratorda xarici və daxili rəngi ayrıca seçmək, kilid sistemini gücləndirmək və smart lock əlavə etmək mümkündür.",
   },
 
   configurator: {
@@ -647,6 +730,9 @@ export const az = {
     sharedInvalid: "Konfiqurasiya tapılmadı",
     sharedInvalidHint: "Link natamam və ya köhnəlmiş ola bilər. Öz qapınızı konfiquratorda yaradın.",
     layersHint: "Hər qatı ayrıca söndürüb qapının necə qurulduğunu görə bilərsiniz.",
+    step1: "Addım 1",
+    chooseModelText:
+      "Konfiqurasiyaya başlamaq üçün model seçin. Sonrakı addımlarda ölçü, rəng, kilid və aksesuarları seçəcəksiniz.",
   },
 
   cart: {
@@ -738,6 +824,33 @@ export const az = {
       DAMAGED_PANEL: "Zədələnmiş panel",
       OTHER: "Digər",
     },
+    doorTypes: {
+      entrance: "Giriş qapısı",
+      entranceHint: "Mənzil və ya ev girişi",
+      villa: "Villa qapısı",
+      villaHint: "Xarici giriş",
+      interior: "Otaq qapısı",
+      interiorHint: "İnteryer",
+      glass: "Şüşəli qapı",
+      glassHint: "Şüşə və ya alüminium",
+      metal: "Metal qapı",
+      metalHint: "Texniki otaq, anbar",
+      other: "Digər",
+    },
+    selectProblem: "Problemi seçin",
+    selectDoorType: "Qapı növünü seçin",
+    boughtFromUs: "Qapı bizdən alınıb?",
+    boughtUnknown: "Bilmirəm",
+    boughtYesWarranty: "Bəli — zəmanət altındadır",
+    boughtYesExpired: "Bəli — zəmanət bitib",
+    boughtNo: "Xeyr, başqa yerdən alınıb",
+    chooseFile: "Fayl seçin",
+    removeFile: "Faylı sil",
+    timeSlot: "Saat aralığı",
+    request: "Müraciət",
+    door: "Qapı",
+    diagnosticNote:
+      "Diaqnostika ünvanda aparılır. Ustanın gəlişi 25 AZN — təmir sifariş edilərsə məbləğ ümumi qiymətdən çıxılır.",
   },
 
   measurement: {
@@ -756,6 +869,15 @@ export const az = {
     },
     successTitle: "Ölçü sifarişi qəbul edildi",
     successText: "Ustanın gəliş vaxtını təsdiqləmək üçün sizinlə əlaqə saxlayacağıq.",
+    orderNumber: "Sifariş nömrəsi",
+    contact: "Əlaqə",
+    notePlaceholder: "Hansı otaqlar, xüsusi tələblər…",
+    facts: [
+      "Usta ünvana gəlir və açırımın dəqiq ölçülərini götürür.",
+      "Divar qalınlığı, çərçivə dərinliyi və açılma istiqaməti qeyd olunur.",
+      "Uyğun modellər və qiymət aralığı yerində təklif edilir.",
+      "Sifariş verildiyi halda ölçü xidməti pulsuzdur.",
+    ],
   },
 
   quote: {
@@ -765,6 +887,19 @@ export const az = {
     message: "Mesaj",
     successTitle: "Sorğunuz göndərildi",
     successText: "Qiymət təklifi 24 saat ərzində hazırlanacaq.",
+    requestNumber: "Sorğu nömrəsi",
+    noModel: "Model seçilməyib / bilmirəm",
+    heightMm: "Hündürlük (mm)",
+    widthMm: "En (mm)",
+    whenNeeded: "Nə vaxt lazımdır?",
+    messagePlaceholder: "Obyekt, tələblər, rəng, kilid sistemi, quraşdırma ehtiyacı…",
+    minChars: "Ən azı 10 simvol yazın",
+    useCases: [
+      "Standart aralıqdan kənar fərdi ölçülər.",
+      "Toplu sifarişlər (5+ qapı).",
+      "Qeyri-standart rəng, şpon və ya vitraj.",
+      "Kommersiya obyektləri və layihə təchizatı.",
+    ],
   },
 
   account: {
