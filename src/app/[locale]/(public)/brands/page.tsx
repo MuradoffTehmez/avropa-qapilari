@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 
 import { getDictionary, isLocale } from "@/i18n";
 import type { Locale } from "@/types";
-import { routes } from "@/lib/routes";
+import { localeAlternates, routes } from "@/lib/routes";
 import { Breadcrumbs, Section } from "@/components/ui/primitives";
 import { brands } from "@/mock/taxonomy";
 import { products } from "@/mock/products";
@@ -19,6 +19,7 @@ export async function generateMetadata({
   const dict = getDictionary(isLocale(locale) ? locale : "az");
 
   return {
+    alternates: localeAlternates("/brands", isLocale(locale) ? locale : "az"),
     title: dict.pageMeta.brands.title,
     description: dict.pageMeta.brands.description,
   };

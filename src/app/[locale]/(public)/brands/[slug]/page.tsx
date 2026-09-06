@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { getDictionary, isLocale, locales } from "@/i18n";
 import type { Locale } from "@/types";
-import { routes } from "@/lib/routes";
+import { localeAlternates, routes } from "@/lib/routes";
 import { Breadcrumbs, Section, Stat } from "@/components/ui/primitives";
 import { ProductCard } from "@/components/product/ProductCard";
 import { brands, getBrand } from "@/mock/taxonomy";
@@ -17,12 +17,19 @@ export function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { locale: raw, slug } = await params;
+  const locale = (isLocale(raw) ? raw : "az") as Locale;
   const b = getBrand(slug);
   if (!b) return {};
-  return { title: b.name, description: b.description };
+
+  const dict = getDictionary(locale);
+  return {
+    title: b.name,
+    description: brandDescription(b, dict),
+    alternates: localeAlternates(`/brands/${slug}`, locale),
+  };
 }
 
 export default async function BrandPage({

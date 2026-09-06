@@ -1,5 +1,5 @@
 import type { Locale } from "@/types";
-import { routeSegments } from "@/i18n/config";
+import { isLocale, locales, routeSegments } from "@/i18n/config";
 
 type SegmentKey = keyof typeof routeSegments;
 
@@ -69,10 +69,43 @@ export function routes(locale: Locale) {
 
 export type Routes = ReturnType<typeof routes>;
 
-/** Locale dəyişdirərkən eyni səhifədə qalmaq üçün path-i yenidən yazır. */
+/**
+ * Locale dəyişdirərkən eyni səhifədə qalmaq üçün path-i yenidən yazır.
+ *
+ * Yalnız prefiksi dəyişmək kifayət etmir: route seqmentləri də lokalizə
+ * olunub (`/en/doors` ↔ `/ru/dveri`). Seqment tərcümə edilməsə hədəf
+ * dildə belə ünvan olmur və 404 qayıdır.
+ */
 export function swapLocaleInPath(pathname: string, next: Locale): string {
   const parts = pathname.split("/").filter(Boolean);
   if (parts.length === 0) return `/${next}`;
+
+  const current = parts[0];
   parts[0] = next;
+
+  if (parts.length > 1 && isLocale(current)) {
+    parts[1] = translateSegment(parts[1], current, next);
+  }
+
   return `/${parts.join("/")}`;
+}
+
+/** `doors` (en) → `dveri` (ru). Tanınmayan seqment dəyişmir. */
+function translateSegment(segment: string, from: Locale, to: Locale): string {
+  for (const group of Object.values(routeSegments)) {
+    if (group[from] === segment) return group[to];
+  }
+  return segment;
+}
+
+/**
+ * Səhifənin bütün dillərdəki ünvanları — `alternates` (hreflang) üçün.
+ * `azPath` fayl sistemindəki yoldur, məs. "/qapilar" və ya "" (ana səhifə).
+ */
+export function localeAlternates(azPath: string, locale: Locale) {
+  const languages = Object.fromEntries(
+    locales.map((l) => [l, swapLocaleInPath(`/az${azPath}`, l)]),
+  ) as Record<Locale, string>;
+
+  return { canonical: languages[locale], languages };
 }

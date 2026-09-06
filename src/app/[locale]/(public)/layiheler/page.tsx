@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getDictionary, isLocale } from "@/i18n";
 import type { Locale } from "@/types";
-import { routes } from "@/lib/routes";
+import { localeAlternates, routes } from "@/lib/routes";
 import { Badge, Breadcrumbs, Section } from "@/components/ui/primitives";
 import { DoorScene } from "@/components/product/DoorScene";
 import Link from "next/link";
@@ -16,6 +16,7 @@ export async function generateMetadata({
   const dict = getDictionary(isLocale(locale) ? locale : "az");
 
   return {
+    alternates: localeAlternates("/layiheler", isLocale(locale) ? locale : "az"),
     title: dict.pageMeta.projects.title,
     description: dict.pageMeta.projects.description,
   };

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getDictionary, isLocale } from "@/i18n";
 import type { Locale } from "@/types";
-import { routes } from "@/lib/routes";
+import { localeAlternates, routes } from "@/lib/routes";
 import { Breadcrumbs } from "@/components/ui/primitives";
 import { QuoteForm } from "@/components/repair/QuoteForm";
 
@@ -14,6 +14,7 @@ export async function generateMetadata({
   const dict = getDictionary(isLocale(locale) ? locale : "az");
 
   return {
+    alternates: localeAlternates("/quote", isLocale(locale) ? locale : "az"),
     title: dict.pageMeta.quote.title,
     description: dict.pageMeta.quote.description,
   };

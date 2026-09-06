@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getDictionary, isLocale } from "@/i18n";
 import type { Locale } from "@/types";
-import { routes } from "@/lib/routes";
+import { localeAlternates, routes } from "@/lib/routes";
 import { Accordion } from "@/components/ui/disclosure";
 import { Breadcrumbs, Section } from "@/components/ui/primitives";
 import { ButtonLink } from "@/components/ui/Button";
@@ -16,6 +16,7 @@ export async function generateMetadata({
   const dict = getDictionary(isLocale(locale) ? locale : "az");
 
   return {
+    alternates: localeAlternates("/faq", isLocale(locale) ? locale : "az"),
     title: dict.pageMeta.faq.title,
     description: dict.pageMeta.faq.description,
   };

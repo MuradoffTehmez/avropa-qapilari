@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getDictionary, isLocale, locales } from "@/i18n";
 import type { Locale } from "@/types";
-import { routes } from "@/lib/routes";
+import { localeAlternates, routes } from "@/lib/routes";
 import { Breadcrumbs } from "@/components/ui/primitives";
 import { CatalogView } from "@/components/product/CatalogView";
 import { products } from "@/mock/products";
 import { categories, getCategory } from "@/mock/taxonomy";
-import { categoryName } from "@/lib/i18n-format";
+import { categoryDescription, categoryName } from "@/lib/i18n-format";
 
 export function generateStaticParams() {
   return locales.flatMap((locale) =>
@@ -18,16 +18,18 @@ export function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ category: string }>;
+  params: Promise<{ locale: string; category: string }>;
 }): Promise<Metadata> {
-  const { category } = await params;
+  const { locale: raw, category } = await params;
+  const locale = (isLocale(raw) ? raw : "az") as Locale;
   const cat = getCategory(category);
   if (!cat) return {};
 
+  const dict = getDictionary(locale);
   return {
-    title: cat.name,
-    description: cat.description,
-    alternates: { canonical: `/az/qapilar/${cat.slug}` },
+    title: categoryName(cat, dict),
+    description: categoryDescription(cat, dict),
+    alternates: localeAlternates(`/qapilar/${category}`, locale),
   };
 }
 
@@ -61,7 +63,7 @@ export default async function CategoryPage({
             {categoryName(cat, dict)}
           </h1>
           <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-stone">
-            {cat.description}
+            {categoryDescription(cat, dict)}
           </p>
         </div>
       </div>

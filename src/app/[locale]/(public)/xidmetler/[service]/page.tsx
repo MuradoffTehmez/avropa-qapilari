@@ -5,7 +5,7 @@ import { CheckCircle2 } from "lucide-react";
 import { getDictionary, isLocale, locales } from "@/i18n";
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/types";
-import { routes } from "@/lib/routes";
+import { localeAlternates, routes } from "@/lib/routes";
 import { Accordion } from "@/components/ui/disclosure";
 import { Breadcrumbs, Card, DataRow, Section, SectionHeading } from "@/components/ui/primitives";
 import { ButtonLink } from "@/components/ui/Button";
@@ -40,7 +40,11 @@ export async function generateMetadata({
 
   const dict = getDictionary(isLocale(locale) ? locale : "az");
   const text = content(item.slug, dict);
-  return { title: text.title, description: text.lead };
+  return {
+    title: text.title,
+    description: text.lead,
+    alternates: localeAlternates(`/xidmetler/${item.slug}`, isLocale(locale) ? locale : "az"),
+  };
 }
 
 export default async function ServiceDetailPage({

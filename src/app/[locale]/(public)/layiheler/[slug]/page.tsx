@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getDictionary, isLocale, locales } from "@/i18n";
 import type { Locale } from "@/types";
-import { routes } from "@/lib/routes";
+import { localeAlternates, routes } from "@/lib/routes";
 import { Breadcrumbs, DataRow, Section } from "@/components/ui/primitives";
 import { ButtonLink } from "@/components/ui/Button";
 import { ProjectDetail } from "@/components/product/ProjectDetail";
@@ -24,6 +24,7 @@ export async function generateMetadata({
   return {
     title: project.title,
     description: `${project.location} · ${project.doorModel} · ${project.color}`,
+    alternates: localeAlternates(`/layiheler/${slug}`, locale),
   };
 }
 

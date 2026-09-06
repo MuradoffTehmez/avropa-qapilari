@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getDictionary, isLocale } from "@/i18n";
 import type { Locale } from "@/types";
-import { routes } from "@/lib/routes";
+import { localeAlternates, routes } from "@/lib/routes";
 import { formatDate } from "@/lib/utils";
 import { Badge, Breadcrumbs, Section } from "@/components/ui/primitives";
 import { localizedPosts } from "@/mock/content.i18n";
@@ -17,6 +17,7 @@ export async function generateMetadata({
   const dict = getDictionary(isLocale(locale) ? locale : "az");
 
   return {
+    alternates: localeAlternates("/blog", isLocale(locale) ? locale : "az"),
     title: dict.pageMeta.blog.title,
     description: dict.pageMeta.blog.description,
   };

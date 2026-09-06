@@ -3,7 +3,7 @@ import { Award, Factory, Users, Wrench } from "lucide-react";
 
 import { getDictionary, isLocale } from "@/i18n";
 import type { Locale } from "@/types";
-import { routes } from "@/lib/routes";
+import { localeAlternates, routes } from "@/lib/routes";
 import { brandDescription, countryName, specializationName } from "@/lib/i18n-format";
 import { Breadcrumbs, Section, SectionHeading, Stat } from "@/components/ui/primitives";
 import { ButtonLink } from "@/components/ui/Button";
@@ -19,6 +19,7 @@ export async function generateMetadata({
   const dict = getDictionary(isLocale(locale) ? locale : "az");
 
   return {
+    alternates: localeAlternates("/haqqimizda", isLocale(locale) ? locale : "az"),
     title: dict.pageMeta.about.title,
     description: dict.pageMeta.about.description,
   };

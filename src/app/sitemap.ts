@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { brand } from "@/config/brand";
 import { locales } from "@/i18n/config";
+import { swapLocaleInPath } from "@/lib/routes";
 import { products } from "@/mock/products";
 import { brands, categories } from "@/mock/taxonomy";
 import { blogPosts } from "@/mock/content";
@@ -47,14 +48,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const all = [...staticPaths, ...dynamicPaths];
 
+  /** Yollar AZ seqmentləri ilə yazılıb; hər dil üçün tərcümə olunur. */
+  const localized = (path: string, locale: string) =>
+    `${base}${swapLocaleInPath(`/az${path}`, locale as (typeof locales)[number])}`;
+
   return locales.flatMap((locale) =>
     all.map((path) => ({
-      url: `${base}/${locale}${path}`,
+      url: localized(path, locale),
       lastModified: now,
       changeFrequency: path === "" ? ("daily" as const) : ("weekly" as const),
       priority: path === "" ? 1 : path.startsWith("/qapi/") ? 0.8 : 0.6,
       alternates: {
-        languages: Object.fromEntries(locales.map((l) => [l, `${base}/${l}${path}`])),
+        languages: Object.fromEntries(locales.map((l) => [l, localized(path, l)])),
       },
     })),
   );

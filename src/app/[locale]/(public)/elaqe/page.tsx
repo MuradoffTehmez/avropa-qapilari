@@ -3,7 +3,7 @@ import { Clock, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 
 import { getDictionary, isLocale } from "@/i18n";
 import type { Locale } from "@/types";
-import { routes } from "@/lib/routes";
+import { localeAlternates, routes } from "@/lib/routes";
 import { brand, hasContact } from "@/config/brand";
 import { Breadcrumbs, Card, Section } from "@/components/ui/primitives";
 import { ContactForm } from "@/components/layout/ContactForm";
@@ -17,6 +17,7 @@ export async function generateMetadata({
   const dict = getDictionary(isLocale(locale) ? locale : "az");
 
   return {
+    alternates: localeAlternates("/elaqe", isLocale(locale) ? locale : "az"),
     title: dict.pageMeta.contact.title,
     description: dict.pageMeta.contact.description,
   };

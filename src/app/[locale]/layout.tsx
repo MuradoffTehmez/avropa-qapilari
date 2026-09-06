@@ -5,6 +5,7 @@ import "@/app/globals.css";
 
 import { getDictionary, isLocale, locales } from "@/i18n";
 import { I18nProvider } from "@/i18n/provider";
+import { localeAlternates } from "@/lib/routes";
 import type { Locale } from "@/types";
 import { brand } from "@/config/brand";
 import { ToastHost } from "@/components/ui/overlays";
@@ -52,10 +53,8 @@ export async function generateMetadata({
     },
     description: dict.meta.description,
     applicationName: brand.name,
-    alternates: {
-      canonical: `/${locale}`,
-      languages: Object.fromEntries(locales.map((l) => [l, `/${l}`])),
-    },
+    // Alt səhifələr öz `alternates`-ini `localeAlternates()` ilə verir.
+    alternates: localeAlternates("", isLocale(locale) ? locale : "az"),
     openGraph: {
       type: "website",
       siteName: brand.name,

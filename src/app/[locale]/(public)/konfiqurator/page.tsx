@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 
 import { getDictionary, isLocale } from "@/i18n";
 import type { Locale } from "@/types";
-import { routes } from "@/lib/routes";
+import { localeAlternates, routes } from "@/lib/routes";
 import { Breadcrumbs, Section, SectionHeading } from "@/components/ui/primitives";
 import { DoorVisual } from "@/components/product/DoorVisual";
 import { products } from "@/mock/products";
@@ -20,6 +20,7 @@ export async function generateMetadata({
   const dict = getDictionary(isLocale(locale) ? locale : "az");
 
   return {
+    alternates: localeAlternates("/konfiqurator", isLocale(locale) ? locale : "az"),
     title: dict.pageMeta.configurator.title,
     description: dict.pageMeta.configurator.description,
   };

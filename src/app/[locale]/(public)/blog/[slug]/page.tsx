@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDictionary, isLocale, locales } from "@/i18n";
 import type { Locale } from "@/types";
-import { routes } from "@/lib/routes";
+import { localeAlternates, routes } from "@/lib/routes";
 import { formatDate } from "@/lib/utils";
 import { Badge, Breadcrumbs, Section } from "@/components/ui/primitives";
 import { localizedPosts } from "@/mock/content.i18n";
@@ -21,7 +21,11 @@ export async function generateMetadata({
   const locale = (isLocale(raw) ? raw : "az") as Locale;
   const post = localizedPosts(locale).find((p) => p.slug === slug);
   if (!post) return {};
-  return { title: post.title, description: post.excerpt };
+  return {
+    title: post.title,
+    description: post.excerpt,
+    alternates: localeAlternates(`/blog/${slug}`, locale),
+  };
 }
 
 export default async function BlogPostPage({

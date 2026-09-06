@@ -4,7 +4,7 @@ import { ArrowRight, Award, Hammer, RefreshCw, Ruler, Truck, Wrench } from "luci
 
 import { getDictionary, isLocale } from "@/i18n";
 import type { Locale } from "@/types";
-import { routes } from "@/lib/routes";
+import { localeAlternates, routes } from "@/lib/routes";
 import { Breadcrumbs, Section, SectionHeading } from "@/components/ui/primitives";
 import { ButtonLink } from "@/components/ui/Button";
 
@@ -17,6 +17,7 @@ export async function generateMetadata({
   const dict = getDictionary(isLocale(locale) ? locale : "az");
 
   return {
+    alternates: localeAlternates("/xidmetler", isLocale(locale) ? locale : "az"),
     title: dict.pageMeta.services.title,
     description: dict.pageMeta.services.description,
   };

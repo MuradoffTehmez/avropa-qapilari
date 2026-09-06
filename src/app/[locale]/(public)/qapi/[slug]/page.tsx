@@ -16,7 +16,7 @@ import {
 
 import { getDictionary, isLocale, locales } from "@/i18n";
 import type { Locale } from "@/types";
-import { routes } from "@/lib/routes";
+import { localeAlternates, routes } from "@/lib/routes";
 import { formatDate, formatDimensions, formatPrice } from "@/lib/utils";
 import { brand } from "@/config/brand";
 import {
@@ -49,13 +49,15 @@ export async function generateMetadata({
 }: {
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
-  const { locale, slug } = await params;
+  const { locale: raw, slug } = await params;
+  const locale = (isLocale(raw) ? raw : "az") as Locale;
   const product = getProduct(slug);
   if (!product) return {};
 
-  const dict = getDictionary(isLocale(locale) ? locale : "az");
+  const dict = getDictionary(locale);
 
   return {
+    alternates: localeAlternates(`/qapi/${slug}`, locale),
     title: product.name,
     description: productShort(product, dict),
     openGraph: {

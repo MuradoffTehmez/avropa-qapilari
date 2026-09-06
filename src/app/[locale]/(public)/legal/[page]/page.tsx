@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { getDictionary, isLocale, locales } from "@/i18n";
 import type { Locale } from "@/types";
-import { routes } from "@/lib/routes";
+import { localeAlternates, routes } from "@/lib/routes";
 import { formatDateLong } from "@/lib/utils";
 import { Breadcrumbs, Section } from "@/components/ui/primitives";
 import { legalPages, legalSlugs } from "@/mock/legal";
@@ -21,7 +21,10 @@ export async function generateMetadata({
   const locale = (isLocale(raw) ? raw : "az") as Locale;
   const item = legalPages(locale).find((p) => p.slug === page);
   if (!item) return {};
-  return { title: item.title };
+  return {
+    title: item.title,
+    alternates: localeAlternates(`/legal/${page}`, locale),
+  };
 }
 
 export default async function LegalPageView({

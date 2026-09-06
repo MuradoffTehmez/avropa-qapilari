@@ -13,7 +13,7 @@ import {
 
 import { getDictionary, isLocale } from "@/i18n";
 import type { Locale } from "@/types";
-import { routes } from "@/lib/routes";
+import { localeAlternates, routes } from "@/lib/routes";
 import { brand, hasContact } from "@/config/brand";
 import {
   Badge,
@@ -39,6 +39,7 @@ export async function generateMetadata({
   const dict = getDictionary(isLocale(locale) ? locale : "az");
 
   return {
+    alternates: localeAlternates("/showroom", isLocale(locale) ? locale : "az"),
     title: dict.pageMeta.showroom.title,
     description: dict.pageMeta.showroom.description,
   };
