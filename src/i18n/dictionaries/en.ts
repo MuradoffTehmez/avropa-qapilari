@@ -1428,5 +1428,9 @@ export const en: Dictionary = {
     notFound: "Page not found",
     notFoundText: "The page you are looking for does not exist or has been moved.",
     goHome: "Back to home",
+    somethingWrong: "Something went wrong",
+    somethingWrongText: "An unexpected error occurred while loading the page. Please try again.",
+    tryAgain: "Try again",
+    loading: "Loading",
   },
 };

@@ -123,7 +123,7 @@ export function CatalogView({
               value={sort}
               onChange={(e) => setSort(e.target.value as SortKey)}
               aria-label={dict.actions.sort}
-              className="h-9 min-w-0 flex-1 text-[13px] sm:w-auto sm:max-w-52 sm:flex-none"
+              className="h-11 min-w-0 flex-1 text-[13px] sm:h-9 sm:w-auto sm:max-w-52 sm:flex-none"
             >
               <option value="popular">{dict.sort.popular}</option>
               <option value="newest">{dict.sort.newest}</option>

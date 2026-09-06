@@ -1426,6 +1426,10 @@ export const az = {
     notFound: "Səhifə tapılmadı",
     notFoundText: "Axtardığınız səhifə mövcud deyil və ya köçürülüb.",
     goHome: "Ana səhifəyə qayıt",
+    somethingWrong: "Nəsə düz getmədi",
+    somethingWrongText: "Səhifə yüklənərkən gözlənilməz xəta baş verdi. Yenidən cəhd edin.",
+    tryAgain: "Yenidən cəhd et",
+    loading: "Yüklənir",
   },
 };
 

@@ -105,7 +105,7 @@ export function Tabs({
             onClick={() => setActive(tab.id)}
             onKeyDown={(event) => onTabKeyDown(event, index)}
             className={cn(
-              "relative whitespace-nowrap px-3.5 py-3 text-[13px] font-medium transition-colors sm:text-sm",
+              "relative inline-flex min-h-11 items-center whitespace-nowrap px-3.5 py-3 text-[13px] font-medium transition-colors sm:min-h-0 sm:text-sm",
               tab.id === active ? "text-ink" : "text-stone hover:text-graphite",
             )}
           >
