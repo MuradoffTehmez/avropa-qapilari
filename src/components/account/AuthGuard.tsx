@@ -23,11 +23,17 @@ export function AuthGuard({
   locale,
   dict,
   required = "CUSTOMER",
+  fallbackWrapper,
   children,
 }: {
   locale: Locale;
   dict: Dictionary;
   required?: Role;
+  /**
+   * Bloklanmış ekranı bükür. Layout-un öz `main` landmark-ı yoxdursa
+   * (məs. admin paneli) buradan verilir.
+   */
+  fallbackWrapper?: (node: ReactNode) => ReactNode;
   children: ReactNode;
 }) {
   const r = routes(locale);
@@ -35,9 +41,18 @@ export function AuthGuard({
   const hydrated = useHydrated();
   const user = useSession((s) => s.user);
 
-  // Serverdə və ilk render-də sessiya bilinmir; boş sahə saxlayırıq ki,
-  // məzmun sıçramasın və hydration uyğunsuzluğu yaranmasın.
-  if (!hydrated) return <div className="min-h-[60dvh]" aria-hidden />;
+  // Serverdə və ilk render-də sessiya bilinmir. Sahəni boş saxlayırıq ki,
+  // məzmun sıçramasın — amma `main` landmark-ı və status mətni qalır,
+  // əks halda ekran oxuyucusu üçün səhifə tamamilə boş olur.
+  const wrap = (node: ReactNode) => (fallbackWrapper ? fallbackWrapper(node) : node);
+
+  if (!hydrated) {
+    return wrap(
+      <div className="min-h-[60dvh]" role="status" aria-live="polite">
+        <span className="sr-only">{dict.errors.loading}</span>
+      </div>,
+    );
+  }
 
   if (hasRole(user, required)) return <>{children}</>;
 
@@ -50,7 +65,7 @@ export function AuthGuard({
       ? dict.auth.technicianTitle
       : dict.account.title;
 
-  return (
+  return wrap(
     <section className="container-page flex min-h-[60dvh] items-center py-12">
       <div className="mx-auto grid max-w-2xl items-center gap-8 sm:grid-cols-[minmax(0,10rem)_1fr]">
         <DoorKeyAnimation state="locked" className="mx-auto w-32 sm:mx-0 sm:w-full" />
@@ -84,6 +99,6 @@ export function AuthGuard({
           </div>
         </div>
       </div>
-    </section>
+    </section>,
   );
 }

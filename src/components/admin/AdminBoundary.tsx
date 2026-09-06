@@ -25,8 +25,20 @@ export function AdminBoundary({
 
   if (pathname.endsWith("/admin/login")) return <>{children}</>;
 
+  // Giriş bloklandıqda AdminShell render olunmur, deməli onun `main`
+  // landmark-ı da olmur — burada təmin edirik ki, səhifə ekran
+  // oxuyucusu üçün landmark-sız qalmasın.
   return (
-    <AuthGuard locale={locale} dict={dict} required="ADMIN">
+    <AuthGuard
+      locale={locale}
+      dict={dict}
+      required="ADMIN"
+      fallbackWrapper={(node) => (
+        <main id="main" className="min-h-dvh bg-bone">
+          {node}
+        </main>
+      )}
+    >
       <AdminShell locale={locale} dict={dict}>
         {children}
       </AdminShell>

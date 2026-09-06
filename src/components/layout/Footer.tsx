@@ -141,9 +141,9 @@ export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
           <div className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4 sm:gap-8">
             {columns.map((col) => (
               <div key={col.title}>
-                <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-300">
+                <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-300">
                   {col.title}
-                </h3>
+                </h2>
                 <ul className="flex flex-col gap-2.5">
                   {col.links.map((link) => (
                     <li key={link.href + link.label}>

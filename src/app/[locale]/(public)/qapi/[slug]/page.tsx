@@ -230,9 +230,9 @@ export default async function ProductPage({
                     </p>
                   </div>
                   <Card className="h-fit p-5">
-                    <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-stone">
+                    <h2 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-stone">
                       {dict.product.quickFacts}
-                    </h3>
+                    </h2>
                     <dl>
                       <DataRow label={dict.product.brand} value={productBrand?.name ?? "—"} />
                       <DataRow label={dict.product.collection} value={product.collection} />
@@ -251,9 +251,9 @@ export default async function ProductPage({
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {specGroups.map((group) => (
                     <div key={group}>
-                      <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-stone">
+                      <h2 className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-stone">
                         {group}
-                      </h3>
+                      </h2>
                       <dl>
                         {product.specs
                           .filter((s) => s.group === group)
@@ -272,18 +272,18 @@ export default async function ProductPage({
               content: (
                 <div className="grid gap-6 sm:grid-cols-2 lg:max-w-3xl">
                   <Card className="p-5">
-                    <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-stone">
+                    <h2 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-stone">
                       {dict.product.standardSize}
-                    </h3>
+                    </h2>
                     <p className="text-2xl font-semibold tracking-tight text-ink">
                       {formatDimensions(product.defaultWidth, product.defaultHeight)}
                     </p>
                     <p className="mt-2 text-[13px] text-stone">{dict.product.stockSize}</p>
                   </Card>
                   <Card className="p-5">
-                    <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-stone">
+                    <h2 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-stone">
                       {dict.product.customSizeRange}
-                    </h3>
+                    </h2>
                     <dl>
                       <DataRow label={dict.product.width} value={`${product.minWidth}–${product.maxWidth} mm`} />
                       <DataRow label={dict.product.height} value={`${product.minHeight}–${product.maxHeight} mm`} />
