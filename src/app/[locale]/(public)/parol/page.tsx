@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 
 import { getDictionary, isLocale } from "@/i18n";
 import type { Locale } from "@/types";
 import { localeAlternates } from "@/lib/routes";
-import { SignInForm } from "@/components/account/SignInForm";
+import { PasswordResetForm } from "@/components/account/PasswordResetForm";
 
 export async function generateMetadata({
   params,
@@ -15,25 +14,19 @@ export async function generateMetadata({
   const dict = getDictionary(isLocale(locale) ? locale : "az");
 
   return {
-    title: dict.auth.signIn,
-    description: dict.auth.signInText,
-    alternates: localeAlternates("/giris", isLocale(locale) ? locale : "az"),
-    robots: { index: false, follow: true },
+    title: dict.auth.reset,
+    description: dict.auth.resetText,
+    alternates: localeAlternates("/parol", isLocale(locale) ? locale : "az"),
+    robots: { index: false, follow: false },
   };
 }
 
-export default async function SignInPage({
+export default async function PasswordResetPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }) {
   const { locale: raw } = await params;
   const locale = (isLocale(raw) ? raw : "az") as Locale;
-  const dict = getDictionary(locale);
-
-  return (
-    <Suspense fallback={<div className="min-h-[60dvh]" />}>
-      <SignInForm locale={locale} dict={dict} />
-    </Suspense>
-  );
+  return <PasswordResetForm locale={locale} dict={getDictionary(locale)} />;
 }

@@ -21,6 +21,8 @@ const localizedSegments: { from: string; to: string; locale: "en" | "ru" }[] = [
   { locale: "en", from: "compare", to: "muqayise" },
   { locale: "en", from: "account", to: "hesab" },
   { locale: "en", from: "login", to: "giris" },
+  { locale: "en", from: "register", to: "qeydiyyat" },
+  { locale: "en", from: "password", to: "parol" },
   { locale: "en", from: "technician", to: "usta" },
   { locale: "ru", from: "dveri", to: "qapilar" },
   { locale: "ru", from: "dver", to: "qapi" },
@@ -37,6 +39,7 @@ const localizedSegments: { from: string; to: string; locale: "en" | "ru" }[] = [
   { locale: "ru", from: "sravnenie", to: "muqayise" },
   { locale: "ru", from: "kabinet", to: "hesab" },
   { locale: "ru", from: "vhod", to: "giris" },
+  { locale: "ru", from: "registraciya", to: "qeydiyyat" },
   { locale: "ru", from: "master", to: "usta" },
 ];
 

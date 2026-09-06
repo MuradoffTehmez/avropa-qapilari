@@ -6,12 +6,14 @@ import { DoorOpen, Home, SlidersHorizontal, User, Wrench } from "lucide-react";
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/types";
 import { routes } from "@/lib/routes";
+import { useSession } from "@/store/session";
 import { cn } from "@/lib/utils";
 
 /** Telefon və planşetdə alt naviqasiya paneli. */
 export function MobileNav({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const path = usePathname();
   const r = routes(locale);
+  const user = useSession((s) => s.user);
 
   // Konfiqurator, checkout və admin öz alt panellərinə malikdir
   const hidden =
@@ -23,7 +25,7 @@ export function MobileNav({ locale, dict }: { locale: Locale; dict: Dictionary }
     { href: r.doors, label: dict.nav.doors, icon: DoorOpen },
     { href: r.configurator, label: dict.nav.configurator, icon: SlidersHorizontal },
     { href: r.repair, label: dict.nav.services, icon: Wrench },
-    { href: r.account, label: dict.actions.account, icon: User },
+    { href: user ? r.account : r.login, label: user ? dict.actions.account : dict.auth.signIn, icon: User },
   ];
 
   return (

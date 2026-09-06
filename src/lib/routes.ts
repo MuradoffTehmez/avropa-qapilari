@@ -53,7 +53,12 @@ export function routes(locale: Locale) {
     checkout: `${base}/${seg("checkout", locale)}`,
 
     login: `${base}/${seg("login", locale)}`,
+    register: `${base}/${seg("register", locale)}`,
+    passwordReset: `${base}/${seg("passwordReset", locale)}`,
     technician: `${base}/${seg("technician", locale)}`,
+
+    adminLogin: `${base}/admin/login`,
+    technicianLogin: `${base}/${seg("technician", locale)}/login`,
 
     account: `${base}/${seg("account", locale)}`,
     accountSection: (section: string) => `${base}/${seg("account", locale)}/${section}`,

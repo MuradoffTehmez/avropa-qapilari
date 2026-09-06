@@ -26,6 +26,7 @@ import { SearchOverlay } from "@/components/layout/SearchOverlay";
 import { useCart, cartCount } from "@/store/cart";
 import { useCompare, useFavorites } from "@/store/lists";
 import { useHydrated, useLockBodyScroll, useScrolledPast } from "@/lib/hooks";
+import { useSession } from "@/store/session";
 import { categories } from "@/mock/taxonomy";
 import { categoryName } from "@/lib/i18n-format";
 
@@ -40,6 +41,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const items = useCart((s) => s.items);
   const favorites = useFavorites((s) => s.ids);
   const compare = useCompare((s) => s.ids);
+  const user = useSession((s) => s.user);
 
   useLockBodyScroll(mobileOpen);
 
@@ -58,6 +60,8 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const count = hydrated ? cartCount(items) : 0;
   const favCount = hydrated ? favorites.length : 0;
   const cmpCount = hydrated ? compare.length : 0;
+
+  const accountHref = hydrated && user ? r.account : r.login;
 
   const close = () => setMobileOpen(false);
 
@@ -142,7 +146,11 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
               <Heart size={19} />
             </HeaderIcon>
 
-            <HeaderIcon href={r.account} label={dict.actions.account} className="hidden sm:flex">
+            <HeaderIcon
+              href={accountHref}
+              label={user ? dict.actions.account : dict.auth.signIn}
+              className="hidden sm:flex"
+            >
               <User size={19} />
             </HeaderIcon>
 
@@ -232,11 +240,11 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
                     {cmpCount > 0 && <span className="text-stone">({cmpCount})</span>}
                   </Link>
                   <Link
-                    href={r.account}
+                    href={accountHref}
                     onClick={close}
                     className="flex items-center gap-2.5 text-graphite"
                   >
-                    <User size={17} /> {dict.actions.account}
+                    <User size={17} /> {user ? dict.actions.account : dict.auth.signIn}
                   </Link>
                 </div>
               </div>

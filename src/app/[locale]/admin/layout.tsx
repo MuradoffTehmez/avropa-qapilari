@@ -1,12 +1,21 @@
 import type { Metadata } from "next";
 import { getDictionary, isLocale } from "@/i18n";
 import type { Locale } from "@/types";
-import { AdminShell } from "@/components/admin/AdminShell";
+import { AdminBoundary } from "@/components/admin/AdminBoundary";
 
-export const metadata: Metadata = {
-  title: "İdarəetmə paneli",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const dict = getDictionary(isLocale(locale) ? locale : "az");
+
+  return {
+    title: { default: dict.auth.adminTitle, template: `%s · ${dict.auth.adminTitle}` },
+    robots: { index: false, follow: false },
+  };
+}
 
 export default async function AdminLayout({
   children,
@@ -20,8 +29,8 @@ export default async function AdminLayout({
   const dict = getDictionary(typed);
 
   return (
-    <AdminShell locale={typed} dict={dict}>
+    <AdminBoundary locale={typed} dict={dict}>
       {children}
-    </AdminShell>
+    </AdminBoundary>
   );
 }

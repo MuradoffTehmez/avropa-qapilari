@@ -39,5 +39,7 @@ export const routeSegments = {
   compare: { az: "muqayise", en: "compare", ru: "sravnenie" },
   account: { az: "hesab", en: "account", ru: "kabinet" },
   login: { az: "giris", en: "login", ru: "vhod" },
+  register: { az: "qeydiyyat", en: "register", ru: "registraciya" },
+  passwordReset: { az: "parol", en: "password", ru: "parol" },
   technician: { az: "usta", en: "technician", ru: "master" },
 } as const;

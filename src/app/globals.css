@@ -217,3 +217,75 @@ svg {
     padding-bottom: calc(3.75rem + env(safe-area-inset-bottom, 0px));
   }
 }
+
+/* ---------------------------------------------------------------------- */
+/* Giriş ekranlarının qapı–açar animasiyası                               */
+/* Vəziyyət `data-state` ilə idarə olunur: locked → unlocking → open       */
+/* ---------------------------------------------------------------------- */
+
+.door-key .dk-panel {
+  transform-origin: 72px 210px;
+  transform: perspective(900px) rotateY(0deg);
+  transition: transform 1.15s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.door-key .dk-key {
+  transform-origin: 207px 204px;
+  transform: rotate(0deg);
+  transition: transform 0.75s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.door-key .dk-bolts {
+  transform: translateX(0);
+  transition: transform 0.55s cubic-bezier(0.65, 0, 0.35, 1) 0.35s;
+}
+
+.door-key .dk-glow {
+  opacity: 0;
+  transition: opacity 0.9s ease 0.3s;
+}
+
+/* Sakit hal — açar üzərində yüngül parıltı */
+.door-key[data-state="locked"] .dk-key {
+  animation: dk-shimmer 3.2s ease-in-out infinite;
+}
+
+.door-key[data-state="unlocking"] .dk-key,
+.door-key[data-state="open"] .dk-key {
+  transform: rotate(95deg);
+}
+
+.door-key[data-state="unlocking"] .dk-bolts,
+.door-key[data-state="open"] .dk-bolts {
+  transform: translateX(-16px);
+}
+
+.door-key[data-state="open"] .dk-panel {
+  transform: perspective(900px) rotateY(-72deg);
+}
+
+.door-key[data-state="open"] .dk-glow {
+  opacity: 1;
+}
+
+@keyframes dk-shimmer {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.62;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .door-key .dk-panel,
+  .door-key .dk-key,
+  .door-key .dk-bolts,
+  .door-key .dk-glow {
+    transition: none;
+  }
+  .door-key[data-state="locked"] .dk-key {
+    animation: none;
+  }
+}

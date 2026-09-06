@@ -19,9 +19,11 @@ import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/types";
 import { routes } from "@/lib/routes";
 import { cn } from "@/lib/utils";
+import { useSession } from "@/store/session";
 
 export function AccountNav({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const router = useRouter();
+  const signOut = useSession((s) => s.signOut);
   const r = routes(locale);
   const pathname = usePathname();
 
@@ -62,7 +64,10 @@ export function AccountNav({ locale, dict }: { locale: Locale; dict: Dictionary 
         })}
         <li className="shrink-0 lg:mt-4 lg:border-t lg:border-line lg:pt-4">
           <button
-            onClick={() => { router.push(r.login); }}
+            onClick={() => {
+              signOut();
+              router.push(r.login);
+            }}
             type="button"
             className="flex w-full items-center gap-2.5 whitespace-nowrap border border-line px-3 py-2.5 text-[13.5px] text-stone transition-colors hover:text-danger lg:border-0 lg:px-3"
           >

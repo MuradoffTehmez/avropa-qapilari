@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   BarChart3,
@@ -10,6 +10,7 @@ import {
   ClipboardList,
   FileText,
   LayoutDashboard,
+  LogOut,
   Megaphone,
   Menu,
   Package,
@@ -29,6 +30,7 @@ import { cn } from "@/lib/utils";
 import { brand } from "@/config/brand";
 import { LogoMark } from "@/components/layout/Logo";
 import { useLockBodyScroll } from "@/lib/hooks";
+import { useSession } from "@/store/session";
 
 /** admin sidebar strukturu. */
 export function AdminShell({
@@ -42,8 +44,11 @@ export function AdminShell({
 }) {
   const r = routes(locale);
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const user = useSession((s) => s.user);
+  const signOut = useSession((s) => s.signOut);
   useLockBodyScroll(open);
 
   const groups: {
@@ -156,7 +161,7 @@ export function AdminShell({
           href={r.home}
           className="flex items-center gap-2 px-2.5 py-2 text-[12px] text-paper/50 transition-colors hover:text-paper"
         >
-          ← Sayta qayıt
+          {dict.admin.backToSite}
         </Link>
       </div>
     </nav>
@@ -172,7 +177,7 @@ export function AdminShell({
         <div className="fixed inset-0 z-100 lg:hidden">
           <button
             type="button"
-            aria-label="Bağla"
+            aria-label={dict.actions.close}
             onClick={() => setOpen(false)}
             className="absolute inset-0 bg-obsidian/50"
           />
@@ -180,7 +185,7 @@ export function AdminShell({
             <button
               type="button"
               onClick={() => setOpen(false)}
-              aria-label="Bağla"
+              aria-label={dict.actions.close}
               className="absolute right-2 top-3.5 z-10 flex h-8 w-8 items-center justify-center text-paper/60"
             >
               <X size={18} />
@@ -195,7 +200,7 @@ export function AdminShell({
           <button
             type="button"
             onClick={() => setOpen(true)}
-            aria-label="Menyu"
+            aria-label={dict.actions.menu}
             className="-ml-2 flex h-9 w-9 items-center justify-center text-graphite lg:hidden"
           >
             <Menu size={19} />
@@ -208,8 +213,8 @@ export function AdminShell({
             />
             <input
               value={query} onChange={(e) => setQuery(e.target.value)}
-              placeholder="Bölmə axtarışı…"
-              aria-label="Axtarış"
+              placeholder={dict.admin.searchSections}
+              aria-label={dict.actions.search}
               className="h-9 w-full rounded-[3px] border border-line bg-bone pl-9 pr-3 text-[13px] text-ink outline-none placeholder:text-mist focus:border-ink"
             />
           </div>
@@ -218,8 +223,8 @@ export function AdminShell({
           <div className="ml-auto flex items-center gap-2">
             <button
               type="button"
-              onClick={() => { setQuery("Təmir"); }}
-              aria-label="Bildirişlər"
+              onClick={() => setQuery(dict.admin.repairs)}
+              aria-label={dict.account.notifications}
               className="relative flex h-9 w-9 items-center justify-center text-graphite hover:text-ink"
             >
               <Bell size={17} />
@@ -227,12 +232,28 @@ export function AdminShell({
             </button>
             <div className="flex items-center gap-2.5 border-l border-line pl-3">
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-sand text-[11px] font-semibold text-graphite">
-                SA
+                {initials(user?.name)}
               </span>
               <div className="hidden sm:block">
-                <p className="text-[13px] font-medium leading-tight text-ink">Super Admin</p>
-                <p className="text-[11px] leading-tight text-stone">admin@{brand.domain}</p>
+                <p className="text-[13px] font-medium leading-tight text-ink">
+                  {user?.name ?? dict.auth.roleAdmin}
+                </p>
+                <p className="max-w-40 truncate text-[11px] leading-tight text-stone">
+                  {user?.email ?? `admin@${brand.domain}`}
+                </p>
               </div>
+              <button
+                type="button"
+                onClick={() => {
+                  signOut();
+                  router.push(r.adminLogin);
+                }}
+                aria-label={dict.account.logout}
+                title={dict.account.logout}
+                className="flex h-9 w-9 items-center justify-center text-graphite transition-colors hover:text-danger"
+              >
+                <LogOut size={17} />
+              </button>
             </div>
           </div>
         </header>
@@ -243,4 +264,15 @@ export function AdminShell({
       </div>
     </div>
   );
+}
+
+/** Adın baş hərfləri — avatar üçün. */
+function initials(name?: string): string {
+  if (!name) return "EP";
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w.charAt(0).toLocaleUpperCase("az"))
+    .join("");
 }
