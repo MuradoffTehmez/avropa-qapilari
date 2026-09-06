@@ -2,6 +2,7 @@
 
 import { useWorkflow } from "@/store/workflow";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, Layers, Link2, RotateCcw, Save, X } from "lucide-react";
 
@@ -34,6 +35,7 @@ import { optionLabel, optionText } from "@/mock/options.i18n";
 import { calculatePrice, sizeRangeLabel } from "@/features/pricing/engine";
 import { checkCompatibility, pruneIncompatible } from "@/features/configurator/compatibility";
 import { useCart } from "@/store/cart";
+import { useSession } from "@/store/session";
 
 export function Configurator({
   product,
@@ -776,10 +778,26 @@ function SummaryStep({
   locale: Locale;
 }) {
   const r = routes(locale);
+  const router = useRouter();
+  const user = useSession((s) => s.user);
   const [configId] = useState(() => `CFG-26-${uid().toUpperCase()}`);
 
+  /** Saxlanmış konfiqurasiya kabinetdə görünür — giriş tələb olunur. */
   function save() {
-    useWorkflow.getState().save({ id: configId, productSlug: product.slug, productName: product.name, selection, total: calculatePrice(product, selection).total, date: new Date().toISOString() });
+    if (!user) {
+      toast(dict.configurator.saveNeedsAccount);
+      router.push(`${r.login}?next=${encodeURIComponent(r.configuratorFor(product.slug))}`);
+      return;
+    }
+
+    useWorkflow.getState().save({
+      id: configId,
+      productSlug: product.slug,
+      productName: product.name,
+      selection,
+      total: calculatePrice(product, selection, { locale, dict }).total,
+      date: new Date().toISOString(),
+    });
     toast(dict.configurator.configurationSaved);
   }
 
@@ -808,7 +826,7 @@ function SummaryStep({
 
   return (
     <div>
-      <StepHeading title={dict.configurator.summary} hint="Seçimlərinizi yoxlayın." />
+      <StepHeading title={dict.configurator.summary} hint={dict.configurator.reviewChoices} />
 
       <div className="mb-6 flex items-center gap-3 border border-line bg-bone p-4">
         <div>

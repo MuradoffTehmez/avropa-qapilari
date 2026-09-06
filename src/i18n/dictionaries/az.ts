@@ -770,6 +770,7 @@ export const az = {
     quoteRequired: "Bu ölçü üçün fərdi qiymət təklifi tələb olunur.",
     saveConfiguration: "Konfiqurasiyanı saxla",
     shareConfiguration: "Konfiqurasiyanı paylaş",
+    saveNeedsAccount: "Konfiqurasiyanı saxlamaq üçün hesabınıza daxil olun.",
     configurationSaved: "Konfiqurasiya saxlanıldı",
     linkCopied: "Link kopyalandı",
     notCompatible: "Bu seçim mövcud konfiqurasiya ilə uyğun deyil",
@@ -840,6 +841,8 @@ export const az = {
     successTitle: "Sifarişiniz qəbul edildi",
     successText: "Menecerimiz qısa müddətdə sizinlə əlaqə saxlayacaq.",
     orderNumber: "Sifariş nömrəsi",
+    signInPrompt: "Hesabınız varsa daxil olun — məlumatlar avtomatik dolur.",
+    guestNote: "Qonaq kimi də davam edə bilərsiniz.",
   },
 
   repair: {

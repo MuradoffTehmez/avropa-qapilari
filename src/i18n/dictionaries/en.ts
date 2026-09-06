@@ -773,6 +773,7 @@ export const en: Dictionary = {
     quoteRequired: "This size requires an individual quote.",
     saveConfiguration: "Save configuration",
     shareConfiguration: "Share configuration",
+    saveNeedsAccount: "Sign in to save this configuration.",
     configurationSaved: "Configuration saved",
     linkCopied: "Link copied",
     notCompatible: "This option is not compatible with your current configuration",
@@ -842,6 +843,8 @@ export const en: Dictionary = {
     successTitle: "Your order has been received",
     successText: "Our manager will contact you shortly.",
     orderNumber: "Order number",
+    signInPrompt: "Sign in if you have an account — your details fill in automatically.",
+    guestNote: "You can also continue as a guest.",
   },
 
   repair: {

@@ -773,6 +773,7 @@ export const ru: Dictionary = {
     quoteRequired: "Для этого размера требуется индивидуальный расчёт.",
     saveConfiguration: "Сохранить конфигурацию",
     shareConfiguration: "Поделиться конфигурацией",
+    saveNeedsAccount: "Войдите, чтобы сохранить конфигурацию.",
     configurationSaved: "Конфигурация сохранена",
     linkCopied: "Ссылка скопирована",
     notCompatible: "Этот вариант несовместим с текущей конфигурацией",
@@ -842,6 +843,8 @@ export const ru: Dictionary = {
     successTitle: "Ваш заказ принят",
     successText: "Наш менеджер свяжется с вами в ближайшее время.",
     orderNumber: "Номер заказа",
+    signInPrompt: "Войдите, если у вас есть аккаунт — данные заполнятся автоматически.",
+    guestNote: "Можно продолжить и как гость.",
   },
 
   repair: {

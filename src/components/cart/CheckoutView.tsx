@@ -15,6 +15,7 @@ import { Stepper } from "@/components/ui/disclosure";
 import { Checkbox, Field, Input, RadioCard, Select, Textarea } from "@/components/ui/form";
 import { cartSubtotal, useCart } from "@/store/cart";
 import { useHydrated } from "@/lib/hooks";
+import { useSession } from "@/store/session";
 import { bakuDistricts, cities } from "@/mock/content";
 import { optionGroups } from "@/mock/options";
 
@@ -71,9 +72,22 @@ export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionar
 
   const items = useCart((s) => s.items);
   const clear = useCart((s) => s.clear);
+  const user = useSession((s) => s.user);
 
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<CheckoutState>(initial);
+  // Giriş edilibsə ad və e-poçt sessiyadan bir dəfə doldurulur.
+  const [prefilled, setPrefilled] = useState(false);
+  if (user && !prefilled) {
+    const [first, ...rest] = user.name.split(" ");
+    setForm((f) => ({
+      ...f,
+      name: f.name || (first ?? ""),
+      surname: f.surname || rest.join(" "),
+      email: f.email || user.email,
+    }));
+    setPrefilled(true);
+  }
   const [errors, setErrors] = useState<Partial<Record<keyof CheckoutState, string>>>({});
   const [placedOrder, setPlacedOrder] = useState<string | null>(null);
 
@@ -192,6 +206,25 @@ export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionar
         {current === "customer" && (
           <div className="max-w-xl space-y-4">
             <SectionTitle>{dict.checkout.steps.customer}</SectionTitle>
+
+            {user ? (
+              <Notice tone="success">
+                {dict.auth.signedInAs} {user.email}
+              </Notice>
+            ) : (
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border border-line bg-bone px-4 py-3 text-[13.5px] text-graphite">
+                <span>{dict.checkout.signInPrompt}</span>
+                <Link
+                  href={`${r.login}?next=${encodeURIComponent(r.checkout)}`}
+                  className="font-medium text-gold-600 underline-offset-4 hover:underline"
+                >
+                  {dict.auth.signIn}
+                </Link>
+                <span className="text-mist">·</span>
+                <span className="text-stone">{dict.checkout.guestNote}</span>
+              </div>
+            )}
+
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label={dict.common.name} required error={errors.name}>
                 <Input value={form.name} onChange={(e) => set("name", e.target.value)} autoComplete="given-name" />
