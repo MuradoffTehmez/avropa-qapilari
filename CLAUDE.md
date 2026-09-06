@@ -48,6 +48,32 @@ Dəyişiklikdən sonra üçünü də işlət. Lint xəbərdarlıqları da təmiz
 
 ---
 
+## Tipoqrafiya
+
+İki şrift işlənir:
+
+- **Inter** (`font-sans`) — bütün UI, mətn, forma, admin, cədvəl
+- **Fraunces** (`font-display`) — yalnız marketinq başlıqları: `h1`,
+  `SectionHeading` başlığı. Admin panelə və UI elementlərinə tətbiq etmə.
+
+Yeni marketinq səhifəsi yazanda `h1`-ə `font-display` sinfini əlavə et.
+Şrift dəyişdirilərsə Azərbaycan hərflərinin (`ə ı İ ğ ş ç ö ü`) glif
+dəstəyini mütləq yoxla — Google Fonts-da `latin-ext` altçoxluğu lazımdır.
+
+---
+
+## Məhsul şəkilləri
+
+`Product.images` boş olduqca sayt SVG qapı vizualını göstərir.
+İstehsalçı kataloqundan foto gələndə `public/products/<sku>/` qovluğuna
+qoyulur və seed-də qeyd olunur — komponentlərdə dəyişiklik lazım deyil.
+Qayda: [`public/products/README.md`](public/products/README.md).
+
+Vizual göstərmək lazım olanda `ProductMedia` komponentindən istifadə et,
+`DoorVisual`-ı birbaşa çağırma (foto dəstəyi itir).
+
+---
+
 ## Dizayn sistemi
 
 Palitra loqodan çıxarılıb — dəyişdirmə:
