@@ -358,3 +358,42 @@ svg {
     overflow-x: auto;
   }
 }
+
+/* ---------------------------------------------------------------------- */
+/* shadcn/ui token körpüsü                                                */
+/*                                                                        */
+/* shadcn komponentləri `bg-primary`, `text-muted-foreground` kimi öz     */
+/* adlarını gözləyir. Onları EuroPorta palitrasına bağlayırıq ki,         */
+/* `src/components/shadcn/` altındakı komponentlər də brend rənglərində   */
+/* görünsün. Mövcud tokenlərə toxunulmur — yalnız ad əlavə olunur.        */
+/* ---------------------------------------------------------------------- */
+
+@theme {
+  --color-background: var(--color-paper);
+  --color-foreground: var(--color-ink);
+
+  --color-card: var(--color-paper);
+  --color-card-foreground: var(--color-ink);
+  --color-popover: var(--color-paper);
+  --color-popover-foreground: var(--color-ink);
+
+  --color-primary: var(--color-ink);
+  --color-primary-foreground: var(--color-paper);
+  --color-secondary: var(--color-bone);
+  --color-secondary-foreground: var(--color-graphite);
+
+  --color-muted: var(--color-bone);
+  --color-muted-foreground: var(--color-stone);
+  --color-accent: var(--color-gold-100);
+  --color-accent-foreground: var(--color-ink);
+
+  --color-destructive: var(--color-danger);
+  --color-destructive-foreground: var(--color-paper);
+
+  --color-border: var(--color-line);
+  --color-input: var(--color-line);
+  --color-ring: var(--color-gold-500);
+
+  /* Layihə radiusları minimaldır — shadcn-in 10px defoltunu qəbul etmirik. */
+  --radius: 4px;
+}
