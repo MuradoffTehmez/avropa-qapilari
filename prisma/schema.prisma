@@ -1,0 +1,282 @@
+// EuroPorta — Mərhələ 2 data modeli (PRD §138–§158).
+//
+// SQLite seçilib, çünki Cloudflare D1 SQLite üzərindədir: eyni sxem
+// lokal inkişafda da, D1-də də işləyir (PRD §8, §9).
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/* ------------------------------ İstifadəçi ----------------------------- */
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  phone     String?
+  name      String
+  // scrypt hash — açıq mətn heç vaxt saxlanılmır (PRD §89)
+  password  String
+  role      String   @default("CUSTOMER") // CUSTOMER | TECHNICIAN | ADMIN
+  createdAt DateTime @default(now())
+
+  sessions       Session[]
+  orders         Order[]
+  configurations Configuration[]
+  repairs        RepairRequest[]
+  measurements   MeasurementRequest[]
+  quotes         QuoteRequest[]
+
+  @@index([role])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  // Kukidə saxlanılan tokenin SHA-256 hash-i; baza sızsa belə
+  // sessiya bərpa edilə bilməz.
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+/* -------------------------------- Kataloq ------------------------------ */
+
+model Brand {
+  id       String    @id @default(cuid())
+  slug     String    @unique
+  name     String
+  country  String
+  founded  Int
+  products Product[]
+}
+
+model Category {
+  id       String    @id @default(cuid())
+  slug     String    @unique
+  name     String
+  products Product[]
+}
+
+model Product {
+  id               String  @id @default(cuid())
+  slug             String  @unique
+  sku              String  @unique
+  name             String
+  collection       String
+  basePrice        Int
+  oldPrice         Int?
+  material         String
+  securityClass    String
+  fireRating       String?
+  soundInsulationDb Int
+  warrantyYears    Int
+  style            String
+  inStock          Boolean @default(true)
+  isNew            Boolean @default(false)
+  isBestseller     Boolean @default(false)
+  onSale           Boolean @default(false)
+  rating           Float   @default(0)
+  reviewCount      Int     @default(0)
+  defaultWidth     Int
+  defaultHeight    Int
+  minWidth         Int
+  maxWidth         Int
+  minHeight        Int
+  maxHeight        Int
+  deliveryDaysMin  Int
+  deliveryDaysMax  Int
+  // Konfiquratorda göstərilən option qrupları, JSON massiv
+  optionGroups     String
+  panelHexes       String
+
+  categoryId String
+  brandId    String
+  category   Category @relation(fields: [categoryId], references: [id])
+  brand      Brand    @relation(fields: [brandId], references: [id])
+
+  orderItems     OrderItem[]
+  configurations Configuration[]
+
+  @@index([categoryId])
+  @@index([brandId])
+  @@index([basePrice])
+}
+
+/* ------------------------------ Konfiqurator --------------------------- */
+
+model OptionValue {
+  id          String  @id
+  groupKey    String
+  code        String
+  label       String
+  description String?
+  priceDelta  Int     @default(0)
+  hex         String?
+  // Uyğunluq qaydaları, JSON massiv (PRD §97)
+  requires    String?
+  excludes    String?
+
+  @@index([groupKey])
+}
+
+model Configuration {
+  id        String   @id @default(cuid())
+  // Paylaşma üçün public kod; daxili id açıqlanmır (PRD §62 prinsipi)
+  code      String   @unique
+  productId String
+  userId    String?
+  width     Int
+  height    Int
+  // Seçimlər: { groupKey: optionValueId | optionValueId[] }
+  choices   String
+  // Serverdə hesablanmış yekun qiymət (PRD §130)
+  total     Int
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+}
+
+/* -------------------------------- Sifariş ------------------------------ */
+
+model Order {
+  id       String @id @default(cuid())
+  // ORD-2026-000001 (PRD §62)
+  number   String @unique
+  userId   String?
+  status   String @default("CONFIRMED")
+
+  customerName  String
+  customerPhone String
+  customerEmail String
+  address       String
+
+  subtotal Int
+  discount Int @default(0)
+  total    Int
+
+  // Təkrar göndərişin qarşısını alır (PRD §137)
+  idempotencyKey String? @unique
+
+  createdAt DateTime @default(now())
+
+  user    User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items   OrderItem[]
+  history OrderStatusHistory[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id        String @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int    @default(1)
+  // Sifariş anındakı qiymət — sonra məhsul qiyməti dəyişsə də donur
+  unitPrice Int
+  width     Int
+  height    Int
+  // Seçilmiş option id-ləri, JSON (PRD §65 order snapshot)
+  snapshot  String
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+}
+
+model OrderStatusHistory {
+  id        String   @id @default(cuid())
+  orderId   String
+  status    String
+  createdAt DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+/* -------------------------------- Servis ------------------------------- */
+
+model RepairRequest {
+  id          String   @id @default(cuid())
+  number      String   @unique
+  userId      String?
+  category    String
+  doorType    String
+  description String
+  city        String
+  address     String
+  preferredAt String?
+  name        String
+  phone       String
+  status      String   @default("NEW")
+  createdAt   DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+}
+
+model MeasurementRequest {
+  id           String   @id @default(cuid())
+  number       String   @unique
+  userId       String?
+  propertyType String
+  doorCount    Int
+  city         String
+  address      String
+  preferredAt  String?
+  name         String
+  phone        String
+  note         String?
+  status       String   @default("NEW")
+  createdAt    DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+}
+
+model QuoteRequest {
+  id        String   @id @default(cuid())
+  number    String   @unique
+  userId    String?
+  name      String
+  phone     String
+  email     String?
+  productId String?
+  width     Int?
+  height    Int?
+  message   String
+  status    String   @default("NEW")
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+}
+
+/* ------------------------------- Nömrələr ------------------------------ */
+
+// ORD-2026-000001 kimi ardıcıl nömrələr üçün sayğac.
+// Tranzaksiya daxilində artırılır ki, paralel sorğularda təkrar olmasın.
+model Counter {
+  key   String @id
+  value Int    @default(0)
+}

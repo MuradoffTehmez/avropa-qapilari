@@ -7,9 +7,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:seed": "prisma db seed",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.41.0",
@@ -19,6 +24,7 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "tailwind-merge": "^3.6.0",
+    "zod": "^4.5.4",
     "zustand": "^5.0.15"
   },
   "devDependencies": {
@@ -29,8 +35,13 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
+    "prisma": "^6.19.3",
     "tailwindcss": "^4",
+    "tsx": "^4.23.13",
     "typescript": "^5"
   },
-  "description": "Avropa qapılarının satışı, konfiqurasiyası, quraşdırılması və təmiri üçün platforma — frontend (Mərhələ 1)"
+  "description": "Avropa qapılarının satışı, konfiqurasiyası, quraşdırılması və təmiri üçün platforma — frontend (Mərhələ 1)",
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
 }
