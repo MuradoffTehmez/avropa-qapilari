@@ -31,6 +31,8 @@ import {
 import { Accordion, Tabs } from "@/components/ui/disclosure";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductActions } from "@/components/product/ProductActions";
+import { CertificateBadges } from "@/components/product/CertificateBadges";
+import { StickyBuyBar } from "@/components/product/StickyBuyBar";
 import { ProductCard } from "@/components/product/ProductCard";
 import { getProduct, getRelatedProducts, products } from "@/mock/products";
 import { getBrand, getCategory } from "@/mock/taxonomy";
@@ -138,7 +140,7 @@ export default async function ProductPage({
             </Badge>
           </div>
 
-          <h1 className="mt-4 text-balance-heading text-2xl font-semibold leading-tight tracking-tight text-ink sm:text-3xl lg:text-[2.35rem]">
+          <h1 className="font-display mt-4 text-balance-heading text-2xl font-semibold leading-tight tracking-tight text-ink sm:text-3xl lg:text-[2.35rem]">
             {product.name}
           </h1>
 
@@ -189,7 +191,9 @@ export default async function ProductPage({
             />
           </div>
 
-          <div className="mt-7">
+          <CertificateBadges product={product} dict={dict} className="mt-6" />
+
+          <div id="product-actions" className="mt-7 scroll-mt-24">
             <ProductActions product={product} locale={locale} dict={dict} />
           </div>
 
@@ -471,6 +475,8 @@ export default async function ProductPage({
           ]}
         />
       </div>
+
+      <StickyBuyBar product={product} locale={locale} dict={dict} />
 
       {/* ---------------------------------------------------- RELATED */}
       {related.length > 0 && (

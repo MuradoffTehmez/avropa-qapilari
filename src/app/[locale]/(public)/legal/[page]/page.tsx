@@ -208,7 +208,7 @@ export default async function LegalPageView({
           <Breadcrumbs
             items={[{ label: dict.nav.home, href: r.home }, { label: dict.footer.legal }, { label: item.title }]}
           />
-          <h1 className="mt-4 text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
+          <h1 className="font-display mt-4 text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
             {item.title}
           </h1>
           <p className="mt-2 text-[13px] text-stone">

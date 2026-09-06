@@ -1,5 +1,6 @@
 import type {
   DoorMaterial,
+  ProductImage,
   OptionGroupKey,
   Product,
   ProductDocument,
@@ -73,6 +74,7 @@ interface Seed {
   short: string;
   wide?: boolean;
   interior?: boolean;
+  images?: ProductImage[];
 }
 
 const seeds: Seed[] = [
@@ -197,6 +199,7 @@ function build(seed: Seed, index: number): Product {
 
     deliveryDays: seed.madeToOrder ? [21, 35] : [3, 7],
     panelHexes: seed.panelHexes,
+    images: seed.images ?? [],
 
     specs: [
       { group: "Konstruksiya", label: "Material", value: materialLabel(seed.material) },

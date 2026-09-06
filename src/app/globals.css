@@ -49,6 +49,7 @@
 
   /* Tipoqrafiya */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  --font-display: var(--font-display), Georgia, "Times New Roman", serif;
 
   /* Radiuslar — arxitektural: az yumşaldılmış */
   --radius-xs: 2px;
@@ -158,6 +159,15 @@ svg {
 
 @utility text-balance-heading {
   text-wrap: balance;
+}
+
+/** Marketinq başlıqları — redaksiya serifi. UI və admin sans qalır. */
+@utility font-display {
+  font-family: var(--font-display);
+  font-variation-settings:
+    "SOFT" 0,
+    "WONK" 0;
+  letter-spacing: -0.015em;
 }
 
 @utility hide-scrollbar {

@@ -150,6 +150,33 @@ export const az = {
     maintenanceText: "Dövri texniki baxış, tənzimləmə və yağlama.",
   },
 
+  trust: {
+    securityCertified: "EN 1627 üzrə sertifikatlı təhlükəsizlik sinifləri",
+    technicianResponse: "Təmir müraciətinə usta cavabı",
+    warrantyRange: "Serial nömrəyə bağlı zəmanət",
+  },
+
+  process: {
+    eyebrow: "Proses",
+    title: "Ölçüdən zəmanətə qədər",
+    text: "Beş addım — hər mərhələdə kimin nə etdiyi bəllidir.",
+    step1: "Ölçü",
+    step1Text: "Usta ünvana gəlir, açırımı ölçür və uyğun modelləri təklif edir.",
+    step1Meta: "Sifarişlə pulsuz",
+    step2: "Konfiqurasiya",
+    step2Text: "Rəng, kilid, dəstək və aksesuarları seçirsiniz, qiyməti dərhal görürsünüz.",
+    step2Meta: "Onlayn və ya showroom-da",
+    step3: "İstehsal",
+    step3Text: "Sifariş Avropa zavoduna göndərilir və ölçünüzə uyğun hazırlanır.",
+    step3Meta: "3–35 iş günü",
+    step4: "Quraşdırma",
+    step4Text: "Sertifikatlı briqada qapını quraşdırır, tənzimləyir və yeri təmizləyir.",
+    step4Meta: "120 AZN-dən",
+    step5: "Zəmanət",
+    step5Text: "Qapıya serial nömrə verilir; bütün servis işləri həmin nömrəyə bağlanır.",
+    step5Meta: "3–10 il",
+  },
+
   catalog: {
     title: "Qapı kataloqu",
     subtitle: "Bütün modellər, filtrlər və müqayisə.",

@@ -53,7 +53,7 @@ export default async function ProjectPage({
           <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-gold-600">
             {project.location}
           </p>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-ink sm:text-3xl lg:text-[2.35rem]">
+          <h1 className="font-display mt-2 text-2xl font-semibold tracking-tight text-ink sm:text-3xl lg:text-[2.35rem]">
             {project.title}
           </h1>
         </div>

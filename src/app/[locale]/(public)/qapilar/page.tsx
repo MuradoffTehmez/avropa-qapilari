@@ -29,7 +29,7 @@ export default async function CatalogPage({
           <Breadcrumbs
             items={[{ label: dict.nav.home, href: r.home }, { label: dict.catalog.title }]}
           />
-          <h1 className="mt-4 text-2xl font-semibold tracking-tight text-ink sm:text-3xl lg:text-[2.35rem]">
+          <h1 className="font-display mt-4 text-2xl font-semibold tracking-tight text-ink sm:text-3xl lg:text-[2.35rem]">
             {dict.catalog.title}
           </h1>
           <p className="mt-2 max-w-xl text-[15px] text-stone">{dict.catalog.subtitle}</p>

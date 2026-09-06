@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Fraunces, Inter } from "next/font/google";
 import { notFound } from "next/navigation";
 import "@/app/globals.css";
 
@@ -14,6 +14,14 @@ const inter = Inter({
   subsets: ["latin", "latin-ext", "cyrillic"],
   display: "swap",
   variable: "--font-inter",
+});
+
+/** Başlıqlar üçün — redaksiya xarakterli variasiyalı serif. */
+const fraunces = Fraunces({
+  subsets: ["latin", "latin-ext"],
+  display: "swap",
+  axes: ["SOFT", "WONK", "opsz"],
+  variable: "--font-display",
 });
 
 export const viewport: Viewport = {
@@ -77,7 +85,7 @@ export default async function LocaleLayout({
   const dict = getDictionary(typedLocale);
 
   return (
-    <html lang={typedLocale} className={inter.variable}>
+    <html lang={typedLocale} className={`${inter.variable} ${fraunces.variable}`}>
       <body className="min-h-dvh bg-paper antialiased">
         <a
           href="#main"

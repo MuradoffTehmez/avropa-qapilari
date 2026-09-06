@@ -60,6 +60,23 @@ export interface ProductSpec {
   value: string;
 }
 
+/**
+ * Məhsul şəkli. İstehsalçı kataloqundan gələn fayllar `public/products/`
+ * qovluğuna qoyulur və burada qeyd olunur. Boş massiv olduqda
+ * komponentlər avtomatik SVG vizuala keçir.
+ */
+export interface ProductImage {
+  /** `/products/mil-720/01.webp` kimi yol */
+  src: string;
+  alt: string;
+  /** Əsas kart şəkli */
+  primary?: boolean;
+  /** Hansı rəng variantına aiddir (option id) */
+  colorOptionId?: string;
+  width?: number;
+  height?: number;
+}
+
 export interface ProductDocument {
   id: string;
   type: "TECH_SHEET" | "CERTIFICATE" | "INSTALLATION" | "WARRANTY";
@@ -110,6 +127,8 @@ export interface Product {
 
   deliveryDays: [number, number];
   panelHexes: string[];
+  /** İstehsalçı kataloqundan gələn fotolar; boş olduqda SVG vizual göstərilir. */
+  images: ProductImage[];
   specs: ProductSpec[];
   documents: ProductDocument[];
   optionGroups: OptionGroupKey[];

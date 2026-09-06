@@ -52,7 +52,7 @@ export default async function BlogPostPage({
           <Badge tone="gold" className="mt-4">
             {post.category}
           </Badge>
-          <h1 className="mt-3 max-w-3xl text-balance-heading text-2xl font-semibold leading-tight tracking-tight text-ink sm:text-3xl lg:text-[2.4rem]">
+          <h1 className="font-display mt-3 max-w-3xl text-balance-heading text-2xl font-semibold leading-tight tracking-tight text-ink sm:text-3xl lg:text-[2.4rem]">
             {post.title}
           </h1>
           <p className="mt-3 text-[13px] text-stone">

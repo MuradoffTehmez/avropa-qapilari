@@ -153,6 +153,33 @@ export const en: Dictionary = {
     maintenanceText: "Periodic inspection, adjustment and lubrication.",
   },
 
+  trust: {
+    securityCertified: "Security classes certified to EN 1627",
+    technicianResponse: "Technician response to a repair request",
+    warrantyRange: "Warranty tied to a serial number",
+  },
+
+  process: {
+    eyebrow: "Process",
+    title: "From measurement to warranty",
+    text: "Five steps — at every stage you know who does what.",
+    step1: "Measurement",
+    step1Text: "A technician visits, measures the opening and recommends matching models.",
+    step1Meta: "Free with an order",
+    step2: "Configuration",
+    step2Text: "You choose colour, lock, handle and accessories, and see the price instantly.",
+    step2Meta: "Online or in the showroom",
+    step3: "Production",
+    step3Text: "The order goes to the European factory and is built to your dimensions.",
+    step3Meta: "3–35 working days",
+    step4: "Installation",
+    step4Text: "A certified crew installs the door, adjusts it and clears the site.",
+    step4Meta: "From 120 AZN",
+    step5: "Warranty",
+    step5Text: "The door gets a serial number; every service record is tied to it.",
+    step5Meta: "3–10 years",
+  },
+
   catalog: {
     title: "Door catalogue",
     subtitle: "All models, filters and comparison.",

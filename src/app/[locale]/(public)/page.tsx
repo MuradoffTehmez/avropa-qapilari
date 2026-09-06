@@ -19,6 +19,8 @@ import { Badge, Section, SectionHeading, Stat, Rating } from "@/components/ui/pr
 import { Accordion } from "@/components/ui/disclosure";
 import { DoorVisual } from "@/components/product/DoorVisual";
 import { ProductCard } from "@/components/product/ProductCard";
+import { TrustStrip } from "@/components/home/TrustStrip";
+import { ProcessSection } from "@/components/home/ProcessSection";
 import { categories, brands } from "@/mock/taxonomy";
 import { getFeaturedProducts } from "@/mock/products";
 import { faq, projects, reviews } from "@/mock/content";
@@ -78,7 +80,7 @@ export default async function HomePage({
             <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.24em] text-gold-300 sm:mb-5 sm:text-[11px] sm:tracking-[0.28em]">
               {dict.home.heroEyebrow}
             </p>
-            <h1 className="text-balance-heading text-[1.9rem] font-semibold leading-[1.1] tracking-tight sm:text-[2.75rem] lg:text-[3.25rem] xl:text-[3.75rem]">
+            <h1 className="font-display text-balance-heading text-[1.9rem] font-semibold leading-[1.1] tracking-tight sm:text-[2.75rem] lg:text-[3.25rem] xl:text-[3.75rem]">
               {dict.home.heroTitleTop}
               <br />
               <span className="text-gold-300">{dict.home.heroTitleBottom}</span>
@@ -149,6 +151,8 @@ export default async function HomePage({
           </div>
         </div>
       </Section>
+
+      <TrustStrip locale={locale} dict={dict} />
 
       {/* ------------------------------------------------ CONFIGURATOR */}
       <Section tone="bone" className="border-y border-line">
@@ -249,6 +253,8 @@ export default async function HomePage({
           </div>
         </div>
       </Section>
+
+      <ProcessSection locale={locale} dict={dict} />
 
       {/* ------------------------------------------------------ REPAIR */}
       <section className="bg-ink text-paper">

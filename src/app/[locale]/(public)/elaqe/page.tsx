@@ -81,7 +81,7 @@ export default async function ContactPage({
           <Breadcrumbs
             items={[{ label: dict.nav.home, href: r.home }, { label: dict.nav.contact }]}
           />
-          <h1 className="mt-4 text-2xl font-semibold tracking-tight text-ink sm:text-3xl lg:text-[2.35rem]">
+          <h1 className="font-display mt-4 text-2xl font-semibold tracking-tight text-ink sm:text-3xl lg:text-[2.35rem]">
             {dict.nav.contact}
           </h1>
         </div>

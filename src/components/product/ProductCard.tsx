@@ -7,7 +7,7 @@ import type { Locale, Product } from "@/types";
 import { routes } from "@/lib/routes";
 import { cn, formatPrice } from "@/lib/utils";
 import { Badge } from "@/components/ui/primitives";
-import { DoorVisual } from "@/components/product/DoorVisual";
+import { ProductMedia } from "@/components/product/ProductMedia";
 import { useCompare, useFavorites } from "@/store/lists";
 import { useHydrated } from "@/lib/hooks";
 import { toast } from "@/components/ui/overlays";
@@ -99,7 +99,7 @@ export function ProductCard({
         {badges}
         {actions}
         <div className="relative aspect-3/4 w-24 shrink-0 overflow-hidden bg-bone sm:w-36">
-          <DoorVisual panelHex={product.panelHexes[0]} style={product.style} glass={product.hasGlass ? "SATIN" : "NONE"} />
+          <ProductMedia product={product} sizes="(max-width: 640px) 30vw, 150px" />
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col justify-between py-1">
@@ -145,13 +145,9 @@ export function ProductCard({
 
       <div className="door-frame border-b border-line">
         <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-[1.03]">
-          <DoorVisual
-            panelHex={product.panelHexes[0]}
-            style={product.style}
-            glass={product.hasGlass ? "SATIN" : "NONE"}
-            smartLock={product.smartLockReady && product.categorySlug === "smart-qapilar"}
-            widthMm={product.defaultWidth}
-            heightMm={product.defaultHeight}
+          <ProductMedia
+            product={product}
+            sizes="(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 25vw"
           />
         </div>
       </div>

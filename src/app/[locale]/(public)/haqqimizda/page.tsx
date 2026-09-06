@@ -30,7 +30,7 @@ export default async function AboutPage({
       <div className="border-b border-line bg-bone">
         <div className="container-page py-8 sm:py-10">
           <Breadcrumbs items={[{ label: dict.nav.home, href: r.home }, { label: dict.nav.about }]} />
-          <h1 className="mt-4 max-w-3xl text-balance-heading text-2xl font-semibold leading-tight tracking-tight text-ink sm:text-3xl lg:text-[2.5rem]">
+          <h1 className="font-display mt-4 max-w-3xl text-balance-heading text-2xl font-semibold leading-tight tracking-tight text-ink sm:text-3xl lg:text-[2.5rem]">
             Qapı bir məhsul deyil — uzunmüddətli münasibətdir
           </h1>
           <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-stone">

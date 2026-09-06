@@ -57,7 +57,7 @@ export default async function CategoryPage({
               { label: categoryName(cat, dict) },
             ]}
           />
-          <h1 className="mt-4 text-2xl font-semibold tracking-tight text-ink sm:text-3xl lg:text-[2.35rem]">
+          <h1 className="font-display mt-4 text-2xl font-semibold tracking-tight text-ink sm:text-3xl lg:text-[2.35rem]">
             {categoryName(cat, dict)}
           </h1>
           <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-stone">
