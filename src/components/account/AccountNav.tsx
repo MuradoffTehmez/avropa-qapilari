@@ -62,7 +62,7 @@ export function AccountNav({ locale, dict }: { locale: Locale; dict: Dictionary 
         })}
         <li className="shrink-0 lg:mt-4 lg:border-t lg:border-line lg:pt-4">
           <button
-            onClick={() => { router.push(`/${locale}/giris`); }}
+            onClick={() => { router.push(r.login); }}
             type="button"
             className="flex w-full items-center gap-2.5 whitespace-nowrap border border-line px-3 py-2.5 text-[13.5px] text-stone transition-colors hover:text-danger lg:border-0 lg:px-3"
           >

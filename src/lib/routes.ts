@@ -52,6 +52,9 @@ export function routes(locale: Locale) {
     cart: `${base}/${seg("cart", locale)}`,
     checkout: `${base}/${seg("checkout", locale)}`,
 
+    login: `${base}/${seg("login", locale)}`,
+    technician: `${base}/${seg("technician", locale)}`,
+
     account: `${base}/${seg("account", locale)}`,
     accountSection: (section: string) => `${base}/${seg("account", locale)}/${section}`,
 

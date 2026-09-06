@@ -38,4 +38,6 @@ export const routeSegments = {
   favorites: { az: "favoritler", en: "favorites", ru: "izbrannoe" },
   compare: { az: "muqayise", en: "compare", ru: "sravnenie" },
   account: { az: "hesab", en: "account", ru: "kabinet" },
+  login: { az: "giris", en: "login", ru: "vhod" },
+  technician: { az: "usta", en: "technician", ru: "master" },
 } as const;
