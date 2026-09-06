@@ -5,10 +5,20 @@ import { routes } from "@/lib/routes";
 import { Breadcrumbs } from "@/components/ui/primitives";
 import { FavoritesView } from "@/components/product/FavoritesView";
 
-export const metadata: Metadata = {
-  title: "Favorilər",
-  robots: { index: false, follow: true },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const dict = getDictionary(isLocale(locale) ? locale : "az");
+
+  return {
+    title: dict.pageMeta.favorites.title,
+    robots: { index: false, follow: true },
+  };
+}
+
 
 export default async function Page({
   params,

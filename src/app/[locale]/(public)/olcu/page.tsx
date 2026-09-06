@@ -5,10 +5,20 @@ import { routes } from "@/lib/routes";
 import { Breadcrumbs } from "@/components/ui/primitives";
 import { MeasurementForm } from "@/components/repair/MeasurementForm";
 
-export const metadata: Metadata = {
-  title: "Ölçü ustası sifarişi",
-  description: "Pulsuz ölçü xidməti. Usta ünvana gəlir və dəqiq ölçü götürür.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const dict = getDictionary(isLocale(locale) ? locale : "az");
+
+  return {
+    title: dict.pageMeta.measurement.title,
+    description: dict.pageMeta.measurement.description,
+  };
+}
+
 
 export default async function Page({
   params,

@@ -82,7 +82,7 @@ export function SearchOverlay({
                 {dict.common.popularSearches}
               </p>
               <div className="flex flex-wrap gap-2">
-                {["Milano", "Smart lock", "RC3", "Villa", "Şüşəli", "RAL 7016"].map((s) => (
+                {dict.common.searchSuggestions.map((s) => (
                   <button
                     key={s}
                     type="button"

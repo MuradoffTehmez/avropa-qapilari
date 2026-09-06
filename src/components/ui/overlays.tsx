@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEscapeKey, useHydrated, useLockBodyScroll } from "@/lib/hooks";
+import { useDict } from "@/i18n/provider";
 
 function Portal({ children }: { children: ReactNode }) {
   const mounted = useHydrated();
@@ -29,6 +30,7 @@ export function Drawer({
   footer?: ReactNode;
   widthClass?: string;
 }) {
+  const dict = useDict();
   const close = useCallback(() => onClose(), [onClose]);
   useEscapeKey(close, open);
   useLockBodyScroll(open);
@@ -40,7 +42,7 @@ export function Drawer({
       <div className="fixed inset-0 z-100" role="dialog" aria-modal="true" aria-label={title}>
         <button
           type="button"
-          aria-label="Bağla"
+          aria-label={dict.actions.close}
           onClick={close}
           className="absolute inset-0 bg-obsidian/45 backdrop-blur-[2px]"
         />
@@ -57,7 +59,7 @@ export function Drawer({
             <button
               type="button"
               onClick={close}
-              aria-label="Bağla"
+              aria-label={dict.actions.close}
               className="-mr-2 flex h-9 w-9 items-center justify-center text-stone transition-colors hover:text-ink"
             >
               <X size={18} />
@@ -86,6 +88,7 @@ export function Modal({
   children: ReactNode;
   footer?: ReactNode;
 }) {
+  const dict = useDict();
   const close = useCallback(() => onClose(), [onClose]);
   useEscapeKey(close, open);
   useLockBodyScroll(open);
@@ -97,7 +100,7 @@ export function Modal({
       <div className="fixed inset-0 z-100 flex items-end justify-center p-0 sm:items-center sm:p-6">
         <button
           type="button"
-          aria-label="Bağla"
+          aria-label={dict.actions.close}
           onClick={close}
           className="absolute inset-0 bg-obsidian/45 backdrop-blur-[2px]"
         />
@@ -112,7 +115,7 @@ export function Modal({
             <button
               type="button"
               onClick={close}
-              aria-label="Bağla"
+              aria-label={dict.actions.close}
               className="-mr-2 flex h-9 w-9 items-center justify-center text-stone transition-colors hover:text-ink"
             >
               <X size={18} />

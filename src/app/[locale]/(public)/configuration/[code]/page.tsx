@@ -6,10 +6,20 @@ import { routes } from "@/lib/routes";
 import { Breadcrumbs, Skeleton } from "@/components/ui/primitives";
 import { SharedConfiguration } from "@/components/configurator/SharedConfiguration";
 
-export const metadata: Metadata = {
-  title: "Paylaşılan konfiqurasiya",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const dict = getDictionary(isLocale(locale) ? locale : "az");
+
+  return {
+    title: dict.pageMeta.sharedConfiguration.title,
+    robots: { index: false, follow: false },
+  };
+}
+
 
 export default async function SharedConfigurationPage({
   params,

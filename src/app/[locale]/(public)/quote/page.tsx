@@ -5,10 +5,20 @@ import { routes } from "@/lib/routes";
 import { Breadcrumbs } from "@/components/ui/primitives";
 import { QuoteForm } from "@/components/repair/QuoteForm";
 
-export const metadata: Metadata = {
-  title: "Qiymət təklifi",
-  description: "Fərdi ölçü, toplu sifariş və xüsusi tələblər üçün qiymət təklifi alın.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const dict = getDictionary(isLocale(locale) ? locale : "az");
+
+  return {
+    title: dict.pageMeta.quote.title,
+    description: dict.pageMeta.quote.description,
+  };
+}
+
 
 export default async function Page({
   params,

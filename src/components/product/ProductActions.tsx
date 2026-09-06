@@ -50,7 +50,7 @@ export function ProductActions({
         lines: [{ group: "Konfiqurasiya", value: "Standart (bazis)" }],
       },
     });
-    toast("Səbətə əlavə edildi");
+    toast(dict.actions.addedToCart);
   }
 
   return (
@@ -70,7 +70,7 @@ export function ProductActions({
           size="sm"
           onClick={() => {
             toggleFav(product.id);
-            toast(isFav ? "Favorilərdən çıxarıldı" : "Favorilərə əlavə edildi");
+            toast(isFav ? dict.product.removedFromFavorites : dict.product.addedToFavorites);
           }}
           className={cn("flex-1 border border-line", isFav && "text-gold-600")}
         >
@@ -84,7 +84,7 @@ export function ProductActions({
           onClick={() => {
             const res = toggleCmp(product.id);
             if (res === "full") toast(`Müqayisədə maksimum ${COMPARE_LIMIT} məhsul ola bilər`);
-            else toast(res === "added" ? "Müqayisəyə əlavə edildi" : "Müqayisədən çıxarıldı");
+            else toast(res === "added" ? dict.product.addedToCompare : dict.product.removedFromCompare);
           }}
           className={cn("flex-1 border border-line", isCmp && "text-ink")}
         >

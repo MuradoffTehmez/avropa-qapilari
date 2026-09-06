@@ -9,11 +9,20 @@ import { ButtonLink } from "@/components/ui/Button";
 import { brands } from "@/mock/taxonomy";
 import { technicians } from "@/mock/content";
 
-export const metadata: Metadata = {
-  title: "Haqqımızda",
-  description:
-    "Avropa istehsalı qapıların satışı, quraşdırılması və servisi üzrə ixtisaslaşmış komanda.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const dict = getDictionary(isLocale(locale) ? locale : "az");
+
+  return {
+    title: dict.pageMeta.about.title,
+    description: dict.pageMeta.about.description,
+  };
+}
+
 
 export default async function AboutPage({
   params,

@@ -1,3 +1,4 @@
+import type { Dictionary } from "@/i18n";
 import type { DoorMaterial, Product, SecurityClass, SurfaceStyle } from "@/types";
 
 /** Kataloq filtrləri və sıralama. */
@@ -128,16 +129,23 @@ export function sortProducts(products: Product[], key: SortKey): Product[] {
   }
 }
 
-/** Filter panelində göstərilən rəng seçimləri. */
-export const filterColors: { hex: string; label: string }[] = [
-  { hex: "#383e42", label: "Antrasit" },
-  { hex: "#0e0e10", label: "Qara" },
-  { hex: "#f1f0ea", label: "Ağ" },
-  { hex: "#6b665e", label: "Boz" },
-  { hex: "#a9743c", label: "Qızılı palıd" },
-  { hex: "#5b3a26", label: "Qoz" },
-  { hex: "#33312e", label: "Antrasit ağac" },
-  { hex: "#c8a678", label: "Açıq palıd" },
-  { hex: "#ece4d5", label: "Fil sümüyü" },
-  { hex: "#c9ced1", label: "Şüşə" },
+/** Filter panelindəki rəng seçimləri; `key` sözlükdəki `catalog.colors` açarıdır. */
+export const filterColors: { hex: string; key: ColorKey }[] = [
+  { hex: "#383e42", key: "anthracite" },
+  { hex: "#0e0e10", key: "black" },
+  { hex: "#f1f0ea", key: "white" },
+  { hex: "#6b665e", key: "grey" },
+  { hex: "#a9743c", key: "oakGold" },
+  { hex: "#5b3a26", key: "walnut" },
+  { hex: "#33312e", key: "anthraciteWood" },
+  { hex: "#c8a678", key: "oakLight" },
+  { hex: "#ece4d5", key: "ivory" },
+  { hex: "#c9ced1", key: "glass" },
 ];
+
+export type ColorKey = keyof Dictionary["catalog"]["colors"];
+
+/** Rəng filtrinin cari dildəki adı. */
+export function colorName(key: ColorKey, dict: Dictionary): string {
+  return dict.catalog.colors[key];
+}

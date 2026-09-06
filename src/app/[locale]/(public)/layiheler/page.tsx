@@ -7,10 +7,20 @@ import { DoorScene } from "@/components/product/DoorScene";
 import Link from "next/link";
 import { projects } from "@/mock/content";
 
-export const metadata: Metadata = {
-  title: "Layihələr",
-  description: "Villa, mənzil, ofis və kommersiya obyektlərində quraşdırdığımız qapılar.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const dict = getDictionary(isLocale(locale) ? locale : "az");
+
+  return {
+    title: dict.pageMeta.projects.title,
+    description: dict.pageMeta.projects.description,
+  };
+}
+
 
 export default async function ProjectsPage({
   params,

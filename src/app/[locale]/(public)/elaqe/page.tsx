@@ -8,10 +8,20 @@ import { brand, hasContact } from "@/config/brand";
 import { Breadcrumbs, Card, Section } from "@/components/ui/primitives";
 import { ContactForm } from "@/components/layout/ContactForm";
 
-export const metadata: Metadata = {
-  title: "Əlaqə",
-  description: "Sual verin — operatorumuz cavablandırsın. Ölçü, quraşdırma və təmir üzrə əlaqə.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const dict = getDictionary(isLocale(locale) ? locale : "az");
+
+  return {
+    title: dict.pageMeta.contact.title,
+    description: dict.pageMeta.contact.description,
+  };
+}
+
 
 export default async function ContactPage({
   params,

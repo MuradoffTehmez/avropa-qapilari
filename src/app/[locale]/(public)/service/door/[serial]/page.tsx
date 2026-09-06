@@ -18,10 +18,20 @@ export function generateStaticParams() {
   );
 }
 
-export const metadata: Metadata = {
-  title: "Qapı pasportu",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const dict = getDictionary(isLocale(locale) ? locale : "az");
+
+  return {
+    title: dict.pageMeta.doorPassport.title,
+    robots: { index: false, follow: false },
+  };
+}
+
 
 /**
  * QR ilə açılan public qapı səhifəsi.

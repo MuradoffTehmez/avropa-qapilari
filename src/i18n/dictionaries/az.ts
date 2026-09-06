@@ -6,6 +6,78 @@ export const az = {
       "Avropa istehsalı giriş, villa və interyer qapıları. Onlayn konfiqurator, ölçü ustası, quraşdırma, təmir və zəmanət.",
   },
 
+  pageMeta: {
+    catalog: {
+      title: "Qapı kataloqu",
+      description:
+        "Avropa istehsalı giriş, villa, otaq, təhlükəsizlik və smart qapılar. Filtr, müqayisə və onlayn konfiqurasiya.",
+    },
+    configurator: {
+      title: "Qapı konfiquratoru",
+      description:
+        "Qapını addım-addım konfiqurasiya edin: ölçü, rəng, çərçivə, şüşə, dəstək, kilid, smart lock və aksesuar. Qiymət real vaxtda hesablanır.",
+    },
+    services: {
+      title: "Xidmətlər",
+      description:
+        "Ölçü, çatdırılma, quraşdırma, təmir, baxım və zəmanət — qapı ilə bağlı bütün xidmətlər bir yerdə.",
+    },
+    repair: {
+      title: "Təmir müraciəti",
+      description:
+        "Qapı təmiri üçün onlayn müraciət: problem, foto, ünvan və uyğun vaxt. Usta 24 saat içində.",
+    },
+    measurement: {
+      title: "Ölçü ustası sifarişi",
+      description: "Pulsuz ölçü xidməti. Usta ünvana gəlir və dəqiq ölçü götürür.",
+    },
+    quote: {
+      title: "Qiymət təklifi",
+      description: "Fərdi ölçü, toplu sifariş və xüsusi tələblər üçün qiymət təklifi alın.",
+    },
+    showroom: {
+      title: "Showroom",
+      description:
+        "Qapıları tam ölçüdə görün, səthə toxunun, kilidi sınayın və rəng nümunələrini müqayisə edin. Ziyarət üçün onlayn qeydiyyat.",
+    },
+    projects: {
+      title: "Layihələr",
+      description: "Villa, mənzil, ofis və kommersiya obyektlərində quraşdırdığımız qapılar.",
+    },
+    brands: {
+      title: "Brendlər",
+      description:
+        "Təmsil etdiyimiz Avropa qapı istehsalçıları: İtaliya, Almaniya, Avstriya və digərləri.",
+    },
+    about: {
+      title: "Haqqımızda",
+      description:
+        "Avropa istehsalı qapıların satışı, quraşdırılması və servisi üzrə ixtisaslaşmış komanda.",
+    },
+    blog: {
+      title: "Bloq",
+      description: "Qapı seçimi, təhlükəsizlik sinifləri, smart lock və baxım üzrə bələdçilər.",
+    },
+    faq: {
+      title: "Tez-tez verilən suallar",
+      description:
+        "Ölçü, çatdırılma, quraşdırma, zəmanət, ödəniş və təmirlə bağlı ən çox soruşulan suallar.",
+    },
+    contact: {
+      title: "Əlaqə",
+      description: "Sual verin — operatorumuz cavablandırsın. Ölçü, quraşdırma və təmir üzrə əlaqə.",
+    },
+    cart: { title: "Səbət" },
+    checkout: { title: "Sifarişin rəsmiləşdirilməsi" },
+    favorites: { title: "Favorilər" },
+    compare: { title: "Müqayisə" },
+    account: { title: "Hesabım" },
+    login: { title: "Giriş və qeydiyyat" },
+    technician: { title: "Usta kabineti" },
+    sharedConfiguration: { title: "Paylaşılan konfiqurasiya" },
+    doorPassport: { title: "Qapı pasportu" },
+  },
+
   nav: {
     home: "Ana səhifə",
     doors: "Qapılar",
@@ -60,6 +132,13 @@ export const az = {
     startConfigurator: "Konfiqurasiyaya başla",
     whatsapp: "WhatsApp",
     call: "Zəng et",
+    skipToContent: "Əsas məzmuna keç",
+    increase: "Artır",
+    decrease: "Azalt",
+    addedToCart: "Səbətə əlavə edildi",
+    whatsappAria: "WhatsApp ilə yazın",
+    doorPreview: "Qapı önizləməsi",
+    doorDesign: "Qapı dizaynı",
   },
 
   common: {
@@ -96,6 +175,7 @@ export const az = {
     loading: "Yüklənir…",
     empty: "Məlumat yoxdur",
     results: "nəticə",
+    searchSuggestions: ["Milano", "Smart lock", "RC3", "Villa", "Şüşəli", "RAL 7016"],
     popularSearches: "Populyar axtarışlar",
     searchPlaceholder: "Model, artikul, kateqoriya, brend…",
     noSearchResults: "üzrə nəticə tapılmadı.",
@@ -269,6 +349,22 @@ export const az = {
     customSize: "Fərdi ölçü",
     smartLock: "Smart lock",
     installationAvailable: "Quraşdırma mümkündür",
+    inStockChip: "Anbarda",
+    saleChip: "Endirim",
+    glassChip: "Şüşəli",
+    fireRatedChip: "Yanğın sertifikatlı",
+    colors: {
+      anthracite: "Antrasit",
+      black: "Qara",
+      white: "Ağ",
+      grey: "Boz",
+      oakGold: "Qızılı palıd",
+      walnut: "Qoz",
+      anthraciteWood: "Antrasit ağac",
+      oakLight: "Açıq palıd",
+      ivory: "Fil sümüyü",
+      glass: "Şüşə",
+    },
     onlyInStock: "Yalnız anbarda olanlar",
     onlySale: "Yalnız endirimlilər",
   },
@@ -383,7 +479,40 @@ export const az = {
       INSTALLATION: "Quraşdırma",
       DELIVERY: "Çatdırılma",
     },
+    hints: {
+      SIZE: "Standart ölçü seçin və ya fərdi ölçü daxil edin.",
+      OPENING_DIRECTION: "Qapının qarşısında dayanaraq menteşələrin tərəfini seçin.",
+      PANEL_STYLE: "Səthin frezə və bölgü xətti — önizləmədə dərhal görünür.",
+      OUTSIDE_COLOR: "RAL kataloqu, ağac dekorları və fərdi rəng seçimi.",
+      INSIDE_COLOR: "İç tərəf ayrıca rəngdə ola bilər.",
+      FRAME: "Divar qalınlığına uyğun çərçivə tipi.",
+      SIDELIGHT: "Geniş açırımlar üçün yan və ya üst panel.",
+      GLASS: "Şüşə paneli əlavə edin və ya şüşəsiz saxlayın.",
+      GLASS_PATTERN: "Qumlama naxışı — yalnız şüşə seçildikdə mümkündür.",
+      HANDLE: "Dəstək forması, ölçüsü və finişi.",
+      HINGE: "Görünən, gücləndirilmiş və ya gizli menteşə.",
+      LOCK: "Kilid sistemi təhlükəsizlik sinfinə təsir edir.",
+      CYLINDER: "Açar sistemi və deşilməyə davamlılıq.",
+      SMART_LOCK: "Elektron kilid yalnız uyğun mexaniki kilidlə birlikdə işləyir.",
+      THRESHOLD: "İzolyasiya və əlçatanlıq üçün astana tipi.",
+      INSULATION: "Səs və istilik göstəricilərini artırır.",
+      ACCESSORY: "Bir neçəsini seçə bilərsiniz.",
+      INSTALLATION: "Sertifikatlı usta xidməti.",
+      DELIVERY: "Çatdırılma üsulu.",
+    },
+    orSeparator: " və ya ",
+    selectFirst: "Əvvəlcə seçin",
+    notCompatibleWith: "{option} ilə uyğun deyil",
+    priceBreakdown: "Qiymət hesablaması",
+    resetDone: "Konfiqurasiya sıfırlandı",
+    addedToCart: "Konfiqurasiya səbətə əlavə edildi",
+    reviewChoices: "Seçimlərinizi yoxlayın.",
+    widePanelRule: "Geniş panel əlavəsi (en > 1000 mm)",
+    tallPanelRule: "Yüksək panel əlavəsi (hündürlük > 2100 mm)",
+    rc4Rule: "RC4+ gücləndirmə paketi",
     chooseModel: "Model seçin",
+    sizeStandard: "Standart",
+    sizeAlternative: "Alternativ",
     standardSizes: "Standart ölçülər",
     customSize: "Fərdi ölçü",
     widthMm: "En (mm)",

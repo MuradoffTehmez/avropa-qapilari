@@ -7,11 +7,20 @@ import { Breadcrumbs, Section } from "@/components/ui/primitives";
 import { ButtonLink } from "@/components/ui/Button";
 import { faq } from "@/mock/content";
 
-export const metadata: Metadata = {
-  title: "Tez-tez verilən suallar",
-  description:
-    "Ölçü, çatdırılma, quraşdırma, zəmanət, ödəniş və təmirlə bağlı ən çox soruşulan suallar.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const dict = getDictionary(isLocale(locale) ? locale : "az");
+
+  return {
+    title: dict.pageMeta.faq.title,
+    description: dict.pageMeta.faq.description,
+  };
+}
+
 
 export default async function FaqPage({
   params,

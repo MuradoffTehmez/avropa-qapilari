@@ -14,7 +14,8 @@ import { Button, ButtonLink } from "@/components/ui/Button";
 import { toast } from "@/components/ui/overlays";
 import { DoorVisual, type GlassKind, type HandleKind } from "@/components/product/DoorVisual";
 import { getProduct } from "@/mock/products";
-import { findOptionValue, optionGroups } from "@/mock/options";
+import { findOptionValue } from "@/mock/options";
+import { optionLabel } from "@/mock/options.i18n";
 import { parseSharedDesign } from "@/features/configurator/shared";
 import { calculatePrice } from "@/features/pricing/engine";
 import { materialName, styleName } from "@/lib/i18n-format";
@@ -61,9 +62,9 @@ export function SharedConfiguration({
     );
   }
 
-  const price = calculatePrice(product, selection);
+  const price = calculatePrice(product, selection, { locale, dict });
   const preview = buildPreview(selection, product);
-  const lines = summaryLines(selection, dict);
+  const lines = summaryLines(selection, locale, dict);
 
   function copyLink() {
     navigator.clipboard?.writeText(window.location.href).then(
@@ -100,7 +101,7 @@ export function SharedConfiguration({
         <div>
           <div className="relative border border-line bg-bone">
             <div className="mx-auto aspect-3/4 max-w-sm">
-              <DoorVisual {...preview} />
+              <DoorVisual {...preview} label={dict.actions.doorPreview} />
             </div>
             <p className="absolute bottom-3 left-3 rounded-[2px] bg-paper/85 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.1em] text-graphite backdrop-blur">
               {selection.width} × {selection.height} mm
@@ -201,16 +202,25 @@ function buildPreview(selection: ConfigurationSelection, product: NonNullable<Re
   };
 }
 
-function summaryLines(selection: ConfigurationSelection, dict: Dictionary) {
+function summaryLines(
+  selection: ConfigurationSelection,
+  locale: Locale,
+  dict: Dictionary,
+) {
   const out: { group: string; value: string }[] = [];
 
   for (const [key, raw] of Object.entries(selection.choices)) {
     if (!raw) continue;
     const ids = Array.isArray(raw) ? raw : [raw];
-    const labels = ids.map((id) => findOptionValue(id)?.label).filter(Boolean) as string[];
+    const labels = ids
+      .map((id) => {
+        const v = findOptionValue(id);
+        return v ? optionLabel(v, locale) : null;
+      })
+      .filter(Boolean) as string[];
     if (labels.length === 0) continue;
     out.push({
-      group: dict.configurator.steps[key as OptionGroupKey] ?? optionGroups[key as OptionGroupKey].title,
+      group: dict.configurator.steps[key as OptionGroupKey],
       value: labels.join(", "),
     });
   }

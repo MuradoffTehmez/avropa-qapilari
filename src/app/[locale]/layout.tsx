@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import "@/app/globals.css";
 
 import { getDictionary, isLocale, locales } from "@/i18n";
+import { I18nProvider } from "@/i18n/provider";
 import type { Locale } from "@/types";
 import { brand } from "@/config/brand";
 import { ToastHost } from "@/components/ui/overlays";
@@ -91,12 +92,14 @@ export default async function LocaleLayout({
           href="#main"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-200 focus:bg-ink focus:px-4 focus:py-2 focus:text-sm focus:text-paper"
         >
-          Əsas məzmuna keç
+          {dict.actions.skipToContent}
         </a>
-        {children}
-        <MobileNav locale={typedLocale} dict={dict} />
-        <ToastHost />
-        <CookieBar dict={dict} />
+        <I18nProvider locale={typedLocale} dict={dict}>
+          {children}
+          <MobileNav locale={typedLocale} dict={dict} />
+          <ToastHost />
+          <CookieBar dict={dict} />
+        </I18nProvider>
       </body>
     </html>
   );

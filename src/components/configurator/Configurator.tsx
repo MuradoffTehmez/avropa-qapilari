@@ -30,6 +30,7 @@ import {
 } from "@/components/product/DoorVisual";
 import { DoorLayers, type VisualLayer } from "@/components/configurator/DoorLayers";
 import { findOptionValue, optionGroups, standardSizes } from "@/mock/options";
+import { optionLabel, optionText } from "@/mock/options.i18n";
 import { calculatePrice, sizeRangeLabel } from "@/features/pricing/engine";
 import { checkCompatibility, pruneIncompatible } from "@/features/configurator/compatibility";
 import { useCart } from "@/store/cart";
@@ -64,7 +65,10 @@ export function Configurator({
     choices: defaultChoices(product),
   }));
 
-  const price = useMemo(() => calculatePrice(product, selection), [product, selection]);
+  const price = useMemo(
+    () => calculatePrice(product, selection, { locale, dict }),
+    [product, selection, locale, dict],
+  );
   const currentGroup = steps[stepIndex];
   const isSummary = stepIndex >= steps.length;
 
@@ -111,7 +115,7 @@ export function Configurator({
     setCustomSize(false);
     setStepIndex(0);
     setHiddenLayers(new Set());
-    toast("Konfiqurasiya sıfırlandı");
+    toast(dict.configurator.resetDone);
   }
 
   function addConfiguredToCart() {
@@ -128,16 +132,16 @@ export function Configurator({
       snapshot: {
         width: selection.width,
         height: selection.height,
-        lines: summaryLines(selection),
+        lines: summaryLines(selection, locale, dict),
       },
     });
-    toast("Konfiqurasiya səbətə əlavə edildi");
+    toast(dict.configurator.addedToCart);
   }
 
   const previewProps = buildPreview(selection, product, hiddenLayers);
-  const visualLayers = buildVisualLayers(selection, product, dict);
+  const visualLayers = buildVisualLayers(selection, product, dict, locale);
   if (currentGroup === "INSIDE_COLOR") previewProps.panelHex = findOptionValue(selection.choices.INSIDE_COLOR as string)?.hex ?? previewProps.panelHex;
-  const selectedLines = summaryLines(selection);
+  const selectedLines = summaryLines(selection, locale, dict);
 
   return (
     <div className="configurator-shell lg:grid lg:min-h-[calc(100dvh-4.5rem)] lg:grid-cols-[1.15fr_1fr]">
@@ -146,7 +150,7 @@ export function Configurator({
         <div className="relative flex h-52 shrink-0 items-center justify-center px-4 py-4 sm:h-72 lg:h-auto lg:flex-1 lg:px-10">
           <div className="h-full max-h-[70vh] w-auto">
             <div className="h-full" style={{ aspectRatio: "3 / 4" }}>
-              <DoorVisual {...previewProps} />
+              <DoorVisual {...previewProps} label={dict.actions.doorPreview} />
             </div>
           </div>
 
@@ -208,7 +212,7 @@ export function Configurator({
       <div className="flex flex-col">
         <div className="border-b border-line bg-paper px-4 py-3 sm:px-6 lg:px-8">
           <Stepper
-            steps={[...steps.map((s) => dict.configurator.steps[s]), "Xülasə"]}
+            steps={[...steps.map((s) => dict.configurator.steps[s]), dict.configurator.summary]}
             current={stepIndex}
             onSelect={setStepIndex}
           />
@@ -239,6 +243,7 @@ export function Configurator({
               selection={selection}
               onSelect={setChoice}
               dict={dict}
+              locale={locale}
             />
           )}
         </div>
@@ -248,7 +253,7 @@ export function Configurator({
           <div className="px-4 py-3 sm:px-6 lg:px-8">
             <details className="group mb-3 hidden lg:block">
               <summary className="cursor-pointer list-none text-[12px] font-medium text-gold-600 underline-offset-2 hover:underline">
-                Qiymət hesablaması ({price.lines.length} sətir)
+                {dict.configurator.priceBreakdown} ({price.lines.length})
               </summary>
               <dl className="mt-3 max-h-44 space-y-1 overflow-y-auto border-t border-line pt-3 text-[13px]">
                 {price.lines.map((l) => (
@@ -353,16 +358,25 @@ function defaultChoices(product: Product): ConfigurationSelection["choices"] {
   return choices;
 }
 
-function summaryLines(selection: ConfigurationSelection) {
+function summaryLines(
+  selection: ConfigurationSelection,
+  locale: Locale,
+  dict: Dictionary,
+) {
   const lines: { group: string; value: string }[] = [];
 
   for (const [key, raw] of Object.entries(selection.choices)) {
     if (!raw) continue;
-    const group = optionGroups[key as OptionGroupKey];
+    const groupKey = key as OptionGroupKey;
     const ids = Array.isArray(raw) ? raw : [raw];
-    const labels = ids.map((id) => findOptionValue(id)?.label).filter(Boolean) as string[];
+    const labels = ids
+      .map((id) => {
+        const v = findOptionValue(id);
+        return v ? optionLabel(v, locale) : null;
+      })
+      .filter(Boolean) as string[];
     if (labels.length === 0) continue;
-    lines.push({ group: group.title, value: labels.join(", ") });
+    lines.push({ group: dict.configurator.steps[groupKey], value: labels.join(", ") });
   }
 
   return lines;
@@ -414,6 +428,7 @@ function buildVisualLayers(
   selection: ConfigurationSelection,
   product: Product,
   dict: Dictionary,
+  locale: Locale,
 ): VisualLayer[] {
   const layers: VisualLayer[] = [
     {
@@ -459,7 +474,7 @@ function buildVisualLayers(
     layers.push({
       key,
       label: dict.configurator.steps[key],
-      value: values.map((v) => v.label).join(", "),
+      value: values.map((v) => optionLabel(v, locale)).join(", "),
       priceDelta: values.reduce((sum, v) => sum + v.priceDelta, 0),
       swatch: values[0].swatch ?? values[0].hex,
       toggleable: true,
@@ -490,7 +505,7 @@ function SizeStep({
 }) {
   return (
     <div>
-      <StepHeading title={dict.configurator.steps.SIZE} hint={optionGroups.SIZE.hint} />
+      <StepHeading title={dict.configurator.steps.SIZE} hint={dict.configurator.hints.SIZE} />
 
       <div className="mb-6 flex gap-2">
         <button
@@ -563,8 +578,8 @@ function SizeStep({
                     <span className="block text-sm font-medium text-ink">{s.label} mm</span>
                     <span className="text-xs text-stone">
                       {s.width === product.defaultWidth && s.height === product.defaultHeight
-                        ? "Standart"
-                        : "Alternativ"}
+                        ? dict.configurator.sizeStandard
+                        : dict.configurator.sizeAlternative}
                     </span>
                   </span>
                   {active && <Check size={16} className="text-ink" />}
@@ -582,31 +597,41 @@ function OptionStep({
   selection,
   onSelect,
   dict,
+  locale,
 }: {
   group: OptionGroupKey;
   selection: ConfigurationSelection;
   onSelect: (group: OptionGroupKey, valueId: string, multi: boolean) => void;
   dict: Dictionary;
+  locale: Locale;
 }) {
   const def = optionGroups[group];
   const isColor = group === "OUTSIDE_COLOR" || group === "INSIDE_COLOR";
   const current = selection.choices[group];
 
-  const labelOf = (id: string) => findOptionValue(id)?.label ?? id;
+  const labelOf = (id: string) => {
+    const v = findOptionValue(id);
+    return v ? optionLabel(v, locale) : id;
+  };
 
   const withCompat = def.values.map((v) => ({
     value: v,
-    compat: checkCompatibility(v, selection, labelOf),
+    compat: checkCompatibility(v, selection, labelOf, dict),
   }));
 
   return (
     <div>
-      <StepHeading title={dict.configurator.steps[group]} hint={def.hint} multi={def.multi} />
+      <StepHeading
+        title={dict.configurator.steps[group]}
+        hint={dict.configurator.hints[group]}
+        multi={def.multi}
+      />
 
       {isColor ? (
         <ColorGrid
           items={withCompat}
           selectedId={current as string}
+          locale={locale}
           onSelect={(id) => onSelect(group, id, false)}
         />
       ) : (
@@ -615,6 +640,8 @@ function OptionStep({
             const selected = def.multi
               ? Array.isArray(current) && current.includes(value.id)
               : current === value.id;
+
+            const text = optionText(value, locale);
 
             return def.multi ? (
               <button
@@ -637,9 +664,9 @@ function OptionStep({
                   {selected && <Check size={11} strokeWidth={3} className="text-paper" />}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-medium text-ink">{value.label}</span>
-                  {value.description && (
-                    <span className="mt-0.5 block text-xs text-stone">{value.description}</span>
+                  <span className="block text-sm font-medium text-ink">{text.label}</span>
+                  {text.description && (
+                    <span className="mt-0.5 block text-xs text-stone">{text.description}</span>
                   )}
                 </span>
                 <span className="shrink-0 text-sm tabular-nums text-graphite">
@@ -650,9 +677,9 @@ function OptionStep({
               <RadioCard
                 key={value.id}
                 name={group}
-                label={value.label}
-                description={value.description}
-                badge={value.badge}
+                label={text.label}
+                description={text.description}
+                badge={text.badge}
                 checked={selected}
                 disabled={!compat.allowed}
                 reason={compat.reason}
@@ -670,10 +697,12 @@ function OptionStep({
 function ColorGrid({
   items,
   selectedId,
+  locale,
   onSelect,
 }: {
   items: { value: OptionValue; compat: { allowed: boolean; reason?: string } }[];
   selectedId?: string;
+  locale: Locale;
   onSelect: (id: string) => void;
 }) {
   return (
@@ -705,7 +734,9 @@ function ColorGrid({
             </span>
             <span className="flex items-baseline justify-between gap-2 p-2.5">
               <span className="min-w-0">
-                <span className="block truncate text-[13px] font-medium text-ink">{value.label}</span>
+                <span className="block truncate text-[13px] font-medium text-ink">
+                  {optionLabel(value, locale)}
+                </span>
                 <span className="text-[11px] text-stone">{value.code}</span>
               </span>
               <span className="shrink-0 text-[12px] tabular-nums text-graphite">

@@ -8,10 +8,20 @@ import { formatDate } from "@/lib/utils";
 import { Badge, Breadcrumbs, Section } from "@/components/ui/primitives";
 import { blogPosts } from "@/mock/content";
 
-export const metadata: Metadata = {
-  title: "Bloq",
-  description: "Qapı seçimi, təhlükəsizlik sinifləri, smart lock və baxım üzrə bələdçilər.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const dict = getDictionary(isLocale(locale) ? locale : "az");
+
+  return {
+    title: dict.pageMeta.blog.title,
+    description: dict.pageMeta.blog.description,
+  };
+}
+
 
 export default async function BlogPage({
   params,

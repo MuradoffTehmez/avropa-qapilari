@@ -1,12 +1,24 @@
 import type {
   ConfigurationSelection,
+  Locale,
   OptionGroupKey,
   OptionValue,
   PriceBreakdown,
   PriceLine,
   Product,
 } from "@/types";
-import { findOptionValue, optionGroups } from "@/mock/options";
+import type { Dictionary } from "@/i18n";
+import { az } from "@/i18n/dictionaries/az";
+import { findOptionValue } from "@/mock/options";
+import { optionLabel } from "@/mock/options.i18n";
+
+/** Qiymət sətirlərinin dili; verilməzsə AZ. */
+export interface PriceContext {
+  locale: Locale;
+  dict: Dictionary;
+}
+
+const azContext: PriceContext = { locale: "az", dict: az };
 
 /**
  * PRICING ENGINE.
@@ -19,7 +31,7 @@ import { findOptionValue, optionGroups } from "@/mock/options";
 
 export interface PriceRule {
   id: string;
-  label: string;
+  label: (dict: Dictionary) => string;
   priority: number;
   applies: (ctx: { product: Product; selection: ConfigurationSelection }) => boolean;
   amount: (ctx: { product: Product; selection: ConfigurationSelection }) => number;
@@ -37,21 +49,21 @@ function sizeModifier(product: Product, width: number, height: number): number {
 export const priceRules: PriceRule[] = [
   {
     id: "rule-wide-panel",
-    label: "Geniş panel əlavəsi (en > 1000 mm)",
+    label: (d) => d.configurator.widePanelRule,
     priority: 10,
     applies: ({ selection }) => selection.width > 1000,
     amount: () => 150,
   },
   {
     id: "rule-tall-panel",
-    label: "Yüksək panel əlavəsi (hündürlük > 2100 mm)",
+    label: (d) => d.configurator.tallPanelRule,
     priority: 20,
     applies: ({ selection }) => selection.height > 2100,
     amount: () => 120,
   },
   {
     id: "rule-rc4-reinforce",
-    label: "RC4+ gücləndirmə paketi",
+    label: (d) => d.configurator.rc4Rule,
     priority: 30,
     applies: ({ product }) => product.securityClass === "RC4" || product.securityClass === "RC5",
     amount: () => 0,
@@ -87,14 +99,16 @@ const groupOrder: OptionGroupKey[] = [
 export function calculatePrice(
   product: Product,
   selection: ConfigurationSelection,
+  ctx: PriceContext = azContext,
 ): PriceBreakdown {
+  const { locale, dict } = ctx;
   const lines: PriceLine[] = [
-    { key: "base", label: "Baza qiyməti", amount: product.basePrice },
+    { key: "base", label: dict.configurator.basePrice, amount: product.basePrice },
   ];
 
   const size = sizeModifier(product, selection.width, selection.height);
   if (size > 0) {
-    lines.push({ key: "size", label: "Ölçü düzəlişi", amount: size });
+    lines.push({ key: "size", label: dict.configurator.sizeModifier, amount: size });
   }
 
   const selected = collectSelected(selection);
@@ -104,7 +118,7 @@ export function calculatePrice(
     for (const v of values) {
       lines.push({
         key: `opt-${v.id}`,
-        label: `${optionGroups[key].title}: ${v.label}`,
+        label: `${dict.configurator.steps[key]}: ${optionLabel(v, locale)}`,
         amount: v.priceDelta,
       });
     }
@@ -113,7 +127,7 @@ export function calculatePrice(
   for (const rule of [...priceRules].sort((a, b) => a.priority - b.priority)) {
     if (!rule.applies({ product, selection })) continue;
     const amount = rule.amount({ product, selection });
-    if (amount !== 0) lines.push({ key: rule.id, label: rule.label, amount });
+    if (amount !== 0) lines.push({ key: rule.id, label: rule.label(dict), amount });
   }
 
   const subtotal = lines.reduce((sum, l) => sum + l.amount, 0);
@@ -136,9 +150,7 @@ export function calculatePrice(
     discount,
     total: Math.max(0, subtotal - discount),
     requiresQuote: outOfRange,
-    quoteReason: outOfRange
-      ? "Bu ölçü üçün fərdi qiymət təklifi tələb olunur."
-      : undefined,
+    quoteReason: outOfRange ? dict.configurator.quoteRequired : undefined,
   };
 }
 

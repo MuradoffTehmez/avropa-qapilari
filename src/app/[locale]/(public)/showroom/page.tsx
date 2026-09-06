@@ -30,11 +30,20 @@ import { DoorVisual } from "@/components/product/DoorVisual";
 import { ShowroomBooking } from "@/components/showroom/ShowroomBooking";
 import { faq } from "@/mock/content";
 
-export const metadata: Metadata = {
-  title: "Showroom",
-  description:
-    "Qapıları tam ölçüdə görün, səthə toxunun, kilidi sınayın və rəng nümunələrini müqayisə edin. Ziyarət üçün onlayn qeydiyyat.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const dict = getDictionary(isLocale(locale) ? locale : "az");
+
+  return {
+    title: dict.pageMeta.showroom.title,
+    description: dict.pageMeta.showroom.description,
+  };
+}
+
 
 export default async function ShowroomPage({
   params,

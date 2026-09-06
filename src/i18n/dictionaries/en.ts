@@ -8,6 +8,78 @@ export const en: Dictionary = {
       "European entrance, villa and interior doors. Online configurator, on-site measurement, installation, repair and warranty.",
   },
 
+  pageMeta: {
+    catalog: {
+      title: "Door catalogue",
+      description:
+        "European entrance, villa, interior, security and smart doors. Filters, comparison and online configuration.",
+    },
+    configurator: {
+      title: "Door configurator",
+      description:
+        "Configure your door step by step: size, colour, frame, glazing, handle, lock, smart lock and accessories. The price updates in real time.",
+    },
+    services: {
+      title: "Services",
+      description:
+        "Measurement, delivery, installation, repair, maintenance and warranty — every door service in one place.",
+    },
+    repair: {
+      title: "Repair request",
+      description:
+        "Request a door repair online: the problem, photos, address and a time that suits you. A technician within 24 hours.",
+    },
+    measurement: {
+      title: "Book a measurement",
+      description: "Free measurement service. A technician comes to your address and takes exact dimensions.",
+    },
+    quote: {
+      title: "Request a quote",
+      description: "Get a quote for custom sizes, bulk orders and special requirements.",
+    },
+    showroom: {
+      title: "Showroom",
+      description:
+        "See the doors at full size, feel the surface, try the lock and compare colour samples. Book your visit online.",
+    },
+    projects: {
+      title: "Projects",
+      description: "Doors we have installed in villas, apartments, offices and commercial buildings.",
+    },
+    brands: {
+      title: "Brands",
+      description:
+        "The European door manufacturers we represent: Italy, Germany, Austria and others.",
+    },
+    about: {
+      title: "About us",
+      description:
+        "A team specialising in the sale, installation and servicing of European-made doors.",
+    },
+    blog: {
+      title: "Blog",
+      description: "Guides on choosing a door, security classes, smart locks and maintenance.",
+    },
+    faq: {
+      title: "Frequently asked questions",
+      description:
+        "The most common questions about measurement, delivery, installation, warranty, payment and repair.",
+    },
+    contact: {
+      title: "Contact",
+      description: "Ask a question and our operator will answer. Measurement, installation and repair enquiries.",
+    },
+    cart: { title: "Cart" },
+    checkout: { title: "Checkout" },
+    favorites: { title: "Favourites" },
+    compare: { title: "Comparison" },
+    account: { title: "My account" },
+    login: { title: "Sign in and register" },
+    technician: { title: "Technician panel" },
+    sharedConfiguration: { title: "Shared configuration" },
+    doorPassport: { title: "Door passport" },
+  },
+
   nav: {
     home: "Home",
     doors: "Doors",
@@ -62,6 +134,13 @@ export const en: Dictionary = {
     startConfigurator: "Start configuring",
     whatsapp: "WhatsApp",
     call: "Call",
+    skipToContent: "Skip to main content",
+    increase: "Increase",
+    decrease: "Decrease",
+    addedToCart: "Added to the cart",
+    whatsappAria: "Message us on WhatsApp",
+    doorPreview: "Door preview",
+    doorDesign: "Door design",
   },
 
   common: {
@@ -98,6 +177,7 @@ export const en: Dictionary = {
     loading: "Loading…",
     empty: "No data",
     results: "results",
+    searchSuggestions: ["Milano", "Smart lock", "RC3", "Villa", "Glazed", "RAL 7016"],
     popularSearches: "Popular searches",
     searchPlaceholder: "Model, SKU, category, brand…",
     noSearchResults: "returned no results.",
@@ -272,6 +352,22 @@ export const en: Dictionary = {
     customSize: "Custom size",
     smartLock: "Smart lock",
     installationAvailable: "Installation available",
+    inStockChip: "In stock",
+    saleChip: "On sale",
+    glassChip: "Glazed",
+    fireRatedChip: "Fire rated",
+    colors: {
+      anthracite: "Anthracite",
+      black: "Black",
+      white: "White",
+      grey: "Grey",
+      oakGold: "Golden oak",
+      walnut: "Walnut",
+      anthraciteWood: "Anthracite wood",
+      oakLight: "Light oak",
+      ivory: "Ivory",
+      glass: "Glass",
+    },
     onlyInStock: "In stock only",
     onlySale: "On sale only",
   },
@@ -386,7 +482,40 @@ export const en: Dictionary = {
       INSTALLATION: "Installation",
       DELIVERY: "Delivery",
     },
+    hints: {
+      SIZE: "Pick a standard size or enter your own.",
+      OPENING_DIRECTION: "Stand in front of the door and choose the side the hinges are on.",
+      PANEL_STYLE: "Surface milling and division lines — shown in the preview straight away.",
+      OUTSIDE_COLOR: "RAL catalogue, wood decors and a custom colour option.",
+      INSIDE_COLOR: "The inner face can have its own colour.",
+      FRAME: "Frame type to match your wall thickness.",
+      SIDELIGHT: "A side or transom panel for wide openings.",
+      GLASS: "Add a glass panel or keep the door solid.",
+      GLASS_PATTERN: "Sandblasted pattern — available only when glazing is selected.",
+      HANDLE: "Handle shape, length and finish.",
+      HINGE: "Visible, reinforced or concealed hinge.",
+      LOCK: "The lock system affects the security class.",
+      CYLINDER: "Key system and drilling resistance.",
+      SMART_LOCK: "An electronic lock works only with a compatible mechanical lock.",
+      THRESHOLD: "Threshold type for insulation and accessibility.",
+      INSULATION: "Improves the acoustic and thermal figures.",
+      ACCESSORY: "You can select several.",
+      INSTALLATION: "Certified fitter service.",
+      DELIVERY: "Delivery method.",
+    },
+    orSeparator: " or ",
+    selectFirst: "Select first",
+    notCompatibleWith: "Not compatible with {option}",
+    priceBreakdown: "Price breakdown",
+    resetDone: "Configuration reset",
+    addedToCart: "Configuration added to the cart",
+    reviewChoices: "Review your choices.",
+    widePanelRule: "Wide panel surcharge (width > 1000 mm)",
+    tallPanelRule: "Tall panel surcharge (height > 2100 mm)",
+    rc4Rule: "RC4+ reinforcement package",
     chooseModel: "Choose a model",
+    sizeStandard: "Standard",
+    sizeAlternative: "Alternative",
     standardSizes: "Standard sizes",
     customSize: "Custom size",
     widthMm: "Width (mm)",

@@ -11,10 +11,20 @@ import { OrderStatusPill, RepairStatusPill } from "@/components/account/StatusPi
 import { appointments, orders, repairRequests, warranties } from "@/mock/account";
 import { technicians } from "@/mock/content";
 
-export const metadata: Metadata = {
-  title: "Hesabım",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const dict = getDictionary(isLocale(locale) ? locale : "az");
+
+  return {
+    title: dict.pageMeta.account.title,
+    robots: { index: false, follow: false },
+  };
+}
+
 
 export default async function AccountDashboardPage({
   params,

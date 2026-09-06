@@ -6,11 +6,20 @@ import { Breadcrumbs } from "@/components/ui/primitives";
 import { CatalogView } from "@/components/product/CatalogView";
 import { products } from "@/mock/products";
 
-export const metadata: Metadata = {
-  title: "Qapı kataloqu",
-  description:
-    "Avropa istehsalı giriş, villa, otaq, təhlükəsizlik və smart qapılar. Filtr, müqayisə və onlayn konfiqurasiya.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const dict = getDictionary(isLocale(locale) ? locale : "az");
+
+  return {
+    title: dict.pageMeta.catalog.title,
+    description: dict.pageMeta.catalog.description,
+  };
+}
+
 
 export default async function CatalogPage({
   params,

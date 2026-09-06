@@ -114,7 +114,7 @@ export function CartView({ locale, dict }: { locale: Locale; dict: Dictionary })
                   <button
                     type="button"
                     onClick={() => setQuantity(item.id, item.quantity + 1)}
-                    aria-label="Artır"
+                    aria-label={dict.actions.increase}
                     className="flex h-9 w-9 items-center justify-center text-graphite transition-colors hover:bg-bone"
                   >
                     <Plus size={14} />

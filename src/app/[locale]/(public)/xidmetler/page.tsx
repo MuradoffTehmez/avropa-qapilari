@@ -8,11 +8,20 @@ import { routes } from "@/lib/routes";
 import { Breadcrumbs, Section, SectionHeading } from "@/components/ui/primitives";
 import { ButtonLink } from "@/components/ui/Button";
 
-export const metadata: Metadata = {
-  title: "Xidmətlər",
-  description:
-    "Ölçü, çatdırılma, quraşdırma, təmir, baxım və zəmanət — qapı ilə bağlı bütün xidmətlər bir yerdə.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const dict = getDictionary(isLocale(locale) ? locale : "az");
+
+  return {
+    title: dict.pageMeta.services.title,
+    description: dict.pageMeta.services.description,
+  };
+}
+
 
 export default async function ServicesPage({
   params,

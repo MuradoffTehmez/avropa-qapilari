@@ -17,6 +17,7 @@ import {
   applyFilters,
   countActive,
   emptyFilters,
+  colorName,
   filterColors,
   sortProducts,
   type CatalogFilters,
@@ -414,7 +415,7 @@ function FilterPanel({
             <Swatch
               key={c.hex}
               hex={c.hex}
-              label={c.label}
+              label={colorName(c.key, dict)}
               selected={filters.colors.includes(c.hex)}
               onClick={() => patch({ colors: toggleIn(filters.colors, c.hex) })}
               className="h-8 w-8"
@@ -546,11 +547,11 @@ function ActiveChips({
   if (filters.minSound !== null) {
     chips.push({ label: `${filters.minSound}+ dB`, clear: () => patch({ minSound: null }) });
   }
-  if (filters.inStock) chips.push({ label: "Anbarda", clear: () => patch({ inStock: false }) });
-  if (filters.onSale) chips.push({ label: "Endirim", clear: () => patch({ onSale: false }) });
-  if (filters.smartLock) chips.push({ label: "Smart lock", clear: () => patch({ smartLock: false }) });
-  if (filters.hasGlass) chips.push({ label: "Şüşəli", clear: () => patch({ hasGlass: false }) });
-  if (filters.fireRated) chips.push({ label: "Yanğın sertifikatlı", clear: () => patch({ fireRated: false }) });
+  if (filters.inStock) chips.push({ label: dict.catalog.inStockChip, clear: () => patch({ inStock: false }) });
+  if (filters.onSale) chips.push({ label: dict.catalog.saleChip, clear: () => patch({ onSale: false }) });
+  if (filters.smartLock) chips.push({ label: dict.catalog.smartLock, clear: () => patch({ smartLock: false }) });
+  if (filters.hasGlass) chips.push({ label: dict.catalog.glassChip, clear: () => patch({ hasGlass: false }) });
+  if (filters.fireRated) chips.push({ label: dict.catalog.fireRatedChip, clear: () => patch({ fireRated: false }) });
 
   return (
     <>

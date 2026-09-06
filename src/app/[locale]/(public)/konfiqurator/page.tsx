@@ -11,11 +11,20 @@ import { products } from "@/mock/products";
 import { categories } from "@/mock/taxonomy";
 import { categoryName, priceFrom } from "@/lib/i18n-format";
 
-export const metadata: Metadata = {
-  title: "Qapı konfiquratoru",
-  description:
-    "Qapını addım-addım konfiqurasiya edin: ölçü, rəng, çərçivə, şüşə, dəstək, kilid, smart lock və aksesuar. Qiymət real vaxtda hesablanır.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const dict = getDictionary(isLocale(locale) ? locale : "az");
+
+  return {
+    title: dict.pageMeta.configurator.title,
+    description: dict.pageMeta.configurator.description,
+  };
+}
+
 
 export default async function ConfiguratorIndexPage({
   params,

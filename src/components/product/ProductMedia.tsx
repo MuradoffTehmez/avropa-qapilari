@@ -41,6 +41,7 @@ export function ProductMedia({
 
   return (
     <DoorVisual
+      label={product.name}
       panelHex={product.panelHexes[index] ?? product.panelHexes[0]}
       style={product.style}
       glass={(product.hasGlass ? "SATIN" : "NONE") as GlassKind}

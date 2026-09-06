@@ -1,4 +1,5 @@
 import type { ConfigurationSelection, OptionValue } from "@/types";
+import type { Dictionary } from "@/i18n";
 
 /**
  * COMPATIBILITY ENGINE.
@@ -21,21 +22,22 @@ export function checkCompatibility(
   value: OptionValue,
   selection: ConfigurationSelection,
   labelOf: (id: string) => string,
+  dict: Dictionary,
 ): CompatibilityResult {
   const chosen = selectedIds(selection);
 
   if (value.requires?.length) {
     const ok = value.requires.some((id) => chosen.includes(id));
     if (!ok) {
-      const names = value.requires.map(labelOf).join(" və ya ");
-      return { allowed: false, reason: `Əvvəlcə seçin: ${names}` };
+      const names = value.requires.map(labelOf).join(dict.configurator.orSeparator);
+      return { allowed: false, reason: `${dict.configurator.selectFirst}: ${names}` };
     }
   }
 
   if (value.excludes?.length) {
     const clash = value.excludes.find((id) => chosen.includes(id));
     if (clash) {
-      return { allowed: false, reason: `${labelOf(clash)} ilə uyğun deyil` };
+      return { allowed: false, reason: dict.configurator.notCompatibleWith.replace("{option}", labelOf(clash)) };
     }
   }
 

@@ -38,6 +38,8 @@ export interface DoorVisualProps {
   widthMm?: number;
   heightMm?: number;
   className?: string;
+  /** Ekran oxuyucusu üçün ad — dilə uyğun ötürülməlidir. */
+  label?: string;
   /** Ətraf mühit (döşəmə + kölgə) göstərilsin */
   ambient?: boolean;
   priority?: boolean;
@@ -91,6 +93,7 @@ export function DoorVisual({
   widthMm = 960,
   heightMm = 2050,
   className,
+  label = "Qapı önizləməsi",
   ambient = true,
 }: DoorVisualProps) {
   const uid = useId().replace(/[^a-z0-9]/gi, "");
@@ -128,7 +131,7 @@ export function DoorVisual({
     <svg
       viewBox="0 0 300 400"
       role="img"
-      aria-label="Qapı önizləməsi"
+      aria-label={label}
       className={cn("h-full w-full", className)}
       preserveAspectRatio="xMidYMid meet"
     >
