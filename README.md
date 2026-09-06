@@ -184,6 +184,7 @@ Yoxlanılmış ekran ölçüləri: **320, 360, 390, 768, 1024, 1280, 1440, 1920 
 7. Ödəniş provayderi inteqrasiyası
 
 Tam məhsul tələbləri sənədi: [`docs/PRD.md`](docs/PRD.md)
+Layihə konvensiyaları və iş qaydaları: [`CLAUDE.md`](CLAUDE.md)
 
 ---
 
