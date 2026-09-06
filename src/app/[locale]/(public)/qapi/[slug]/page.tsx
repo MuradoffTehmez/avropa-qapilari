@@ -39,6 +39,8 @@ import { getBrand, getCategory } from "@/mock/taxonomy";
 import { localizedFaq, localizedReviews } from "@/mock/content.i18n";
 import { optionGroups } from "@/mock/options";
 import { categoryName, materialName, priceFrom, productDescription, productShort, styleName } from "@/lib/i18n-format";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { breadcrumbSchema, productSchema } from "@/lib/structured-data";
 
 export function generateStaticParams() {
   return locales.flatMap((locale) => products.map((p) => ({ locale, slug: p.slug })));
@@ -87,34 +89,21 @@ export default async function ProductPage({
 
   const specGroups = Array.from(new Set(product.specs.map((s) => s.group)));
 
-  /** structured data */
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: product.name,
-    sku: product.sku,
-    description: productShort(product, dict),
-    brand: { "@type": "Brand", name: productBrand?.name ?? brand.name },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: product.rating,
-      reviewCount: product.reviewCount,
-    },
-    offers: {
-      "@type": "Offer",
-      price: product.basePrice,
-      priceCurrency: "AZN",
-      availability: product.inStock
-        ? "https://schema.org/InStock"
-        : "https://schema.org/PreOrder",
-    },
-  };
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      <JsonLd
+        data={[
+          productSchema(product, productBrand, localizedReviews(locale), locale, dict),
+          breadcrumbSchema([
+            { label: dict.nav.home, href: r.home },
+            { label: dict.catalog.title, href: r.doors },
+            ...(category
+              ? [{ label: categoryName(category, dict), href: r.category(category.slug) }]
+              : []),
+            { label: product.name, href: r.product(product.slug) },
+          ]),
+        ]}
       />
 
       <div className="border-b border-line bg-bone">

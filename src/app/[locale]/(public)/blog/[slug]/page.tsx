@@ -7,6 +7,8 @@ import { localeAlternates, routes } from "@/lib/routes";
 import { formatDate } from "@/lib/utils";
 import { Badge, Breadcrumbs, Section } from "@/components/ui/primitives";
 import { localizedPosts } from "@/mock/content.i18n";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { articleSchema, breadcrumbSchema } from "@/lib/structured-data";
 
 export function generateStaticParams() {
   return locales.flatMap((locale) => localizedPosts(locale).map((p) => ({ locale, slug: p.slug })));
@@ -45,6 +47,17 @@ export default async function BlogPostPage({
 
   return (
     <>
+      <JsonLd
+        data={[
+          articleSchema(post, locale),
+          breadcrumbSchema([
+            { label: dict.nav.home, href: r.home },
+            { label: dict.nav.blog, href: r.blog },
+            { label: post.title, href: r.blogPost(post.slug) },
+          ]),
+        ]}
+      />
+
       <div className="border-b border-line bg-bone">
         <div className="container-page py-8 sm:py-10">
           <Breadcrumbs

@@ -25,6 +25,13 @@ import { categories, brands } from "@/mock/taxonomy";
 import { getFeaturedProducts } from "@/mock/products";
 import { localizedFaq, localizedProjects, localizedReviews } from "@/mock/content.i18n";
 import { categoryName, countryName } from "@/lib/i18n-format";
+import { JsonLd } from "@/components/seo/JsonLd";
+import {
+  faqSchema,
+  localBusinessSchema,
+  organizationSchema,
+  websiteSchema,
+} from "@/lib/structured-data";
 
 export default async function HomePage({
   params,
@@ -41,6 +48,15 @@ export default async function HomePage({
 
   return (
     <>
+      <JsonLd
+        data={[
+          organizationSchema(locale, dict),
+          websiteSchema(locale),
+          localBusinessSchema(locale, dict),
+          faqSchema(localizedFaq(locale).slice(0, 6)),
+        ]}
+      />
+
       {/* ---------------------------------------------------------- HERO */}
       <section className="relative overflow-hidden bg-ink text-paper">
         <div

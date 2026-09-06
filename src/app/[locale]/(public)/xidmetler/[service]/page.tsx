@@ -10,6 +10,8 @@ import { Accordion } from "@/components/ui/disclosure";
 import { Breadcrumbs, Card, DataRow, Section, SectionHeading } from "@/components/ui/primitives";
 import { ButtonLink } from "@/components/ui/Button";
 import { localizedFaq } from "@/mock/content.i18n";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { breadcrumbSchema, faqSchema, serviceSchema } from "@/lib/structured-data";
 
 type ServiceSlug = "measurement" | "installation" | "repair" | "maintenance";
 
@@ -67,6 +69,18 @@ export default async function ServiceDetailPage({
 
   return (
     <>
+      <JsonLd
+        data={[
+          serviceSchema(text.title, text.lead, `/${locale}/${item.slug}`),
+          breadcrumbSchema([
+            { label: dict.nav.home, href: r.home },
+            { label: dict.nav.services, href: r.services },
+            { label: text.title },
+          ]),
+          faqSchema(localizedFaq(locale).slice(0, 5)),
+        ]}
+      />
+
       <div className="border-b border-line bg-bone">
         <div className="container-page py-8 sm:py-10">
           <Breadcrumbs

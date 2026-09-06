@@ -6,6 +6,8 @@ import { Accordion } from "@/components/ui/disclosure";
 import { Breadcrumbs, Section } from "@/components/ui/primitives";
 import { ButtonLink } from "@/components/ui/Button";
 import { localizedFaq } from "@/mock/content.i18n";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { breadcrumbSchema, faqSchema } from "@/lib/structured-data";
 
 export async function generateMetadata({
   params,
@@ -35,22 +37,17 @@ export default async function FaqPage({
 
   const groups = Array.from(new Set(localizedFaq(locale).map((f) => f.group)));
 
-  /** FAQPage structured data */
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: localizedFaq(locale).map((f) => ({
-      "@type": "Question",
-      name: f.question,
-      acceptedAnswer: { "@type": "Answer", text: f.answer },
-    })),
-  };
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      <JsonLd
+        data={[
+          faqSchema(localizedFaq(locale)),
+          breadcrumbSchema([
+            { label: dict.nav.home, href: r.home },
+            { label: dict.nav.faq, href: r.faq },
+          ]),
+        ]}
       />
 
       <div className="border-b border-line bg-bone">
