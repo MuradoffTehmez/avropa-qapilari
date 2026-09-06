@@ -6,11 +6,12 @@ import { CheckCircle2, Ruler } from "lucide-react";
 import type { Dictionary } from "@/i18n";
 import type { Locale, PropertyType } from "@/types";
 import { routes } from "@/lib/routes";
-import { createReference } from "@/lib/utils";
+
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card, Notice } from "@/components/ui/primitives";
 import { Field, Input, RadioCard, Select, Textarea } from "@/components/ui/form";
 import { bakuDistricts, cities } from "@/mock/content";
+import { ApiRequestError, apiFetch } from "@/lib/api";
 
 const timeSlots = ["09:00 – 12:00", "12:00 – 15:00", "15:00 – 18:00"];
 
@@ -34,6 +35,7 @@ export function MeasurementForm({ locale, dict }: { locale: Locale; dict: Dictio
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
 
   function set<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -51,9 +53,38 @@ export function MeasurementForm({ locale, dict }: { locale: Locale; dict: Dictio
     setErrors(next);
     if (Object.keys(next).length > 0) return;
 
-    const reference = createReference("MSR");
-    useWorkflow.getState().add({ id: reference, kind: "measurements", title: dict.measurement.title, detail: `${form.doorCount} ${dict.common.doorUnit} · ${form.city}, ${form.street} · ${form.date} ${form.slot}` });
-    setSubmitted(reference);
+    void send();
+  }
+
+  async function send() {
+    setSending(true);
+    try {
+      const { number } = await apiFetch<{ number: string }>("/api/measurement", {
+        method: "POST",
+        json: {
+          propertyType: form.propertyType,
+          doorCount: Number(form.doorCount) || 1,
+          city: form.city,
+          address: form.street,
+          preferredAt: form.date ? `${form.date} ${form.slot}` : undefined,
+          name: form.name,
+          phone: form.phone,
+          note: form.notes || undefined,
+        },
+      });
+
+      useWorkflow.getState().add({
+        id: number,
+        kind: "measurements",
+        title: dict.measurement.title,
+        detail: `${form.doorCount} ${dict.common.doorUnit} · ${form.city}, ${form.street}`,
+      });
+      setSubmitted(number);
+    } catch (error) {
+      if (error instanceof ApiRequestError) setErrors(error.error.details ?? {});
+    } finally {
+      setSending(false);
+    }
   }
 
   if (submitted) {
@@ -192,7 +223,7 @@ export function MeasurementForm({ locale, dict }: { locale: Locale; dict: Dictio
           </div>
         </section>
 
-        <Button type="submit" size="lg">
+        <Button type="submit" size="lg" disabled={sending}>
           {dict.actions.submit}
         </Button>
       </div>

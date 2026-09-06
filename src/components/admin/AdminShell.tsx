@@ -246,8 +246,7 @@ export function AdminShell({
               <button
                 type="button"
                 onClick={() => {
-                  signOut();
-                  router.push(r.adminLogin);
+                  void signOut().then(() => router.push(r.adminLogin));
                 }}
                 aria-label={dict.account.logout}
                 title={dict.account.logout}

@@ -11,6 +11,7 @@ import { brand } from "@/config/brand";
 import { ToastHost } from "@/components/ui/overlays";
 import { CookieBar } from "@/components/layout/CookieBar";
 import { MobileNav } from "@/components/layout/MobileNav";
+import { SessionBootstrap } from "@/components/account/SessionBootstrap";
 
 const inter = Inter({
   subsets: ["latin", "latin-ext", "cyrillic"],
@@ -94,6 +95,7 @@ export default async function LocaleLayout({
           {dict.actions.skipToContent}
         </a>
         <I18nProvider locale={typedLocale} dict={dict}>
+          <SessionBootstrap />
           {children}
           <MobileNav locale={typedLocale} dict={dict} />
           <ToastHost />

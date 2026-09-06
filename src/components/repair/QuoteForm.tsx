@@ -6,11 +6,12 @@ import { CheckCircle2, FileText } from "lucide-react";
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/types";
 import { routes } from "@/lib/routes";
-import { createReference } from "@/lib/utils";
+
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/primitives";
 import { Field, Input, Select, Textarea } from "@/components/ui/form";
 import { products } from "@/mock/products";
+import { ApiRequestError, apiFetch } from "@/lib/api";
 
 /** Quote Request. */
 export function QuoteForm({ locale, dict }: { locale: Locale; dict: Dictionary }) {
@@ -27,6 +28,7 @@ export function QuoteForm({ locale, dict }: { locale: Locale; dict: Dictionary }
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
 
   function set<K extends keyof typeof form>(key: K, value: string) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -42,9 +44,37 @@ export function QuoteForm({ locale, dict }: { locale: Locale; dict: Dictionary }
 
     setErrors(next);
     if (Object.keys(next).length > 0) return;
-    const reference = createReference("QTE");
-    useWorkflow.getState().add({ id: reference, kind: "quotes", title: dict.quote.title, detail: `${form.message} · ${form.quantity} ${dict.common.piece} · ${form.width} × ${form.height} mm` });
-    setSubmitted(reference);
+    void send();
+  }
+
+  async function send() {
+    setSending(true);
+    try {
+      const { number } = await apiFetch<{ number: string }>("/api/quote", {
+        method: "POST",
+        json: {
+          name: form.name,
+          phone: form.phone,
+          email: form.email || undefined,
+          productSlug: form.product || undefined,
+          width: Number(form.width) || undefined,
+          height: Number(form.height) || undefined,
+          message: form.message,
+        },
+      });
+
+      useWorkflow.getState().add({
+        id: number,
+        kind: "quotes",
+        title: dict.quote.title,
+        detail: `${form.message} · ${form.quantity} ${dict.common.piece} · ${form.width} × ${form.height} mm`,
+      });
+      setSubmitted(number);
+    } catch (error) {
+      if (error instanceof ApiRequestError) setErrors(error.error.details ?? {});
+    } finally {
+      setSending(false);
+    }
   }
 
   if (submitted) {
@@ -138,7 +168,7 @@ export function QuoteForm({ locale, dict }: { locale: Locale; dict: Dictionary }
           />
         </Field>
 
-        <Button type="submit" size="lg">
+        <Button type="submit" size="lg" disabled={sending}>
           {dict.actions.submit}
         </Button>
       </div>

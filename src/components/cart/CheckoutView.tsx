@@ -8,7 +8,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, ShoppingBag } from "lucide-react";
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/types";
 import { routes } from "@/lib/routes";
-import { createReference, formatPrice } from "@/lib/utils";
+import { formatPrice } from "@/lib/utils";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card, EmptyState, Notice, Skeleton } from "@/components/ui/primitives";
 import { Stepper } from "@/components/ui/disclosure";
@@ -19,6 +19,7 @@ import { useSession } from "@/store/session";
 import { bakuDistricts, cities } from "@/mock/content";
 import { optionGroups } from "@/mock/options";
 import { optionText } from "@/mock/options.i18n";
+import { ApiRequestError, apiFetch } from "@/lib/api";
 
 type StepId = "customer" | "address" | "delivery" | "installation" | "payment" | "confirmation";
 
@@ -92,6 +93,62 @@ export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionar
   }
   const [errors, setErrors] = useState<Partial<Record<keyof CheckoutState, string>>>({});
   const [placedOrder, setPlacedOrder] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
+  // Səhifə açılanda bir dəfə yaradılır — təkrar klik yeni sifariş yaratmır.
+  const [idempotencyKey] = useState(() => crypto.randomUUID());
+
+  /**
+   * Sifarişi serverə göndərir.
+   *
+   * Məbləğ göndərilmir — server hər sətri yenidən hesablayır (PRD §130).
+   * `Idempotency-Key` bir dəfə yaradılır və təkrar klikdə eyni qalır,
+   * ona görə ikiqat sifariş yaranmır (PRD §137).
+   */
+  async function placeOrder() {
+    setSending(true);
+    try {
+      const { number } = await apiFetch<{ number: string; total: number }>("/api/orders", {
+        method: "POST",
+        headers: { "Idempotency-Key": idempotencyKey },
+        json: {
+          customerName: `${form.name} ${form.surname}`.trim(),
+          customerPhone: form.phone,
+          customerEmail: form.email,
+          address: [form.city, form.district, form.street, form.building, form.apartment]
+            .filter(Boolean)
+            .join(", "),
+          items: items.map((i) => ({
+            productSlug: i.productSlug,
+            quantity: i.quantity,
+            width: i.snapshot.width,
+            height: i.snapshot.height,
+            choices: i.snapshot.lines.reduce<Record<string, string | string[]>>((acc, line) => {
+              acc[line.group] = line.value;
+              return acc;
+            }, {}),
+          })),
+        },
+      });
+
+      useWorkflow.getState().add({
+        id: number,
+        kind: "orders",
+        title: dict.checkout.workflowTitle,
+        total,
+        detail: items
+          .map((i) => `${i.productName} · ${i.quantity} ${dict.common.piece}`)
+          .join(", "),
+      });
+      clear();
+      setPlacedOrder(number);
+    } catch (error) {
+      if (error instanceof ApiRequestError) {
+        setErrors(error.error.details as Partial<Record<keyof CheckoutState, string>>);
+      }
+    } finally {
+      setSending(false);
+    }
+  }
 
   function set<K extends keyof CheckoutState>(key: K, value: CheckoutState[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -184,10 +241,7 @@ export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionar
     if (!validate(current)) return;
 
     if (current === "confirmation") {
-      const number = createReference("ORD");
-      useWorkflow.getState().add({ id: number, kind: "orders", title: dict.checkout.workflowTitle, total, detail: items.map((i) => `${i.productName} · ${i.quantity} ${dict.common.piece} · ${i.snapshot.width}×${i.snapshot.height} mm`).join("\n") });
-      clear();
-      setPlacedOrder(number);
+      void placeOrder();
       return;
     }
     setDirection("forward");
@@ -436,7 +490,7 @@ export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionar
               <ArrowLeft size={16} /> {dict.actions.back}
             </Button>
           )}
-          <Button onClick={goNext} size="lg">
+          <Button onClick={goNext} size="lg" disabled={sending}>
             {current === "confirmation" ? dict.checkout.placeOrder : dict.actions.continue}
             {current !== "confirmation" && <ArrowRight size={16} />}
           </Button>

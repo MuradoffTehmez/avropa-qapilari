@@ -1,7 +1,7 @@
 # EuroPorta — layihə təlimatı
 
 Avropa qapılarının satışı, konfiqurasiyası, quraşdırılması və təmiri üçün platforma.
-Hazırda **Mərhələ 1 — yalnız frontend**. Backend hələ yazılmayıb.
+Hazırda **Mərhələ 2** — backend qoşulub (Prisma + SQLite, `src/app/api/`).
 
 Tam məhsul tələbləri: [`docs/PRD.md`](docs/PRD.md)
 
@@ -9,17 +9,26 @@ Tam məhsul tələbləri: [`docs/PRD.md`](docs/PRD.md)
 
 ## Əsas qaydalar
 
-1. **Backend yazma.** API route, verilənlər bazası, autentifikasiya və ödəniş
-   Mərhələ 2-nin işidir. İndi yalnız UI və client-side məntiq.
-2. **Bütün UI mətni sözlükdən gəlir.** Komponentə sabit mətn yazma —
+1. **Mərhələ 2 — backend qoşulub.** API route-ları `src/app/api/`, server
+   məntiqi `src/server/`, sxem `prisma/schema.prisma`. Data qatı üçün
+   Prisma + SQLite (Cloudflare D1 ilə eyni motor).
+2. **Qiymət yalnız serverdə hesablanır.** Client-dən gələn `total`,
+   `price`, `priceDelta` heç vaxt qəbul edilmir — `src/server/pricing.ts`
+   məhsul və option dəyərlərini bazadan oxuyub yenidən hesablayır (PRD §130).
+3. **Bütün UI mətni sözlükdən gəlir.** Komponentə sabit mətn yazma —
    `src/i18n/dictionaries/{az,en,ru}.ts` fayllarının üçünə də açar əlavə et.
    `Dictionary` tipi üçünün eyni olmasını məcbur edir; biri unudulsa build düşür.
-3. **Şirkət məlumatları boşdur** və elə də qalmalıdır. `src/config/brand.ts`-də
+4. **Şirkət məlumatları boşdur** və elə də qalmalıdır. `src/config/brand.ts`-də
    telefon, e-poçt, ünvan, sosial linklər boş sətirdir; UI onları
    `hasContact` / `hasSocial` ilə şərtli göstərir. Uydurma məlumat yazma.
-4. **"demo" və "nümunə" sözləri qadağandır.** İstifadəçi məhz bunları silməyi
+5. **"demo" və "nümunə" sözləri qadağandır.** İstifadəçi məhz bunları silməyi
    istəyib. Test datası olduğunu bildirmək lazımdırsa kod şərhində yaz, UI-də yox.
-5. **PRD istinadı UI mətninə yazılmır.** Kod şərhində yazmaq olar.
+6. **PRD istinadı UI mətninə yazılmır.** Kod şərhində yazmaq olar.
+7. **Parol və sessiya.** Parollar scrypt ilə `salt:hash` şəklində saxlanılır;
+   sessiya tokeni bazada yalnız SHA-256 hash kimi qalır, kuki HttpOnly.
+   `src/server/auth.ts`-dən kənarda parol emalı yazma.
+8. **Kritik yazma əməliyyatları idempotent olmalıdır** — `Idempotency-Key`
+   başlığı (PRD §137).
 
 ---
 
@@ -42,6 +51,12 @@ npm run typecheck
 
 ```bash
 npm run lint
+```
+
+Baza sxemi dəyişəndə:
+
+```bash
+npm run db:migrate
 ```
 
 Dəyişiklikdən sonra üçünü də işlət. Lint xəbərdarlıqları da təmizlənməlidir.

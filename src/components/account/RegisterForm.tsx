@@ -13,13 +13,14 @@ import { Checkbox, Field, Input } from "@/components/ui/form";
 import { AuthHeading, AuthShell } from "@/components/account/AuthShell";
 import type { DoorState } from "@/components/account/DoorKeyAnimation";
 import { useSession } from "@/store/session";
+import { ApiRequestError, apiFetch } from "@/lib/api";
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 export function RegisterForm({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const r = routes(locale);
   const router = useRouter();
-  const signIn = useSession((s) => s.signIn);
+  const setUser = useSession((s) => s.setUser);
 
   const [form, setForm] = useState({
     name: "",
@@ -49,12 +50,33 @@ export function RegisterForm({ locale, dict }: { locale: Locale; dict: Dictionar
     setErrors(problems);
     if (Object.keys(problems).length > 0) return;
 
+    void submitRegister();
+  }
+
+  async function submitRegister() {
     setDoor("unlocking");
-    window.setTimeout(() => setDoor("open"), 650);
-    window.setTimeout(() => {
-      signIn({ name: form.name.trim(), email: form.email, role: "CUSTOMER" });
-      router.push(r.account);
-    }, 1500);
+    try {
+      const user = await apiFetch<{ id: string; name: string; email: string; role: "CUSTOMER" | "TECHNICIAN" | "ADMIN" }>(
+        "/api/auth/register",
+        {
+          method: "POST",
+          json: {
+            name: form.name.trim(),
+            email: form.email,
+            phone: form.phone || undefined,
+            password: form.password,
+          },
+        },
+      );
+      setUser(user);
+      setDoor("open");
+      window.setTimeout(() => router.push(r.account), 850);
+    } catch (error) {
+      setDoor("locked");
+      if (error instanceof ApiRequestError) {
+        setErrors(error.error.details ?? { email: error.error.message });
+      }
+    }
   }
 
   const busy = door !== "locked";

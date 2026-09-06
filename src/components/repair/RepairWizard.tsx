@@ -14,12 +14,13 @@ import {
 import type { Dictionary } from "@/i18n";
 import type { Locale, RepairCategoryKey } from "@/types";
 import { routes } from "@/lib/routes";
-import { cn, createReference } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card, Notice } from "@/components/ui/primitives";
 import { Stepper } from "@/components/ui/disclosure";
 import { Field, Input, RadioCard, Select, Textarea } from "@/components/ui/form";
 import { bakuDistricts, cities } from "@/mock/content";
+import { ApiRequestError, apiFetch } from "@/lib/api";
 
 const stepIds = [
   "problem",
@@ -93,6 +94,7 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
   const [form, setForm] = useState<RepairForm>(initial);
   const [errors, setErrors] = useState<Partial<Record<keyof RepairForm, string>>>({});
   const [submitted, setSubmitted] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
 
   function set<K extends keyof RepairForm>(key: K, value: RepairForm[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -120,14 +122,44 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
     return Object.keys(next).length === 0;
   }
 
+  /** Müraciəti serverə göndərir; nömrəni server verir (PRD §62). */
+  async function send() {
+    setSending(true);
+    try {
+      const { number } = await apiFetch<{ number: string }>("/api/repair", {
+        method: "POST",
+        json: {
+          category: form.category,
+          doorType: form.doorType,
+          description: form.description,
+          city: form.city,
+          address: `${form.street} ${form.building}`.trim(),
+          preferredAt: form.date ? `${form.date} ${form.slot}` : undefined,
+          name: form.name,
+          phone: form.phone,
+        },
+      });
+
+      useWorkflow.getState().add({
+        id: number,
+        kind: "repairs",
+        title: dict.repair.title,
+        detail: `${form.description} · ${form.city}, ${form.street} ${form.building}`,
+      });
+      setSubmitted(number);
+    } catch (error) {
+      if (error instanceof ApiRequestError) setErrors(error.error.details ?? {});
+    } finally {
+      setSending(false);
+    }
+  }
+
   function goNext() {
     const id = stepIds[step];
     if (!validate(id)) return;
 
     if (id === "confirm") {
-      const reference = createReference("REP");
-    useWorkflow.getState().add({ id: reference, kind: "repairs", title: dict.repair.title, detail: `${form.description} · ${form.city}, ${form.street} ${form.building} · ${form.date} ${form.slot}` });
-    setSubmitted(reference);
+      void send();
       return;
     }
     setDirection("forward");
@@ -403,7 +435,7 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
               <ArrowLeft size={16} /> {dict.actions.back}
             </Button>
           )}
-          <Button size="lg" onClick={goNext}>
+          <Button size="lg" onClick={goNext} disabled={sending}>
             {id === "confirm" ? dict.actions.submit : dict.actions.continue}
             {id !== "confirm" && <ArrowRight size={16} />}
           </Button>

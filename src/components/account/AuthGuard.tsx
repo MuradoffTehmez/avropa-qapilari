@@ -40,13 +40,16 @@ export function AuthGuard({
   const pathname = usePathname();
   const hydrated = useHydrated();
   const user = useSession((s) => s.user);
+  const status = useSession((s) => s.status);
 
   // Serverdə və ilk render-də sessiya bilinmir. Sahəni boş saxlayırıq ki,
   // məzmun sıçramasın — amma `main` landmark-ı və status mətni qalır,
   // əks halda ekran oxuyucusu üçün səhifə tamamilə boş olur.
   const wrap = (node: ReactNode) => (fallbackWrapper ? fallbackWrapper(node) : node);
 
-  if (!hydrated) {
+  // Sessiya serverdən oxunana qədər qərar vermirik — əks halda giriş
+  // etmiş istifadəçi bir an "giriş tələb olunur" ekranını görür.
+  if (!hydrated || status === "loading") {
     return wrap(
       <div className="min-h-[60dvh]" role="status" aria-live="polite">
         <span className="sr-only">{dict.errors.loading}</span>

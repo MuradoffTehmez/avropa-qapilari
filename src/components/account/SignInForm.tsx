@@ -12,7 +12,8 @@ import { Button } from "@/components/ui/Button";
 import { Checkbox, Field, Input } from "@/components/ui/form";
 import { AuthHeading, AuthShell } from "@/components/account/AuthShell";
 import type { DoorState } from "@/components/account/DoorKeyAnimation";
-import { nameFromEmail, useSession } from "@/store/session";
+import { useSession } from "@/store/session";
+import { ApiRequestError, apiFetch } from "@/lib/api";
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -20,7 +21,7 @@ export function SignInForm({ locale, dict }: { locale: Locale; dict: Dictionary 
   const r = routes(locale);
   const router = useRouter();
   const params = useSearchParams();
-  const signIn = useSession((s) => s.signIn);
+  const setUser = useSession((s) => s.setUser);
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -42,12 +43,28 @@ export function SignInForm({ locale, dict }: { locale: Locale; dict: Dictionary 
     setErrors(problems);
     if (Object.keys(problems).length > 0) return;
 
+    void submitLogin();
+  }
+
+  async function submitLogin() {
     setDoor("unlocking");
-    window.setTimeout(() => setDoor("open"), 650);
-    window.setTimeout(() => {
-      signIn({ name: nameFromEmail(form.email), email: form.email, role: "CUSTOMER" });
-      router.push(next ?? r.account);
-    }, 1500);
+    try {
+      const user = await apiFetch<{ id: string; name: string; email: string; role: "CUSTOMER" | "TECHNICIAN" | "ADMIN" }>(
+        "/api/auth/login",
+        { method: "POST", json: { email: form.email, password: form.password } },
+      );
+      setUser(user);
+      setDoor("open");
+      // Qapının açılma animasiyası bitsin, sonra keçid.
+      window.setTimeout(() => router.push(next ?? r.account), 850);
+    } catch (error) {
+      setDoor("locked");
+      if (error instanceof ApiRequestError) {
+        setErrors(
+          error.error.details ?? { password: error.error.message },
+        );
+      }
+    }
   }
 
   const busy = door !== "locked";

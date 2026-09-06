@@ -1,7 +1,7 @@
 # EuroPorta — Girişin yeni standartı
 
 Avropa istehsalı qapıların onlayn satışı, konfiqurasiyası, quraşdırılması, təmiri və
-zəmanət idarəçiliyi üçün platforma. Bu repozitoriya **Mərhələ 1 — frontend** işidir.
+zəmanət idarəçiliyi üçün platforma. Repozitoriya **Mərhələ 2**-dədir: frontend hazırdır, əsas backend funksiyaları qoşulub.
 
 ---
 
@@ -10,10 +10,10 @@ zəmanət idarəçiliyi üçün platforma. Bu repozitoriya **Mərhələ 1 — fr
 | | Vəziyyət |
 |---|---|
 | Frontend (Mərhələ 1) | ✅ Hazırdır |
-| Backend / API | ⛔ Hələ yazılmayıb |
-| Məlumat mənbəyi | Test datası — `src/mock/` |
-| Formalar | Client-side validasiya işləyir; müraciətlər brauzerdə saxlanılır |
-| Autentifikasiya | Yoxdur — `/giris` ekranı hazır, sessiya backend ilə qoşulacaq |
+| Backend / API (Mərhələ 2) | ✅ Əsas funksiyalar hazırdır |
+| Məlumat mənbəyi | Prisma + SQLite; seed `src/mock/`-dan doldurur |
+| Formalar | Serverdə validasiya (zod) və qeydiyyat; nömrəni server verir |
+| Autentifikasiya | ✅ scrypt parol, HttpOnly sessiya kukisi, rol yoxlaması |
 | Ödəniş | Yoxdur — provayder abstraksiyası planlaşdırılıb |
 | Şirkət əlaqə məlumatları | Boş — `src/config/brand.ts` faylında doldurulmalıdır |
 
