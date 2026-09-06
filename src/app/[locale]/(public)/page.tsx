@@ -16,7 +16,6 @@ import { routes } from "@/lib/routes";
 import { formatDate } from "@/lib/utils";
 import { ButtonLink } from "@/components/ui/Button";
 import { Badge, Section, SectionHeading, Stat, Rating } from "@/components/ui/primitives";
-import { Accordion } from "@/components/ui/disclosure";
 import { DoorVisual } from "@/components/product/DoorVisual";
 import { ProductCard } from "@/components/product/ProductCard";
 import { TrustStrip } from "@/components/home/TrustStrip";
@@ -26,6 +25,7 @@ import { getFeaturedProducts } from "@/mock/products";
 import { localizedFaq, localizedProjects, localizedReviews } from "@/mock/content.i18n";
 import { categoryName, countryName } from "@/lib/i18n-format";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { FaqScroller } from "@/components/home/FaqScroller";
 import {
   faqSchema,
   localBusinessSchema,
@@ -396,18 +396,16 @@ export default async function HomePage({
 
       {/* --------------------------------------------------------- FAQ */}
       <Section tone="bone" className="border-t border-line">
-        <div className="container-page grid gap-10 lg:grid-cols-[1fr_1.6fr] lg:gap-16">
-          <div>
-            <SectionHeading eyebrow="FAQ" title={dict.home.faqTitle} text={dict.home.faqText} className="!mb-6" />
+        <FaqScroller
+          locale={locale}
+          dict={dict}
+          eyebrow="FAQ"
+          action={
             <ButtonLink href={r.faq} variant="outline" size="sm">
               {dict.actions.viewAll} <ArrowRight size={15} />
             </ButtonLink>
-          </div>
-          <Accordion
-            defaultOpen={0}
-            items={localizedFaq(locale).slice(0, 6).map((f) => ({ id: f.id, title: f.question, content: f.answer }))}
-          />
-        </div>
+          }
+        />
       </Section>
     </>
   );

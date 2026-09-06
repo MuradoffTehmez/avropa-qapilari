@@ -6,12 +6,12 @@ import { getDictionary, isLocale, locales } from "@/i18n";
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/types";
 import { localeAlternates, routes } from "@/lib/routes";
-import { Accordion } from "@/components/ui/disclosure";
 import { Breadcrumbs, Card, DataRow, Section, SectionHeading } from "@/components/ui/primitives";
 import { ButtonLink } from "@/components/ui/Button";
 import { localizedFaq } from "@/mock/content.i18n";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { breadcrumbSchema, faqSchema, serviceSchema } from "@/lib/structured-data";
+import { FaqScroller } from "@/components/home/FaqScroller";
 
 type ServiceSlug = "measurement" | "installation" | "repair" | "maintenance";
 
@@ -150,13 +150,7 @@ export default async function ServiceDetailPage({
       </Section>
 
       <Section tone="bone" className="border-t border-line">
-        <div className="container-page">
-          <SectionHeading title={dict.home.faqTitle} />
-          <Accordion
-            className="lg:max-w-3xl"
-            items={localizedFaq(locale).slice(0, 5).map((f) => ({ id: f.id, title: f.question, content: f.answer }))}
-          />
-        </div>
+        <FaqScroller locale={locale} dict={dict} eyebrow={dict.nav.faq} />
       </Section>
     </>
   );

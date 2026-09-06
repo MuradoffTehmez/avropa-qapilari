@@ -25,10 +25,9 @@ import {
   SectionHeading,
 } from "@/components/ui/primitives";
 import { ButtonLink } from "@/components/ui/Button";
-import { Accordion } from "@/components/ui/disclosure";
 import { DoorVisual } from "@/components/product/DoorVisual";
 import { ShowroomBooking } from "@/components/showroom/ShowroomBooking";
-import { localizedFaq } from "@/mock/content.i18n";
+import { FaqScroller } from "@/components/home/FaqScroller";
 
 export async function generateMetadata({
   params,
@@ -301,17 +300,7 @@ export default async function ShowroomPage({
 
       {/* ----------------------------------------------------------- FAQ */}
       <Section tone="bone" className="border-t border-line">
-        <div className="container-page grid gap-8 lg:grid-cols-[1fr_1.6fr] lg:gap-16">
-          <SectionHeading
-            eyebrow={dict.nav.faq}
-            title={dict.showroom.faqTitle}
-            className="!mb-0"
-          />
-          <Accordion
-            defaultOpen={0}
-            items={localizedFaq(locale).slice(0, 5).map((f) => ({ id: f.id, title: f.question, content: f.answer }))}
-          />
-        </div>
+        <FaqScroller locale={locale} dict={dict} eyebrow={dict.showroom.faqTitle} />
       </Section>
     </>
   );

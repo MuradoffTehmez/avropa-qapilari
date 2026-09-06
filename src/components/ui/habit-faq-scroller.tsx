@@ -21,6 +21,8 @@ export interface FaqRow {
 }
 
 export interface FaqSectionData {
+  /** Başlığın üstündəki kiçik etiket. */
+  eyebrow?: string;
   mainTitle: string;
   mainSubtitle: string;
   rows: FaqRow[];
@@ -92,10 +94,27 @@ export const HorizontalScroller = ({
  * Məzmundan asılı deyil — mətn `data` ilə ötürülür. Layihə lüğəti ilə
  * bağlanmış variant: `src/components/home/FaqScroller.tsx`.
  */
-const FaqSection = ({ data, className }: { data: FaqSectionData; className?: string }) => {
+const FaqSection = ({
+  data,
+  className,
+  action,
+}: {
+  data: FaqSectionData;
+  className?: string;
+  /** Sətirlərin altında göstərilən düymə və ya link. */
+  action?: ReactNode;
+}) => {
   return (
     <div className={cn("flex w-full flex-col items-center gap-10", className)}>
       <div className="flex max-w-2xl flex-col items-center gap-3 px-4 text-center">
+        {data.eyebrow && (
+          <p
+            className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gold-600"
+            style={{ opacity: 0, animation: "fadeInUp 0.7s ease-out 0.1s forwards" }}
+          >
+            {data.eyebrow}
+          </p>
+        )}
         <h2
           className="font-display text-balance-heading text-[1.7rem] font-semibold leading-tight text-ink sm:text-[2.1rem]"
           style={{ opacity: 0, animation: "fadeInUp 0.7s ease-out 0.2s forwards" }}
@@ -119,6 +138,8 @@ const FaqSection = ({ data, className }: { data: FaqSectionData; className?: str
           </HorizontalScroller>
         ))}
       </div>
+
+      {action && <div className="px-4">{action}</div>}
     </div>
   );
 };

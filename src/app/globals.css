@@ -349,13 +349,35 @@ svg {
   animation-play-state: paused;
 }
 
+/*
+  Hərəkət azaldılıbsa marki dayanır və sətir səliqəli statik şəbəkəyə
+  çevrilir: dublikat nüsxə gizlədilir, kartlar sətirlərə düzülür,
+  kənar maskası götürülür. Belə görünüş qəsdən edilmiş kimi oxunur,
+  yarımçıq dayanmış animasiya kimi yox.
+*/
 @media (prefers-reduced-motion: reduce) {
   .animate-scroll-horizontal,
   .animate-scroll-horizontal-reverse {
     animation: none;
+    width: auto;
   }
+
   .scroller-mask {
-    overflow-x: auto;
+    mask-image: none;
+    overflow: visible;
+  }
+
+  /* kəsintisiz dövr üçün olan ikinci nüsxə lazım deyil */
+  .scroller-mask > div > [aria-hidden="true"] {
+    display: none;
+  }
+
+  /* `flex-shrink-0` sarınmağa imkan vermir — sıfırlayırıq */
+  .scroller-mask > div > div {
+    width: 100%;
+    flex-shrink: 1;
+    flex-wrap: wrap;
+    justify-content: center;
   }
 }
 

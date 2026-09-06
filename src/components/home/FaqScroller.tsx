@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/types";
 import { localizedFaq } from "@/mock/content.i18n";
@@ -23,10 +25,15 @@ export function FaqScroller({
   locale,
   dict,
   className,
+  eyebrow,
+  action,
 }: {
   locale: Locale;
   dict: Dictionary;
   className?: string;
+  eyebrow?: string;
+  /** Sətirlərin altındakı düymə — məs. "Hamısına bax". */
+  action?: ReactNode;
 }) {
   const items = localizedFaq(locale);
 
@@ -43,7 +50,9 @@ export function FaqScroller({
   return (
     <FaqSection
       className={className}
+      action={action}
       data={{
+        eyebrow,
         mainTitle: dict.home.faqTitle,
         mainSubtitle: dict.home.faqText,
         rows,
