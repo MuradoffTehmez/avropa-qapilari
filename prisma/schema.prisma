@@ -243,6 +243,10 @@ model RepairRequest {
   scheduledAt String?
   estimatedCost Int?
   technicianId  String?
+  // Usta panelindən doldurulan servis qeydi
+  resolution  String?
+  usedParts   String?
+  completedAt DateTime?
   createdAt   DateTime @default(now())
 
   user       User?       @relation(fields: [userId], references: [id], onDelete: SetNull)

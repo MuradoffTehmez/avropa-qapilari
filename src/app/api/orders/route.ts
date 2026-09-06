@@ -4,6 +4,7 @@ import { fail, handle, ok } from "@/server/http";
 import { nextNumber } from "@/server/numbering";
 import { calculatePrice, PricingError, type PriceResult } from "@/server/pricing";
 import { orderSchema } from "@/server/validation";
+import { startPayment } from "@/server/payments";
 
 /**
  * POST /api/orders — sifariş yaradır.
@@ -23,7 +24,18 @@ export async function POST(request: Request) {
         where: { idempotencyKey },
         include: { items: true },
       });
-      if (existing) return ok({ number: existing.number, total: existing.total, repeated: true });
+      if (existing) {
+        return ok({
+          number: existing.number,
+          total: existing.total,
+          repeated: true,
+          payment: {
+            reference: null,
+            status: existing.paymentStatus,
+            redirectUrl: null,
+          },
+        });
+      }
     }
 
     const input = orderSchema.parse(await request.json());
@@ -104,7 +116,28 @@ export async function POST(request: Request) {
       return created;
     });
 
-    return ok({ number: order.number, total: order.total, repeated: false }, { status: 201 });
+    // Ödəniş provayderdən asılı deyil: adapter yoxdursa qeyd `PENDING`
+    // qalır və ödəniş sahədə alınır (src/server/payments.ts).
+    const payment = await startPayment({
+      orderId: order.id,
+      orderNumber: order.number,
+      amount: order.total,
+      currency: "AZN",
+    });
+
+    return ok(
+      {
+        number: order.number,
+        total: order.total,
+        repeated: false,
+        payment: {
+          reference: payment.reference,
+          status: payment.status,
+          redirectUrl: payment.redirectUrl ?? null,
+        },
+      },
+      { status: 201 },
+    );
   });
 }
 

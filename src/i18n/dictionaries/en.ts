@@ -1120,6 +1120,7 @@ export const en: Dictionary = {
     assignTechnician: "Assign technician",
     noMatchingRequest: "No matching request found.",
     technicianWorkspace: "Technician workspace",
+    noTechnicianProfile: "No technician profile is linked to your account. Contact an administrator.",
     jobsAndServiceNotes: "My jobs and service notes",
     technicianIntro: "Accept requests, update their status and record the work completed.",
     addJob: "Add a new job",
@@ -1179,6 +1180,14 @@ export const en: Dictionary = {
     INSTALLED: "Installed",
     COMPLETED: "Completed",
     CANCELLED: "Cancelled",
+    REFUNDED: "Refunded",
+  },
+
+  paymentStatus: {
+    PENDING: "Pending",
+    AUTHORIZED: "Authorised",
+    PAID: "Paid",
+    FAILED: "Failed",
     REFUNDED: "Refunded",
   },
 
@@ -1331,7 +1340,7 @@ export const en: Dictionary = {
     draft: "Draft",
     active: "Active",
     expired: "Expired",
-    labels: {
+    labels: { payment: "Payment",
       product: "Product", category: "Category", brand: "Brand", material: "Material", securityClass: "Class", price: "Price", stock: "Stock", name: "Name", homePage: "Home page", founded: "Founded", model: "Model", value: "Value", code: "Code", compatibility: "Compatibility", number: "Number", date: "Date", customer: "Customer", city: "City", item: "Product", installation: "Installation", amount: "Amount", subject: "Subject", problem: "Problem", technician: "Technician", object: "Property", door: "Door", time: "Time", type: "Type", reference: "Reference", specialization: "Specialisation", area: "Area", job: "Jobs", rating: "Rating", status: "Status", function: "Function", orders: "Orders", total: "Total", registration: "Registered", onHand: "On hand", reserved: "Reserved", available: "Available", state: "State", serial: "Serial", end: "End", author: "Author", text: "Text", title: "Title", url: "URL", updated: "Updated", step: "Step", count: "Count", rate: "Rate", actor: "User", action: "Action", target: "Target", detail: "Detail", scope: "Scope", period: "Period",
     },
     roleFunctions: { products: "Products", orders: "Orders", repairs: "Repairs", customers: "Customers", finance: "Finance", roles: "Roles / RBAC", settings: "System settings" },

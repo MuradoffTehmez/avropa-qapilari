@@ -1,24 +1,39 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { CheckCircle2, Wrench } from "lucide-react";
-import { useWorkflow } from "@/store/workflow";
-import { ActivityFeed } from "./ActivityFeed";
+import { CheckCircle2, Phone, Ruler, Wrench } from "lucide-react";
+
 import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/primitives";
-import { Checkbox, Field, Input, Textarea } from "@/components/ui/form";
-import { createReference } from "@/lib/utils";
-import { technicians } from "@/mock/content";
+import { Card, DataRow, EmptyState } from "@/components/ui/primitives";
+import { Field, Input, Textarea } from "@/components/ui/form";
+import { toast } from "@/components/ui/overlays";
+import { RepairStatusPill } from "@/components/account/StatusPill";
+import { formatDate } from "@/lib/utils";
+import { ApiRequestError, apiFetch } from "@/lib/api";
 import { useDict } from "@/i18n/provider";
+import type { TechnicianWorkspace } from "@/server/technician";
 
-export function TechnicianPanel({ locale }: { locale: string }) {
+/**
+ * Usta kabineti — yalnız ustaya təyin edilmiş müraciətlər.
+ *
+ * Status və servis qeydi `/api/technician/jobs/:number`-ə yazılır;
+ * server orada müraciətin həmin ustaya aid olduğunu yoxlayır.
+ */
+export function TechnicianPanel({ workspace }: { workspace: TechnicianWorkspace | null }) {
   const dict = useDict();
-  const add = useWorkflow((s) => s.add);
-  const [note, setNote] = useState("");
-  const [parts, setParts] = useState("");
-  const [saved, setSaved] = useState(false);
 
-  const technician = technicians[0]?.name ?? dict.accountUi.technician;
+  if (!workspace) {
+    return (
+      <div className="container-page max-w-3xl py-12">
+        <EmptyState
+          icon={<Wrench size={30} />}
+          title={dict.accountUi.technicianWorkspace}
+          text={dict.accountUi.noTechnicianProfile}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="container-page max-w-5xl py-8 lg:py-12">
@@ -26,82 +41,193 @@ export function TechnicianPanel({ locale }: { locale: string }) {
         {dict.accountUi.technicianWorkspace}
       </p>
       <h1 className="mt-3 text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
-        {dict.accountUi.jobsAndServiceNotes}
+        {workspace.name}
       </h1>
       <p className="mt-2 max-w-xl text-[15px] leading-relaxed text-stone">
         {dict.accountUi.technicianIntro}
       </p>
+      <p className="mt-1 text-[13px] text-mist">
+        {dict.adminUi.labels.job}: {workspace.completedJobs}
+      </p>
 
-      <Button
-        variant="secondary"
-        className="mt-6"
-        onClick={() =>
-          add({
-            id: createReference("REP"),
-            kind: "repairs",
-            title: dict.accountUi.hingeAdjustment,
-            detail: "Yasamal · 10:00–12:00",
-            technician,
-          })
-        }
-      >
-        <Wrench size={15} /> {dict.accountUi.addJob}
-      </Button>
+      <section className="mt-8">
+        <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold tracking-tight text-ink">
+          <Wrench size={17} className="text-gold-500" />
+          {dict.account.repairs}
+        </h2>
 
-      <div className="mt-8">
-        <ActivityFeed section="all" locale={locale} manage />
+        {workspace.jobs.length === 0 ? (
+          <EmptyState icon={<Wrench size={30} />} title={dict.account.noRepairs} />
+        ) : (
+          <div className="space-y-4">
+            {workspace.jobs.map((job) => (
+              <JobCard key={job.number} job={job} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="mt-10">
+        <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold tracking-tight text-ink">
+          <Ruler size={17} className="text-gold-500" />
+          {dict.admin.measurements}
+        </h2>
+
+        {workspace.visits.length === 0 ? (
+          <EmptyState icon={<Ruler size={30} />} title={dict.accountUi.noMeasurements} />
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {workspace.visits.map((visit) => (
+              <Card key={visit.number} className="p-4">
+                <p className="font-mono text-[12px] text-graphite">{visit.number}</p>
+                <p className="mt-1 text-[14.5px] text-ink">
+                  {dict.measurement.property[visit.propertyType as keyof typeof dict.measurement.property]} ·{" "}
+                  {visit.doorCount} {dict.common.doorUnit}
+                </p>
+                <p className="mt-0.5 text-[13px] text-stone">{visit.address}</p>
+              </Card>
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+
+function JobCard({ job }: { job: TechnicianWorkspace["jobs"][number] }) {
+  const dict = useDict();
+  const router = useRouter();
+
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({
+    resolution: job.resolution ?? "",
+    usedParts: job.usedParts ?? "",
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState(false);
+
+  async function send(payload: Record<string, unknown>) {
+    setBusy(true);
+    try {
+      await apiFetch(`/api/technician/jobs/${job.number}`, { method: "PATCH", json: payload });
+      router.refresh();
+      return true;
+    } catch (error) {
+      if (error instanceof ApiRequestError) {
+        setErrors(error.error.details ?? { resolution: error.error.message });
+      }
+      return false;
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const closed = job.status === "COMPLETED" || job.status === "CANCELLED";
+
+  return (
+    <Card className="p-4 sm:p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="font-mono text-[12.5px] text-graphite">{job.number}</p>
+          <p className="mt-1 text-[15px] font-medium text-ink">
+            {dict.repair.categories[job.category]}
+          </p>
+          <p className="mt-1 text-[13.5px] leading-relaxed text-stone">{job.description}</p>
+        </div>
+        <RepairStatusPill status={job.status} label={dict.repairStatus[job.status]} />
       </div>
 
-      <Card className="p-5 sm:p-6">
-        <h2 className="text-lg font-semibold tracking-tight text-ink">{dict.accountUi.jobCompletion}</h2>
+      <dl className="mt-4 border-t border-line pt-3">
+        <DataRow label={dict.common.address} value={job.address} />
+        <DataRow label={dict.common.date} value={formatDate(job.createdAt)} />
+        <DataRow
+          label={dict.common.phone}
+          value={
+            job.phone ? (
+              <a href={`tel:${job.phone}`} className="flex items-center gap-1.5 hover:underline">
+                <Phone size={13} /> {job.phone}
+              </a>
+            ) : (
+              "—"
+            )
+          }
+        />
+        {job.resolution && <DataRow label={dict.accountUi.workDone} value={job.resolution} />}
+        {job.usedParts && <DataRow label={dict.accountUi.usedParts} value={job.usedParts} />}
+      </dl>
+
+      {!closed && (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {job.status !== "ON_THE_WAY" && (
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={busy}
+              onClick={() => void send({ status: "ON_THE_WAY" })}
+            >
+              {dict.repairStatus.ON_THE_WAY}
+            </Button>
+          )}
+          {job.status !== "IN_PROGRESS" && (
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={busy}
+              onClick={() => void send({ status: "IN_PROGRESS" })}
+            >
+              {dict.repairStatus.IN_PROGRESS}
+            </Button>
+          )}
+          <Button size="sm" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
+            <CheckCircle2 size={15} /> {dict.accountUi.jobCompletion}
+          </Button>
+        </div>
+      )}
+
+      {open && !closed && (
         <form
-          className="mt-5 space-y-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            add({
-              id: createReference("SRV"),
-              kind: "repairs",
-              title: dict.accountUi.serviceCompletionNote,
-              detail: `${dict.accountUi.workDone}: ${note}\n${dict.accountUi.usedParts}: ${parts}`,
-              technician,
+          className="mt-4 space-y-4 border-t border-line pt-4"
+          noValidate
+          onSubmit={async (event) => {
+            event.preventDefault();
+            const done = await send({
+              status: "COMPLETED",
+              resolution: form.resolution,
+              usedParts: form.usedParts || undefined,
             });
-            setSaved(true);
-            setNote("");
-            setParts("");
+            if (done) {
+              setOpen(false);
+              toast(dict.accountUi.serviceHistoryAdded);
+            }
           }}
         >
-          <Field label={dict.accountUi.diagnosisAndWork} required>
+          <Field label={dict.accountUi.diagnosisAndWork} required error={errors.resolution}>
             <Textarea
-              required
-              minLength={10}
-              rows={5}
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
+              rows={4}
+              value={form.resolution}
+              onChange={(e) => {
+                setForm((f) => ({ ...f, resolution: e.target.value }));
+                setErrors((x) => ({ ...x, resolution: "" }));
+              }}
               placeholder={dict.accountUi.diagnosisPlaceholder}
             />
           </Field>
 
-          <Field label={dict.accountUi.spareParts} required>
+          <Field label={dict.accountUi.spareParts} error={errors.usedParts}>
             <Input
-              required
-              value={parts}
-              onChange={(e) => setParts(e.target.value)}
+              value={form.usedParts}
+              onChange={(e) => setForm((f) => ({ ...f, usedParts: e.target.value }))}
               placeholder={dict.accountUi.sparePartsPlaceholder}
             />
           </Field>
 
-          <Checkbox required label={dict.accountUi.customerAccepted} />
-
-          <div className="flex flex-wrap items-center gap-3">
-            <Button type="submit">{dict.accountUi.saveServiceNote}</Button>
-            {saved && (
-              <p role="status" className="flex items-center gap-1.5 text-[13px] text-success">
-                <CheckCircle2 size={15} /> {dict.accountUi.serviceHistoryAdded}
-              </p>
-            )}
-          </div>
+          <Button type="submit" disabled={busy}>
+            {dict.accountUi.saveServiceNote}
+          </Button>
         </form>
-      </Card>
-    </div>
+      )}
+    </Card>
   );
 }

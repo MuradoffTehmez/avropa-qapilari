@@ -1118,6 +1118,7 @@ export const az = {
     assignTechnician: "Usta təyin et",
     noMatchingRequest: "Axtarışa uyğun müraciət yoxdur.",
     technicianWorkspace: "Usta kabineti",
+    noTechnicianProfile: "Hesabınıza usta profili bağlanmayıb. Admin ilə əlaqə saxlayın.",
     jobsAndServiceNotes: "İşlərim və servis qeydləri",
     technicianIntro: "Müraciəti qəbul edin, statusunu yeniləyin və görülmüş işi qeyd edin.",
     addJob: "Yeni iş əlavə et",
@@ -1177,6 +1178,14 @@ export const az = {
     INSTALLED: "Quraşdırılıb",
     COMPLETED: "Tamamlanıb",
     CANCELLED: "Ləğv edilib",
+    REFUNDED: "Geri qaytarılıb",
+  },
+
+  paymentStatus: {
+    PENDING: "Gözləyir",
+    AUTHORIZED: "Bloklanıb",
+    PAID: "Ödənilib",
+    FAILED: "Uğursuz",
     REFUNDED: "Geri qaytarılıb",
   },
 
@@ -1329,7 +1338,7 @@ export const az = {
     draft: "Qaralama",
     active: "Aktiv",
     expired: "Bitib",
-    labels: {
+    labels: { payment: "Ödəniş",
       product: "Məhsul", category: "Kateqoriya", brand: "Brend", material: "Material", securityClass: "Sinif", price: "Qiymət", stock: "Stok", name: "Ad", homePage: "Ana səhifə", founded: "Təsis", model: "Model", value: "Dəyər", code: "Kod", compatibility: "Uyğunluq", number: "Nömrə", date: "Tarix", customer: "Müştəri", city: "Şəhər", item: "Məhsul", installation: "Quraşdırma", amount: "Məbləğ", subject: "Mövzu", problem: "Problem", technician: "Usta", object: "Obyekt", door: "Qapı", time: "Saat", type: "Növ", reference: "İstinad", specialization: "İxtisas", area: "Ərazi", job: "İş", rating: "Reytinq", status: "Status", function: "Funksiya", orders: "Sifariş", total: "Ümumi", registration: "Qeydiyyat", onHand: "Anbarda", reserved: "Rezerv", available: "Əlçatan", state: "Vəziyyət", serial: "Serial", end: "Bitmə", author: "Müəllif", text: "Mətn", title: "Başlıq", url: "URL", updated: "Yenilənib", step: "Mərhələ", count: "Say", rate: "Nisbət", actor: "İstifadəçi", action: "Əməliyyat", target: "Obyekt", detail: "Detal", scope: "Əhatə", period: "Müddət",
     },
     roleFunctions: { products: "Məhsullar", orders: "Sifarişlər", repairs: "Təmir", customers: "Müştərilər", finance: "Maliyyə", roles: "Rollar / RBAC", settings: "Sistem tənzimləmələri" },

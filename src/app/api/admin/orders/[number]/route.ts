@@ -16,17 +16,24 @@ export async function PATCH(
   return handle(async () => {
     await requireUser("ADMIN");
     const { number } = await params;
-    const { status } = orderStatusSchema.parse(await request.json());
+    const input = orderStatusSchema.parse(await request.json());
 
     const order = await db.order.findUnique({ where: { number } });
     if (!order) return fail("NOT_FOUND", "Sifariş tapılmadı", 404);
-    if (order.status === status) return ok({ number, status, changed: false });
+
+    const status = input.status ?? order.status;
+    const paymentStatus = input.paymentStatus ?? order.paymentStatus;
+    const statusChanged = status !== order.status;
 
     await db.$transaction([
-      db.order.update({ where: { id: order.id }, data: { status } }),
-      db.orderStatusHistory.create({ data: { orderId: order.id, status } }),
+      db.order.update({ where: { id: order.id }, data: { status, paymentStatus } }),
+      // Ödəniş qeydi varsa o da eyni vəziyyətə gətirilir.
+      db.payment.updateMany({ where: { orderId: order.id }, data: { status: paymentStatus } }),
+      ...(statusChanged
+        ? [db.orderStatusHistory.create({ data: { orderId: order.id, status } })]
+        : []),
     ]);
 
-    return ok({ number, status, changed: true });
+    return ok({ number, status, paymentStatus, changed: statusChanged });
   });
 }

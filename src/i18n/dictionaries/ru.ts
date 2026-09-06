@@ -1120,6 +1120,7 @@ export const ru: Dictionary = {
     assignTechnician: "Назначить мастера",
     noMatchingRequest: "Подходящих обращений не найдено.",
     technicianWorkspace: "Кабинет мастера",
+    noTechnicianProfile: "К вашей учётной записи не привязан профиль мастера. Обратитесь к администратору.",
     jobsAndServiceNotes: "Мои работы и сервисные записи",
     technicianIntro: "Принимайте обращения, обновляйте их статус и фиксируйте выполненную работу.",
     addJob: "Добавить работу",
@@ -1180,6 +1181,14 @@ export const ru: Dictionary = {
     COMPLETED: "Завершён",
     CANCELLED: "Отменён",
     REFUNDED: "Возвращён",
+  },
+
+  paymentStatus: {
+    PENDING: "Ожидает",
+    AUTHORIZED: "Заблокировано",
+    PAID: "Оплачено",
+    FAILED: "Неуспешно",
+    REFUNDED: "Возвращено",
   },
 
   repairStatus: {
@@ -1331,7 +1340,7 @@ export const ru: Dictionary = {
     draft: "Черновик",
     active: "Активно",
     expired: "Завершено",
-    labels: {
+    labels: { payment: "Оплата",
       product: "Товар", category: "Категория", brand: "Бренд", material: "Материал", securityClass: "Класс", price: "Цена", stock: "Остаток", name: "Имя", homePage: "Главная", founded: "Основан", model: "Модель", value: "Значение", code: "Код", compatibility: "Совместимость", number: "Номер", date: "Дата", customer: "Клиент", city: "Город", item: "Товар", installation: "Установка", amount: "Сумма", subject: "Тема", problem: "Проблема", technician: "Мастер", object: "Объект", door: "Дверь", time: "Время", type: "Тип", reference: "Ссылка", specialization: "Специализация", area: "Зона", job: "Работы", rating: "Рейтинг", status: "Статус", function: "Функция", orders: "Заказы", total: "Итого", registration: "Регистрация", onHand: "На складе", reserved: "Резерв", available: "Доступно", state: "Состояние", serial: "Серийный №", end: "Окончание", author: "Автор", text: "Текст", title: "Заголовок", url: "URL", updated: "Обновлено", step: "Этап", count: "Количество", rate: "Доля", actor: "Пользователь", action: "Действие", target: "Объект", detail: "Детали", scope: "Область", period: "Период",
     },
     roleFunctions: { products: "Товары", orders: "Заказы", repairs: "Ремонт", customers: "Клиенты", finance: "Финансы", roles: "Роли / RBAC", settings: "Системные настройки" },

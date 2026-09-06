@@ -153,13 +153,32 @@ export const REQUEST_STATUSES = [
   "CANCELLED",
 ] as const;
 
-export const orderStatusSchema = z.object({
-  status: z.enum(ORDER_STATUSES, "Belə sifariş statusu yoxdur"),
-});
+export const PAYMENT_STATUSES = [
+  "PENDING",
+  "AUTHORIZED",
+  "PAID",
+  "FAILED",
+  "REFUNDED",
+] as const;
+
+export const orderStatusSchema = z
+  .object({
+    status: z.enum(ORDER_STATUSES, "Belə sifariş statusu yoxdur").optional(),
+    paymentStatus: z.enum(PAYMENT_STATUSES, "Belə ödəniş vəziyyəti yoxdur").optional(),
+  })
+  .refine((v) => v.status !== undefined || v.paymentStatus !== undefined, {
+    message: "Dəyişdiriləcək sahə göstərilməyib",
+  });
 
 export const requestUpdateSchema = z.object({
   status: z.enum(REQUEST_STATUSES, "Belə status yoxdur").optional(),
   technicianId: z.string().nullable().optional(),
   scheduledAt: z.string().optional(),
   estimatedCost: z.number().int().min(0).optional(),
+});
+
+export const technicianJobSchema = z.object({
+  status: z.enum(REQUEST_STATUSES, "Belə status yoxdur").optional(),
+  resolution: z.string().trim().min(10, "Ən azı 10 simvol yazın").optional(),
+  usedParts: z.string().trim().max(500).optional(),
 });

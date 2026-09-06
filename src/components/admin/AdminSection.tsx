@@ -12,6 +12,7 @@ import { Badge, Card, DataRow, Rating } from "@/components/ui/primitives";
 import { AdminPageHeader, DataTable } from "@/components/admin/DataTable";
 import {
   OrderStatusControl,
+  PaymentStatusControl,
   RepairStatusControl,
   TechnicianControl,
 } from "@/components/admin/AdminControls";
@@ -259,7 +260,7 @@ export function AdminSection({
         />
         <DataTable
           title={dict.admin.orders}
-          minWidth={860}
+          minWidth={1040}
           source="server"
           rows={data.orders ?? []}
           columns={[
@@ -278,6 +279,11 @@ export function AdminSection({
               key: "status",
               header: label.status,
               render: (o) => <OrderStatusControl number={o.number} status={o.status} />,
+            },
+            {
+              key: "payment",
+              header: label.payment,
+              render: (o) => <PaymentStatusControl number={o.number} status={o.paymentStatus} />,
             },
             {
               key: "total",

@@ -80,6 +80,39 @@ export function OrderStatusControl({
   );
 }
 
+/** Sifarişin ödəniş vəziyyəti — daxili adapterdə əl ilə təsdiqlənir. */
+export function PaymentStatusControl({
+  number,
+  status,
+}: {
+  number: string;
+  status: string;
+}) {
+  const dict = useDict();
+  const router = useRouter();
+
+  const options = Object.entries(dict.paymentStatus).map(([value, label]) => ({ value, label }));
+
+  return (
+    <Control
+      value={status}
+      options={options}
+      label={`${number} — ${dict.adminUi.labels.payment}`}
+      onPick={async (next) => {
+        try {
+          await apiFetch(`/api/admin/orders/${number}`, {
+            method: "PATCH",
+            json: { paymentStatus: next },
+          });
+          router.refresh();
+        } catch (error) {
+          if (error instanceof ApiRequestError) toast(error.error.message);
+        }
+      }}
+    />
+  );
+}
+
 /** Təmir müraciətinin statusu. */
 export function RepairStatusControl({
   number,
