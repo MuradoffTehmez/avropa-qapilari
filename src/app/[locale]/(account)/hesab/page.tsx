@@ -47,10 +47,10 @@ export default async function AccountDashboardPage({
     <div className="space-y-8">
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <Card className="p-5">
-          <Stat label={dict.account.orders} value={orders.length} hint={`${activeOrders.length} aktiv`} />
+          <Stat label={dict.account.orders} value={orders.length} hint={`${activeOrders.length} ${dict.accountUi.active}`} />
         </Card>
         <Card className="p-5">
-          <Stat label={dict.account.repairs} value={repairRequests.length} hint={`${activeRepairs.length} aktiv`} />
+          <Stat label={dict.account.repairs} value={repairRequests.length} hint={`${activeRepairs.length} ${dict.accountUi.active}`} />
         </Card>
         <Card className="p-5">
           <Stat label={dict.account.warranties} value={warranties.length} hint={dict.account.activeWarranties} />
@@ -84,7 +84,7 @@ export default async function AccountDashboardPage({
                   {formatDate(a.date)} · {a.startTime}
                 </p>
                 <p className="mt-1 text-[13px] text-stone">{a.address}</p>
-                {tech && <p className="mt-2 text-[13px] text-graphite">Usta: {tech.name}</p>}
+                {tech && <p className="mt-2 text-[13px] text-graphite">{dict.accountUi.technician}: {tech.name}</p>}
                 <p className="mt-2 font-mono text-[11px] text-mist">{a.reference}</p>
               </Card>
             );
@@ -166,7 +166,7 @@ export default async function AccountDashboardPage({
                   <p className="text-[15px] font-medium text-ink">{w.productName}</p>
                   <p className="mt-0.5 font-mono text-[12px] text-stone">{w.serialNumber}</p>
                 </div>
-                <span className="shrink-0 rounded-[2px] bg-[#e8f2ec] px-2 py-0.5 text-[11px] font-medium uppercase tracking-wider text-success">
+                <span className="shrink-0 rounded-[2px] bg-success-soft px-2 py-0.5 text-xs font-medium uppercase tracking-wider text-success">
                   {dict.warranty.active}
                 </span>
               </div>

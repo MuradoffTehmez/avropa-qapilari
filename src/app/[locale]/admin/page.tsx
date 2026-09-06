@@ -9,6 +9,7 @@ import { OrderStatusPill, RepairStatusPill } from "@/components/account/StatusPi
 import { orders, repairRequests, appointments, measurements } from "@/mock/account";
 import { products } from "@/mock/products";
 import { optionGroups } from "@/mock/options";
+import { optionText } from "@/mock/options.i18n";
 
 /** admin dashboard KPI. */
 export default async function AdminDashboardPage({
@@ -68,7 +69,7 @@ export default async function AdminDashboardPage({
               }
             >
               {k.delta >= 0 ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
-              {Math.abs(k.delta)}% keçən aya nisbətən
+              {Math.abs(k.delta)}% {dict.adminUi.comparedToLastMonth}
             </p>
           </Card>
         ))}
@@ -114,14 +115,14 @@ export default async function AdminDashboardPage({
             ))}
           </ul>
 
-          <div className="hidden overflow-x-auto md:block">
+          <div className="hidden overflow-x-auto md:block" role="region" tabIndex={0} aria-label={dict.admin.recentOrders}>
             <table className="w-full min-w-[520px] text-[13px]">
               <thead>
                 <tr className="border-b border-line bg-bone/60 text-left text-[11px] uppercase tracking-[0.1em] text-stone">
-                  <th className="px-5 py-2.5 font-medium">Nömrə</th>
-                  <th className="px-5 py-2.5 font-medium">Müştəri</th>
-                  <th className="px-5 py-2.5 font-medium">Status</th>
-                  <th className="px-5 py-2.5 text-right font-medium">Məbləğ</th>
+                  <th className="px-5 py-2.5 font-medium">{dict.adminUi.labels.number}</th>
+                  <th className="px-5 py-2.5 font-medium">{dict.adminUi.labels.customer}</th>
+                  <th className="px-5 py-2.5 font-medium">{dict.adminUi.labels.status}</th>
+                  <th className="px-5 py-2.5 text-right font-medium">{dict.adminUi.labels.amount}</th>
                 </tr>
               </thead>
               <tbody>
@@ -178,13 +179,13 @@ export default async function AdminDashboardPage({
           title={dict.admin.topDoors}
           items={topDoors.map((p, i) => ({
             label: p.name,
-            value: `${48 - i * 7} satış`,
+            value: `${48 - i * 7} ${dict.adminUi.saleUnit}`,
           }))}
         />
         <TopList
           title={dict.admin.topColors}
           items={topColors.map((c, i) => ({
-            label: c.label,
+            label: optionText(c, locale).label,
             value: `${34 - i * 5}%`,
             hex: c.hex,
           }))}
@@ -192,7 +193,7 @@ export default async function AdminDashboardPage({
         <TopList
           title={dict.admin.topLocks}
           items={topLocks.map((l, i) => ({
-            label: l.label,
+            label: optionText(l, locale).label,
             value: `${42 - i * 11}%`,
           }))}
         />
@@ -211,22 +212,22 @@ export default async function AdminDashboardPage({
                 <p className="text-[12px] text-stone">{formatDate(m.preferredDate)}</p>
               </div>
               <p className="mt-1 text-[13.5px] text-ink">
-                {dict.measurement.property[m.propertyType]} · {m.doorCount} qapı
+                {dict.measurement.property[m.propertyType]} · {m.doorCount} {dict.common.doorUnit}
               </p>
               <p className="mt-0.5 text-[12px] text-stone">{m.technician ?? "—"}</p>
             </li>
           ))}
         </ul>
 
-        <div className="hidden overflow-x-auto md:block">
+        <div className="hidden overflow-x-auto md:block" role="region" tabIndex={0} aria-label={dict.admin.measurements}>
           <table className="w-full min-w-[560px] text-[13px]">
             <thead>
               <tr className="border-b border-line bg-bone/60 text-left text-[11px] uppercase tracking-[0.1em] text-stone">
-                <th className="px-5 py-2.5 font-medium">Nömrə</th>
-                <th className="px-5 py-2.5 font-medium">Obyekt</th>
-                <th className="px-5 py-2.5 font-medium">Qapı</th>
-                <th className="px-5 py-2.5 font-medium">Usta</th>
-                <th className="px-5 py-2.5 font-medium">Tarix</th>
+                <th className="px-5 py-2.5 font-medium">{dict.adminUi.labels.number}</th>
+                <th className="px-5 py-2.5 font-medium">{dict.adminUi.labels.object}</th>
+                <th className="px-5 py-2.5 font-medium">{dict.adminUi.labels.door}</th>
+                <th className="px-5 py-2.5 font-medium">{dict.adminUi.labels.technician}</th>
+                <th className="px-5 py-2.5 font-medium">{dict.adminUi.labels.date}</th>
               </tr>
             </thead>
             <tbody>

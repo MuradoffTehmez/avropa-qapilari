@@ -144,6 +144,12 @@ export function Configurator({
   const visualLayers = buildVisualLayers(selection, product, dict, locale);
   if (currentGroup === "INSIDE_COLOR") previewProps.panelHex = findOptionValue(selection.choices.INSIDE_COLOR as string)?.hex ?? previewProps.panelHex;
   const selectedLines = summaryLines(selection, locale, dict);
+  const previewKey = JSON.stringify([
+    selection.width,
+    selection.height,
+    selection.choices,
+    [...hiddenLayers].sort(),
+  ]);
 
   return (
     <div className="configurator-shell lg:grid lg:min-h-[calc(100dvh-4.5rem)] lg:grid-cols-[1.15fr_1fr]">
@@ -151,7 +157,7 @@ export function Configurator({
       <div className="configurator-preview sticky top-16 z-20 flex flex-col border-b border-line bg-bone lg:top-[4.5rem] lg:h-[calc(100dvh-4.5rem)] lg:border-b-0 lg:border-r">
         <div className="relative flex h-52 shrink-0 items-center justify-center px-4 py-4 sm:h-72 lg:h-auto lg:flex-1 lg:px-10">
           <div className="h-full max-h-[70vh] w-auto">
-            <div className="h-full" style={{ aspectRatio: "3 / 4" }}>
+            <div key={previewKey} className="motion-preview h-full" style={{ aspectRatio: "3 / 4" }}>
               <DoorVisual {...previewProps} label={dict.actions.doorPreview} />
             </div>
           </div>
@@ -639,6 +645,7 @@ function OptionStep({
         title={dict.configurator.steps[group]}
         hint={dict.configurator.hints[group]}
         multi={def.multi}
+        multipleChoiceLabel={dict.configurator.multipleChoice}
       />
 
       {isColor ? (
@@ -754,7 +761,7 @@ function ColorGrid({
                 <span className="text-[11px] text-stone">{value.code}</span>
               </span>
               <span className="shrink-0 text-[12px] tabular-nums text-graphite">
-                {value.priceDelta === 0 ? "—" : `+${value.priceDelta}`}
+                {value.priceDelta === 0 ? "—" : `+${formatPrice(value.priceDelta)}`}
               </span>
             </span>
           </button>
@@ -874,16 +881,18 @@ function StepHeading({
   title,
   hint,
   multi,
+  multipleChoiceLabel,
 }: {
   title: string;
   hint: string;
   multi?: boolean;
+  multipleChoiceLabel?: string;
 }) {
   return (
     <div className="mb-5">
       <div className="flex items-center gap-2">
         <h2 className="text-xl font-semibold tracking-tight text-ink sm:text-2xl">{title}</h2>
-        {multi && <Badge tone="outline">Çoxlu seçim</Badge>}
+        {multi && multipleChoiceLabel && <Badge tone="outline">{multipleChoiceLabel}</Badge>}
       </div>
       <p className="mt-1.5 text-[14px] text-stone">{hint}</p>
     </div>

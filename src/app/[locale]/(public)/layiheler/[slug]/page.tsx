@@ -63,32 +63,26 @@ export default async function ProjectPage({
 
       <Section>
         <div className="container-page grid gap-8 lg:grid-cols-2 lg:gap-12">
-          <ProjectDetail accent={project.accent} title={project.title} />
+          <ProjectDetail accent={project.accent} title={project.title} dict={dict} />
 
           <div>
             <h2 className="text-xl font-semibold tracking-tight text-ink">
-              Girişin yenilənməsi
+              {dict.projectDetail.renewalTitle}
             </h2>
             <p className="mt-3 text-[15px] leading-relaxed text-graphite">
-              Mövcud giriş ölçülür, açılma istiqaməti seçilir və interyerə uyğun qapı
-              quraşdırılır. Son mərhələdə kilid, menteşə və izolyasiya yoxlanılır.
+              {dict.projectDetail.renewalText}
             </p>
 
             <dl className="mt-6 border-t border-line">
-              <DataRow label="Model" value={project.doorModel} />
+              <DataRow label={dict.common.model} value={project.doorModel} />
               <DataRow label={dict.common.color} value={project.color} />
-              <DataRow label="Layihə növü" value={project.category} />
-              <DataRow label="İl" value={project.year} />
+              <DataRow label={dict.projectDetail.projectType} value={project.category} />
+              <DataRow label={dict.projectDetail.year} value={project.year} />
             </dl>
 
-            <h2 className="mt-8 text-lg font-semibold tracking-tight text-ink">İş mərhələləri</h2>
+            <h2 className="mt-8 text-lg font-semibold tracking-tight text-ink">{dict.projectDetail.stages}</h2>
             <ol className="mt-4 border-t border-line">
-              {[
-                "Ölçü və məsləhət",
-                "Konfiqurasiya və qiymətin təsdiqi",
-                "Çatdırılma və quraşdırma",
-                "Keyfiyyət yoxlaması və zəmanət",
-              ].map((step, i) => (
+              {dict.projectDetail.stageItems.map((step, i) => (
                 <li key={step} className="flex items-start gap-4 border-b border-line py-3.5">
                   <span className="flex h-7 w-7 shrink-0 items-center justify-center border border-line text-xs font-semibold tabular-nums text-graphite">
                     {i + 1}
@@ -99,7 +93,7 @@ export default async function ProjectPage({
             </ol>
 
             <ButtonLink href={r.measurement} size="lg" className="mt-7">
-              Oxşar layihə üçün ölçü sifariş et
+              {dict.projectDetail.similarProject}
             </ButtonLink>
           </div>
         </div>

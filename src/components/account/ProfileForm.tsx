@@ -32,7 +32,7 @@ export function ProfileForm({ dict }: { dict: Dictionary }) {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            toast("Profil yadda saxlanıldı");
+            toast(dict.accountUi.profileSaved);
           }}
         >
           <div className="grid gap-4 sm:grid-cols-2">
@@ -48,7 +48,7 @@ export function ProfileForm({ dict }: { dict: Dictionary }) {
             <Field label={dict.common.phone}>
               <Input type="tel" value={form.phone} onChange={(e) => set("phone", e.target.value)} />
             </Field>
-            <Field label="Dil">
+            <Field label={dict.accountUi.language}>
               <Select value={form.language} onChange={(e) => set("language", e.target.value)}>
                 {locales.map((l) => (
                   <option key={l} value={l}>
@@ -61,8 +61,8 @@ export function ProfileForm({ dict }: { dict: Dictionary }) {
 
           <div className="mt-5 border-t border-line pt-4">
             <Checkbox
-              label="Marketinq bildirişlərinə razıyam"
-              description="Endirimlər, yeni modellər və kampaniyalar"
+              label={dict.accountUi.marketingConsent}
+              description={dict.accountUi.marketingDescription}
               checked={form.marketingConsent}
               onChange={(e) => set("marketingConsent", e.target.checked)}
             />
@@ -76,21 +76,21 @@ export function ProfileForm({ dict }: { dict: Dictionary }) {
 
       <Card className="p-5">
         <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-stone">
-          Təhlükəsizlik
+          {dict.accountUi.security}
         </h3>
         <div className="space-y-3 text-sm text-graphite">
           <div className="flex items-center justify-between border-b border-line pb-3">
-            <span>Şifrə</span>
+            <span>{dict.accountUi.password}</span>
             <Button variant="ghost" size="sm">
-              Dəyiş
+              {dict.accountUi.change}
             </Button>
           </div>
           <div className="flex items-center justify-between border-b border-line pb-3">
-            <span>Aktiv sessiyalar</span>
-            <span className="text-[13px] text-stone">1 cihaz</span>
+            <span>{dict.accountUi.activeSessions}</span>
+            <span className="text-[13px] text-stone">{dict.accountUi.oneDevice}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span>Hesabın silinməsi</span>
+            <span>{dict.accountUi.deleteAccount}</span>
             <Button variant="ghost" size="sm" className="text-danger">
               {dict.actions.remove}
             </Button>

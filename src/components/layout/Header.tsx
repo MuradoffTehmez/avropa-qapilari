@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   ChevronRight,
   Heart,
@@ -25,7 +25,7 @@ import { LocaleSwitcher } from "@/components/layout/LocaleSwitcher";
 import { SearchOverlay } from "@/components/layout/SearchOverlay";
 import { useCart, cartCount } from "@/store/cart";
 import { useCompare, useFavorites } from "@/store/lists";
-import { useHydrated, useLockBodyScroll, useScrolledPast } from "@/lib/hooks";
+import { useDialogFocus, useHydrated, useLockBodyScroll, useScrolledPast } from "@/lib/hooks";
 import { useSession } from "@/store/session";
 import { categories } from "@/mock/taxonomy";
 import { categoryName } from "@/lib/i18n-format";
@@ -35,6 +35,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const mobilePanelRef = useRef<HTMLDivElement>(null);
   const scrolled = useScrolledPast(8);
   const hydrated = useHydrated();
 
@@ -44,6 +45,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const user = useSession((s) => s.user);
 
   useLockBodyScroll(mobileOpen);
+  useDialogFocus(mobilePanelRef, mobileOpen);
 
   /** `wide: true` — yalnız geniş ekranda görünür; mobil menyuda hamısı var. */
   const nav = [
@@ -103,6 +105,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
                 <Link
                   key={item.href}
                   href={item.href}
+                  aria-current={active ? "page" : undefined}
                   className={cn(
                     "relative whitespace-nowrap px-2 py-2 text-[13px] font-medium transition-colors xl:px-3 xl:text-[13.5px]",
                     active ? "text-ink" : "text-graphite hover:text-ink",
@@ -171,9 +174,16 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
             type="button"
             aria-label={dict.actions.close}
             onClick={close}
-            className="absolute inset-0 bg-obsidian/50"
+            className="motion-overlay absolute inset-0 bg-obsidian/50"
           />
-          <div className="absolute inset-y-0 left-0 flex w-[88%] max-w-sm flex-col bg-paper">
+          <div
+            ref={mobilePanelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={dict.actions.menu}
+            tabIndex={-1}
+            className="motion-drawer-left absolute inset-y-0 left-0 flex w-[88%] max-w-sm flex-col bg-paper outline-none"
+          >
             <div className="flex h-16 shrink-0 items-center justify-between border-b border-line px-4">
               <Logo compact tagline={dict.meta.slogan} />
               <button
@@ -188,17 +198,21 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
 
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
               <nav className="flex flex-col px-2 py-2" aria-label={dict.actions.menu}>
-                {nav.map((item) => (
+                {nav.map((item) => {
+                  const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                  return (
                   <Link
                     key={item.href}
                     href={item.href}
                     onClick={close}
+                    aria-current={active ? "page" : undefined}
                     className="flex items-center justify-between border-b border-line px-3 py-3.5 text-[15px] font-medium text-ink last:border-b-0"
                   >
                     {item.label}
                     <ChevronRight size={15} className="text-mist" />
                   </Link>
-                ))}
+                  );
+                })}
               </nav>
 
               <div className="border-t border-line px-5 py-4">

@@ -93,13 +93,13 @@ export default async function DoorPassportPage({
               </div>
 
               <dl className="mt-5 border-t border-line pt-3">
-                <DataRow label="Quraşdırma tarixi" value={formatDate(asset.installedAt)} />
+                <DataRow label={dict.service.installationDate} value={formatDate(asset.installedAt)} />
                 <DataRow
                   label={dict.service.warrantyStatus}
                   value={
                     asset.warrantyStatus === "ACTIVE"
-                      ? `Aktiv — ${formatDate(asset.warrantyEnd)} tarixinədək`
-                      : "Müddət bitib"
+                      ? dict.service.activeUntil.replace("{date}", formatDate(asset.warrantyEnd))
+                      : dict.service.warrantyExpired
                   }
                 />
                 {brand.contact.phone && (
@@ -120,7 +120,7 @@ export default async function DoorPassportPage({
               <div className="border-b border-line px-5 py-3.5">
                 <h2 className="flex items-center gap-2 text-[13px] font-semibold text-ink">
                   <Lock size={14} className="text-stone" />
-                  Servis tarixçəsi
+                  {dict.service.history}
                 </h2>
               </div>
 
@@ -144,7 +144,7 @@ export default async function DoorPassportPage({
                   {dict.service.fullHistoryLocked}
                 </p>
                 <ButtonLink href={r.account} size="sm" variant="secondary" className="mt-4">
-                  Hesaba daxil ol
+                  {dict.service.signIn}
                 </ButtonLink>
               </div>
             </Card>
@@ -164,14 +164,14 @@ export default async function DoorPassportPage({
               <p className="mt-1 font-mono text-[12px] text-graphite">{asset.serialNumber}</p>
             </Card>
 
-            <Notice tone="info" title="Məxfilik">
+            <Notice tone="info" title={dict.service.privacy}>
               {dict.service.publicNotice}
             </Notice>
 
             <Card className="p-5">
               <h2 className="mb-4 flex items-center gap-2 text-[13px] font-semibold text-ink">
                 <ShieldCheck size={15} className="text-gold-500" />
-                Bu qapı üçün nə edə bilərsiniz
+                {dict.service.availableActions}
               </h2>
               <div className="space-y-2">
                 <ButtonLink href={r.repair} full>

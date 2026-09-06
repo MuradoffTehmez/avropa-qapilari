@@ -38,6 +38,7 @@ import { getProduct, getRelatedProducts, products } from "@/mock/products";
 import { getBrand, getCategory } from "@/mock/taxonomy";
 import { localizedFaq, localizedReviews } from "@/mock/content.i18n";
 import { optionGroups } from "@/mock/options";
+import { optionText } from "@/mock/options.i18n";
 import { categoryName, materialName, priceFrom, productDescription, productShort, styleName } from "@/lib/i18n-format";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { breadcrumbSchema, productSchema } from "@/lib/structured-data";
@@ -127,9 +128,9 @@ export default async function ProductPage({
 
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            {product.isNew && <Badge tone="dark">Yeni</Badge>}
-            {product.onSale && <Badge tone="gold">Endirim</Badge>}
-            {product.isBestseller && <Badge tone="outline">Bestseller</Badge>}
+            {product.isNew && <Badge tone="dark">{dict.common.new}</Badge>}
+            {product.onSale && <Badge tone="gold">{dict.common.sale}</Badge>}
+            {product.isBestseller && <Badge tone="outline">{dict.common.bestseller}</Badge>}
             <Badge tone={product.inStock ? "success" : "neutral"}>
               {product.inStock ? dict.common.inStock : dict.common.madeToOrder}
             </Badge>
@@ -176,7 +177,7 @@ export default async function ProductPage({
               <KeySpec icon={ShieldCheck} label={dict.product.security} value={product.securityClass} />
             )}
             <KeySpec icon={Volume2} label={dict.product.soundInsulation} value={`${product.soundInsulationDb} dB`} />
-            <KeySpec icon={Package} label="Material" value={materialName(product.material, dict)} />
+            <KeySpec icon={Package} label={dict.catalog.material} value={materialName(product.material, dict)} />
             {product.fireRating && <KeySpec icon={Flame} label={dict.product.fireRating} value={product.fireRating} />}
             <KeySpec icon={Award} label={dict.product.warrantyPeriod} value={`${product.warrantyYears} ${dict.common.years}`} />
             <KeySpec
@@ -272,7 +273,7 @@ export default async function ProductPage({
                 <div className="grid gap-6 sm:grid-cols-2 lg:max-w-3xl">
                   <Card className="p-5">
                     <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-stone">
-                      Standart ölçü
+                      {dict.product.standardSize}
                     </h3>
                     <p className="text-2xl font-semibold tracking-tight text-ink">
                       {formatDimensions(product.defaultWidth, product.defaultHeight)}
@@ -304,20 +305,21 @@ export default async function ProductPage({
               content: (
                 <div>
                   <p className="mb-5 max-w-xl text-[15px] text-graphite">
-                    Xarici və daxili rəng ayrıca seçilir. Aşağıdakı rənglər konfiquratorda mövcuddur.
+                    {dict.product.colorsHint}
                   </p>
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
-                    {optionGroups.OUTSIDE_COLOR.values.map((c) => (
-                      <div key={c.id} className="border border-line">
+                    {optionGroups.OUTSIDE_COLOR.values.map((c) => {
+                      const text = optionText(c, locale);
+                      return <div key={c.id} className="border border-line">
                         <div className="h-20" style={{ background: c.swatch ?? c.hex }} />
                         <div className="p-2.5">
-                          <p className="text-[13px] font-medium text-ink">{c.label}</p>
+                          <p className="text-[13px] font-medium text-ink">{text.label}</p>
                           <p className="text-xs text-stone">
-                            {c.priceDelta === 0 ? "Baza" : `+${formatPrice(c.priceDelta)}`}
+                            {c.priceDelta === 0 ? dict.common.base : `+${formatPrice(c.priceDelta)}`}
                           </p>
                         </div>
-                      </div>
-                    ))}
+                      </div>;
+                    })}
                   </div>
                 </div>
               ),
@@ -329,21 +331,22 @@ export default async function ProductPage({
                 <div className="grid gap-4 sm:grid-cols-2 lg:max-w-4xl">
                   {[...optionGroups.LOCK.values, ...optionGroups.SMART_LOCK.values]
                     .filter((v) => v.code !== "NONE")
-                    .map((lock) => (
-                      <Card key={lock.id} className="p-5">
+                    .map((lock) => {
+                      const text = optionText(lock, locale);
+                      return <Card key={lock.id} className="p-5">
                         <div className="flex items-start justify-between gap-4">
                           <div>
-                            <h3 className="text-[15px] font-medium text-ink">{lock.label}</h3>
-                            {lock.description && (
-                              <p className="mt-1 text-[13px] text-stone">{lock.description}</p>
+                            <h3 className="text-[15px] font-medium text-ink">{text.label}</h3>
+                            {text.description && (
+                              <p className="mt-1 text-[13px] text-stone">{text.description}</p>
                             )}
                           </div>
                           <p className="shrink-0 text-sm font-medium tabular-nums text-graphite">
-                            {lock.priceDelta === 0 ? "Baza" : `+${formatPrice(lock.priceDelta)}`}
+                            {lock.priceDelta === 0 ? dict.common.base : `+${formatPrice(lock.priceDelta)}`}
                           </p>
                         </div>
-                      </Card>
-                    ))}
+                      </Card>;
+                    })}
                 </div>
               ),
             },
@@ -352,15 +355,16 @@ export default async function ProductPage({
               label: dict.product.tabs.installation,
               content: (
                 <div className="grid gap-4 sm:grid-cols-3 lg:max-w-4xl">
-                  {optionGroups.INSTALLATION.values.map((v) => (
-                    <Card key={v.id} className="p-5">
-                      <h3 className="text-[15px] font-medium text-ink">{v.label}</h3>
-                      {v.description && <p className="mt-1.5 text-[13px] text-stone">{v.description}</p>}
+                  {optionGroups.INSTALLATION.values.map((v) => {
+                    const text = optionText(v, locale);
+                    return <Card key={v.id} className="p-5">
+                      <h3 className="text-[15px] font-medium text-ink">{text.label}</h3>
+                      {text.description && <p className="mt-1.5 text-[13px] text-stone">{text.description}</p>}
                       <p className="mt-4 text-lg font-semibold text-ink">
                         {v.priceDelta === 0 ? dict.common.free : formatPrice(v.priceDelta)}
                       </p>
-                    </Card>
-                  ))}
+                    </Card>;
+                  })}
                 </div>
               ),
             },
@@ -370,17 +374,17 @@ export default async function ProductPage({
               content: (
                 <div className="max-w-2xl space-y-4 text-[15px] leading-relaxed text-graphite">
                   <p>
-                    Bu model üçün təxmini çatdırılma müddəti{" "}
+                    {dict.product.deliveryBefore}{" "}
                     <strong className="text-ink">
-                      {product.deliveryDays[0]}–{product.deliveryDays[1]} iş günü
+                      {product.deliveryDays[0]}–{product.deliveryDays[1]} {dict.common.businessDays}
                     </strong>
-                    dir.
+                    {" "}{dict.product.deliveryAfter}
                   </p>
                   <dl className="border-t border-line">
                     {optionGroups.DELIVERY.values.map((v) => (
                       <DataRow
                         key={v.id}
-                        label={v.label}
+                        label={optionText(v, locale).label}
                         value={v.priceDelta === 0 ? dict.common.free : formatPrice(v.priceDelta)}
                       />
                     ))}
@@ -394,18 +398,12 @@ export default async function ProductPage({
               content: (
                 <div className="max-w-2xl space-y-4 text-[15px] leading-relaxed text-graphite">
                   <p>
-                    Zəmanət müddəti{" "}
-                    <strong className="text-ink">{product.warrantyYears} il</strong> təşkil edir və
-                    quraşdırma tarixindən başlayır.
+                    {dict.product.warrantyBefore}{" "}
+                    <strong className="text-ink">{product.warrantyYears} {dict.common.years}</strong>{" "}
+                    {dict.product.warrantyAfter}
                   </p>
-                  <p>
-                    Hər qapıya unikal serial nömrə verilir. Serial nömrə üzərindəki QR kod vasitəsilə
-                    zəmanət statusunu və servis tarixçəsini istənilən vaxt yoxlaya bilərsiniz.
-                  </p>
-                  <p className="text-[13px] text-stone">
-                    Zəmanət mexaniki zədələr, düzgün olmayan istismar və üçüncü tərəf müdaxiləsini
-                    əhatə etmir.
-                  </p>
+                  <p>{dict.product.warrantyQr}</p>
+                  <p className="text-[13px] text-stone">{dict.product.warrantyExclusions}</p>
                 </div>
               ),
             },
@@ -426,7 +424,12 @@ export default async function ProductPage({
                           <p className="text-xs text-stone">PDF · {doc.sizeKb} KB</p>
                         </div>
                       </div>
-                      <DocumentPreview title={doc.title} model={product.name} details={`${product.sku} · ${product.defaultWidth}×${product.defaultHeight} mm · ${product.securityClass} · ${product.warrantyYears} il zəmanət`} />
+                      <DocumentPreview
+                        title={doc.title}
+                        model={product.name}
+                        details={`${product.sku} · ${product.defaultWidth}×${product.defaultHeight} mm · ${product.securityClass} · ${product.warrantyYears} ${dict.common.years} ${dict.common.warranty}`}
+                        downloadLabel={dict.actions.download}
+                      />
                     </div>
                   ))}
                   <p className="text-xs text-stone sm:col-span-2">
@@ -444,7 +447,7 @@ export default async function ProductPage({
                       <Card key={rv.id} className="p-5">
                         <div className="flex items-center justify-between">
                           <Rating value={rv.rating} />
-                          {rv.verified && <Badge tone="success">Təsdiqlənib</Badge>}
+                          {rv.verified && <Badge tone="success">{dict.product.verifiedReview}</Badge>}
                         </div>
                         <p className="mt-3 text-[14px] leading-relaxed text-graphite">{rv.text}</p>
                         <p className="mt-4 text-xs text-stone">
@@ -455,7 +458,7 @@ export default async function ProductPage({
                   </div>
                 ) : (
                   <p className="text-[15px] text-stone">
-                    Bu model üçün hələ təsdiqlənmiş rəy yoxdur.
+                    {dict.product.noVerifiedReviews}
                   </p>
                 ),
             },
@@ -480,7 +483,7 @@ export default async function ProductPage({
         <Section tone="bone" className="border-t border-line">
           <div className="container-page">
             <SectionHeading title={dict.product.similar} />
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-3 xs:grid-cols-2 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
               {related.map((p) => (
                 <ProductCard key={p.id} product={p} locale={locale} dict={dict} />
               ))}

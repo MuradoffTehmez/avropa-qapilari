@@ -8,16 +8,17 @@ import { Card } from "@/components/ui/primitives";
 import { Checkbox, Field, Input } from "@/components/ui/form";
 import { LogoMark } from "@/components/layout/Logo";
 import { cn } from "@/lib/utils";
+import { getDictionary, isLocale } from "@/i18n";
 
 type Mode = "login" | "register" | "reset";
 
-const modes: { id: Mode; label: string }[] = [
-  { id: "login", label: "Giriş" },
-  { id: "register", label: "Qeydiyyat" },
-  { id: "reset", label: "Şifrəni bərpa et" },
-];
-
 export function AuthPanel({ locale }: { locale: string }) {
+  const dict = getDictionary(isLocale(locale) ? locale : "az");
+  const modes: { id: Mode; label: string }[] = [
+    { id: "login", label: dict.auth.signIn },
+    { id: "register", label: dict.auth.register },
+    { id: "reset", label: dict.auth.reset },
+  ];
   const [mode, setMode] = useState<Mode>("login");
   const [done, setDone] = useState(false);
 
@@ -28,23 +29,17 @@ export function AuthPanel({ locale }: { locale: string }) {
       {/* Sol tərəf — dəyər təklifi */}
       <div className="order-2 lg:order-1">
         <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gold-600">
-          Şəxsi kabinet
+          {dict.account.title}
         </p>
         <h1 className="mt-4 text-balance-heading text-2xl font-semibold leading-tight tracking-tight text-ink sm:text-3xl lg:text-[2.5rem]">
-          Qapınızla bağlı hər şey, bir yerdə.
+          {dict.auth.signInTitle}
         </h1>
         <p className="mt-4 max-w-md text-[15px] leading-relaxed text-stone">
-          Sifarişləri izləyin, saxladığınız dizaynları açın, zəmanətə baxın və servis
-          müraciətlərini idarə edin.
+          {dict.auth.signInText}
         </p>
 
         <ul className="mt-8 space-y-3">
-          {[
-            "Sifariş və çatdırılma statusu",
-            "Saxlanmış konfiqurasiyalar",
-            "Zəmanət və servis tarixçəsi",
-            "Ölçü və təmir görüşləri",
-          ].map((item) => (
+          {[dict.auth.benefitOrders, dict.auth.benefitConfigs, dict.auth.benefitWarranty, dict.auth.benefitAppointments].map((item) => (
             <li key={item} className="flex items-start gap-2.5 text-[14.5px] text-graphite">
               <CheckCircle2 size={17} className="mt-0.5 shrink-0 text-gold-500" />
               {item}
@@ -59,13 +54,13 @@ export function AuthPanel({ locale }: { locale: string }) {
           <LogoMark size={30} />
           <div>
             <p className="text-[15px] font-semibold text-ink">{active.label}</p>
-            <p className="text-xs text-stone">EuroPorta hesabı</p>
+            <p className="text-xs text-stone">EuroPorta · {dict.actions.account}</p>
           </div>
         </div>
 
         <div
           role="tablist"
-          aria-label="Giriş rejimi"
+          aria-label={dict.auth.signInTitle}
           className="mb-6 grid grid-cols-3 gap-1 border border-line p-1"
         >
           {modes.map((m) => (
@@ -92,18 +87,18 @@ export function AuthPanel({ locale }: { locale: string }) {
           <div role="status" className="py-2">
             <CheckCircle2 size={34} className="text-success" />
             <h2 className="mt-4 text-lg font-semibold tracking-tight text-ink">
-              {mode === "reset" ? "Bərpa addımı tamamlandı" : "Hesaba keçid hazırdır"}
+              {mode === "reset" ? dict.auth.resetSent : mode === "register" ? dict.auth.accountCreated : dict.auth.welcomeBack}
             </h2>
             <p className="mt-2 text-[14px] leading-relaxed text-stone">
               {mode === "reset"
-                ? "Serverlə əlaqə qurulduqdan sonra e-poçtunuza bərpa linki göndəriləcək."
-                : "Kabinetdə sifarişlərinizi, dizaynlarınızı və servis müraciətlərinizi görə bilərsiniz."}
+                ? dict.auth.resetSentText
+                : dict.auth.signInText}
             </p>
             <Link
               href={`/${locale}/hesab`}
               className="mt-5 inline-flex items-center gap-1.5 text-[14px] font-medium text-gold-600 underline-offset-4 hover:underline"
             >
-              Kabinetə keç <ArrowRight size={15} />
+              {dict.auth.goToAccount} <ArrowRight size={15} />
             </Link>
           </div>
         ) : (
@@ -115,17 +110,17 @@ export function AuthPanel({ locale }: { locale: string }) {
             }}
           >
             {mode === "register" && (
-              <Field label="Ad və soyad" required>
-                <Input required autoComplete="name" placeholder="Ad Soyad" />
+              <Field label={dict.auth.fullName} required>
+                <Input required autoComplete="name" placeholder={dict.auth.fullNamePlaceholder} />
               </Field>
             )}
 
-            <Field label="E-poçt" required>
-              <Input required type="email" autoComplete="email" placeholder="ad@example.com" />
+            <Field label={dict.auth.email} required>
+              <Input required type="email" autoComplete="email" placeholder={dict.auth.emailPlaceholder} />
             </Field>
 
             {mode !== "reset" && (
-              <Field label="Şifrə" required hint="Ən azı 8 simvol.">
+              <Field label={dict.auth.password} required hint={dict.auth.passwordHint}>
                 <Input
                   required
                   type="password"
@@ -138,17 +133,7 @@ export function AuthPanel({ locale }: { locale: string }) {
             {mode === "register" && (
               <Checkbox
                 required
-                label={
-                  <>
-                    <Link
-                      href={`/${locale}/legal/terms`}
-                      className="underline underline-offset-2"
-                    >
-                      İstifadə şərtləri
-                    </Link>{" "}
-                    ilə razıyam
-                  </>
-                }
+                label={dict.auth.termsAccept}
               />
             )}
 
@@ -158,8 +143,7 @@ export function AuthPanel({ locale }: { locale: string }) {
 
             <p className="flex items-start gap-2 pt-1 text-xs leading-relaxed text-stone">
               <ShieldCheck size={14} className="mt-0.5 shrink-0 text-gold-500" />
-              Şifrələr yalnız serverdə hash formasında saxlanılır və heç vaxt açıq mətn kimi
-              göndərilmir.
+              {dict.auth.securityNote}
             </p>
           </form>
         )}

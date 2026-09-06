@@ -9,6 +9,8 @@ import { formatDateTime, formatPrice } from "@/lib/utils";
 import { Badge, Card } from "@/components/ui/primitives";
 import { Input, Select } from "@/components/ui/form";
 import { technicians } from "@/mock/content";
+import { useDict } from "@/i18n/provider";
+import type { Dictionary } from "@/i18n";
 
 const kindsBySection: Record<string, string[]> = {
   orders: ["orders", "quotes"],
@@ -19,14 +21,20 @@ const kindsBySection: Record<string, string[]> = {
   all: ["orders", "repairs", "measurements", "quotes"],
 };
 
-const statuses = [
-  "Yeni",
-  "Təsdiqləndi",
-  "Planlaşdırıldı",
-  "İcradadır",
-  "Tamamlandı",
-  "Ləğv edildi",
-];
+type StatusKey = keyof Dictionary["accountUi"]["statuses"];
+
+const legacyStatuses: Record<string, StatusKey> = {
+  Yeni: "new",
+  Təsdiqləndi: "confirmed",
+  Planlaşdırıldı: "scheduled",
+  İcradadır: "inProgress",
+  Tamamlandı: "completed",
+  "Ləğv edildi": "cancelled",
+};
+
+function statusKey(value: string): StatusKey {
+  return legacyStatuses[value] ?? (value as StatusKey);
+}
 
 /** Bu brauzerdə yaradılmış müraciətlər — hesabda və idarəetmə panelində göstərilir. */
 export function ActivityFeed({
@@ -38,6 +46,7 @@ export function ActivityFeed({
   locale: string;
   manage?: boolean;
 }) {
+  const dict = useDict();
   const records = useWorkflow((s) => s.records);
   const designs = useWorkflow((s) => s.designs);
   const update = useWorkflow((s) => s.update);
@@ -66,7 +75,7 @@ export function ActivityFeed({
                 href={`/${locale}/konfiqurator/${d.productSlug}?design=${encodeURIComponent(JSON.stringify(d.selection))}`}
                 className="text-[13px] font-medium text-gold-600 underline-offset-4 hover:underline"
               >
-                Dizaynı aç →
+                {dict.accountUi.openDesign} →
               </Link>
             </div>
           </Card>
@@ -80,23 +89,23 @@ export function ActivityFeed({
   const relevant = records.filter((r) => kinds.includes(r.kind));
   if (relevant.length === 0) return null;
 
-  const q = query.toLocaleLowerCase("az");
+  const q = query.toLowerCase();
   const filtered = relevant.filter((r) =>
-    `${r.id} ${r.title} ${r.detail}`.toLocaleLowerCase("az").includes(q),
+    `${r.id} ${r.title} ${r.detail}`.toLowerCase().includes(q),
   );
 
   return (
     <section className="mb-8 space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-lg font-semibold tracking-tight text-ink">Yeni müraciətlər</h2>
+        <h2 className="text-lg font-semibold tracking-tight text-ink">{dict.accountUi.newRequests}</h2>
         <div className="relative w-full sm:w-64">
           <Search
             size={15}
             className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-mist"
           />
           <Input
-            aria-label="Müraciət axtarışı"
-            placeholder="Nömrə və ya ad"
+            aria-label={dict.accountUi.requestSearch}
+            placeholder={dict.accountUi.requestSearchPlaceholder}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="h-10 pl-9 text-[13px]"
@@ -111,7 +120,9 @@ export function ActivityFeed({
               <p className="font-mono text-[11px] text-stone">{r.id}</p>
               <h3 className="mt-1 text-[15px] font-medium text-ink">{r.title}</h3>
             </div>
-            <Badge tone={r.status === "Tamamlandı" ? "success" : "gold"}>{r.status}</Badge>
+            <Badge tone={statusKey(r.status) === "completed" ? "success" : "gold"}>
+              {dict.accountUi.statuses[statusKey(r.status)] ?? r.status}
+            </Badge>
           </div>
 
           <p className="mt-2 whitespace-pre-wrap text-[13.5px] leading-relaxed text-graphite">
@@ -123,12 +134,12 @@ export function ActivityFeed({
               {formatPrice(r.total)}
             </p>
           )}
-          {r.technician && <p className="mt-2 text-[13px] text-graphite">Usta: {r.technician}</p>}
+          {r.technician && <p className="mt-2 text-[13px] text-graphite">{dict.accountUi.technician}: {r.technician}</p>}
 
           <ol className="mt-4 flex flex-wrap gap-x-4 gap-y-1 border-t border-line pt-3 text-[11.5px] text-stone">
             {r.history.map((h, i) => (
               <li key={i}>
-                {h.status} · {formatDateTime(h.date)}
+                {dict.accountUi.statuses[statusKey(h.status)] ?? h.status} · {formatDateTime(h.date)}
               </li>
             ))}
           </ol>
@@ -137,22 +148,22 @@ export function ActivityFeed({
             <div className="mt-4 grid gap-2 border-t border-line pt-4 sm:grid-cols-2">
               <Select
                 aria-label={`${r.id} statusu`}
-                value={r.status}
+                value={statusKey(r.status)}
                 onChange={(e) => update(r.id, e.target.value)}
                 className="h-10 text-[13px]"
               >
-                {statuses.map((s) => (
-                  <option key={s}>{s}</option>
+                {(Object.keys(dict.accountUi.statuses) as StatusKey[]).map((s) => (
+                  <option key={s} value={s}>{dict.accountUi.statuses[s]}</option>
                 ))}
               </Select>
               <Select
                 aria-label={`${r.id} üçün usta`}
                 value={r.technician ?? ""}
-                onChange={(e) => update(r.id, "Planlaşdırıldı", e.target.value)}
+                onChange={(e) => update(r.id, "scheduled", e.target.value)}
                 className="h-10 text-[13px]"
               >
                 <option value="" disabled>
-                  Usta təyin et
+                  {dict.accountUi.assignTechnician}
                 </option>
                 {technicians.map((t) => (
                   <option key={t.id}>{t.name}</option>
@@ -164,7 +175,7 @@ export function ActivityFeed({
       ))}
 
       {filtered.length === 0 && (
-        <p className="py-4 text-[14px] text-stone">Axtarışa uyğun müraciət yoxdur.</p>
+        <p className="py-4 text-[14px] text-stone">{dict.accountUi.noMatchingRequest}</p>
       )}
     </section>
   );

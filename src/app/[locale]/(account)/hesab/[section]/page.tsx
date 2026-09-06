@@ -15,6 +15,7 @@ import { Timeline } from "@/components/ui/disclosure";
 import { ButtonLink } from "@/components/ui/Button";
 import { OrderStatusPill, RepairStatusPill } from "@/components/account/StatusPill";
 import { DoorVisual } from "@/components/product/DoorVisual";
+import { ProductMedia } from "@/components/product/ProductMedia";
 import { ProfileForm } from "@/components/account/ProfileForm";
 import {
   addresses,
@@ -28,6 +29,7 @@ import {
 } from "@/mock/account";
 import { technicians } from "@/mock/content";
 import { snapshotLine } from "@/mock/options.i18n";
+import { products } from "@/mock/products";
 
 const sections = [
   "orders",
@@ -83,13 +85,14 @@ export default async function AccountSectionPage({
 
             <div className="grid gap-6 p-4 lg:grid-cols-[1.4fr_1fr]">
               <div className="space-y-3">
-                {o.items.map((item) => (
-                  <div key={item.id} className="flex gap-3">
+                {o.items.map((item) => {
+                  const product = products.find((candidate) => candidate.id === item.productId);
+                  return <div key={item.id} className="flex gap-3">
                     <Link
                       href={r.product(item.productSlug)}
                       className="aspect-3/4 w-16 shrink-0 overflow-hidden border border-line bg-bone"
                     >
-                      <DoorVisual panelHex={item.panelHex} ambient={false} />
+                      {product ? <ProductMedia product={product} sizes="64px" /> : <DoorVisual panelHex={item.panelHex} ambient={false} />}
                     </Link>
                     <div className="min-w-0">
                       <p className="text-[14px] font-medium text-ink">{item.productName}</p>
@@ -106,8 +109,8 @@ export default async function AccountSectionPage({
                           ))}
                       </ul>
                     </div>
-                  </div>
-                ))}
+                  </div>;
+                })}
               </div>
 
               {/* order timeline */}
@@ -140,7 +143,7 @@ export default async function AccountSectionPage({
                   <p className="text-[12px] text-stone">{formatDate(q.createdAt)}</p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Badge tone={q.status === "SENT" ? "gold" : "info"}>{q.status}</Badge>
+                  <Badge tone={q.status === "SENT" ? "gold" : "info"}>{q.status === "SENT" ? dict.accountUi.quoteSent : q.status}</Badge>
                   {q.amount && (
                     <span className="text-[15px] font-semibold tabular-nums text-ink">
                       {formatPrice(q.amount)}
@@ -164,14 +167,14 @@ export default async function AccountSectionPage({
         </h2>
 
         {savedConfigurations.length === 0 ? (
-          <EmptyState icon={<Sliders size={30} />} title="Saxlanmış konfiqurasiya yoxdur" />
+          <EmptyState icon={<Sliders size={30} />} title={dict.accountUi.noSavedConfigurations} />
         ) : (
           savedConfigurations.map((c) => (
             <Card key={c.id} className="flex flex-wrap items-center justify-between gap-4 p-4">
               <div>
                 <p className="font-mono text-[12px] text-stone">{c.id}</p>
                 <p className="mt-1 text-[15px] font-medium text-ink">{c.productName}</p>
-                <p className="mt-0.5 text-[13px] text-stone">{c.summary}</p>
+                <p className="mt-0.5 text-[13px] text-stone">1200 × 2100 · {dict.catalog.colors.anthraciteWood} · Smart Lock X2</p>
                 <p className="mt-1 text-[12px] text-mist">{formatDate(c.date)}</p>
               </div>
               <div className="flex items-center gap-3">
@@ -215,12 +218,12 @@ export default async function AccountSectionPage({
 
             <dl className="mt-4 border-t border-line pt-3">
               <DataRow label={dict.common.date} value={formatDate(rp.createdAt)} />
-              {rp.technician && <DataRow label="Usta" value={rp.technician} />}
+              {rp.technician && <DataRow label={dict.accountUi.technician} value={rp.technician} />}
               {rp.scheduledAt && (
-                <DataRow label="Görüş" value={formatDateTime(rp.scheduledAt)} />
+                <DataRow label={dict.accountUi.appointment} value={formatDateTime(rp.scheduledAt)} />
               )}
               {rp.estimatedCost !== undefined && (
-                <DataRow label="Təxmini dəyər" value={formatPrice(rp.estimatedCost)} />
+                <DataRow label={dict.accountUi.estimatedCost} value={formatPrice(rp.estimatedCost)} />
               )}
             </dl>
           </Card>
@@ -234,12 +237,12 @@ export default async function AccountSectionPage({
             <div>
               <p className="font-mono text-[13px] text-graphite">{m.number}</p>
               <p className="mt-0.5 text-[13.5px] text-ink">
-                {dict.measurement.property[m.propertyType]} · {m.doorCount} qapı
+                {dict.measurement.property[m.propertyType]} · {m.doorCount} {dict.common.doorUnit}
               </p>
               <p className="text-[12px] text-stone">{m.address}</p>
             </div>
             <div className="text-right">
-              <Badge tone={m.status === "COMPLETED" ? "success" : "gold"}>{m.status}</Badge>
+              <Badge tone={m.status === "COMPLETED" ? "success" : "gold"}>{m.status === "COMPLETED" ? dict.accountUi.statuses.completed : dict.accountUi.statuses.scheduled}</Badge>
               <p className="mt-1 text-[12px] text-stone">{formatDate(m.preferredDate)}</p>
             </div>
           </Card>
@@ -274,11 +277,11 @@ export default async function AccountSectionPage({
                     {a.startTime} – {a.endTime}
                   </p>
                   <p className="text-[13px] text-stone">{a.address}</p>
-                  {tech && <p className="mt-0.5 text-[13px] text-graphite">Usta: {tech.name}</p>}
+                  {tech && <p className="mt-0.5 text-[13px] text-graphite">{dict.accountUi.technician}: {tech.name}</p>}
                 </div>
               </div>
               <div className="text-right">
-                <Badge tone={a.status === "CONFIRMED" ? "success" : "gold"}>{a.status}</Badge>
+                <Badge tone={a.status === "CONFIRMED" ? "success" : "gold"}>{a.status === "CONFIRMED" ? dict.accountUi.statuses.confirmed : dict.accountUi.statuses.scheduled}</Badge>
                 <p className="mt-1 font-mono text-[11px] text-mist">{a.reference}</p>
               </div>
             </Card>
@@ -341,7 +344,7 @@ export default async function AccountSectionPage({
           <h2 className="text-xl font-semibold tracking-tight text-ink">
             {dict.account.addresses}
           </h2>
-          <LocalManager section="addresses" label="Yeni ünvan" />
+          <LocalManager section="addresses" label={dict.accountUi.newAddress} />
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
@@ -351,15 +354,15 @@ export default async function AccountSectionPage({
                 <div className="flex items-start gap-2.5">
                   <MapPin size={16} className="mt-0.5 shrink-0 text-gold-500" />
                   <div>
-                    <p className="text-[15px] font-medium text-ink">{a.label}</p>
+                    <p className="text-[15px] font-medium text-ink">{a.id === "ad-1" ? dict.accountUi.homeAddress : a.label}</p>
                     <p className="mt-1 text-[13px] leading-relaxed text-stone">
-                      {[a.city, a.district, a.street, a.building, a.apartment && `mənzil ${a.apartment}`]
+                      {[a.city, a.district, a.street, a.building, a.apartment && `${dict.accountUi.apartment} ${a.apartment}`]
                         .filter(Boolean)
                         .join(", ")}
                     </p>
                   </div>
                 </div>
-                {a.isDefault && <Badge tone="outline">Əsas</Badge>}
+                {a.isDefault && <Badge tone="outline">{dict.accountUi.defaultAddress}</Badge>}
               </div>
             </Card>
           ))}

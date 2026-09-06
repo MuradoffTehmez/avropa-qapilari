@@ -11,10 +11,10 @@ const badgeTones: Record<BadgeTone, string> = {
   neutral: "bg-sand text-graphite",
   dark: "bg-ink text-paper",
   gold: "bg-gold-100 text-gold-700",
-  success: "bg-[#e8f2ec] text-success",
-  warning: "bg-[#faf1de] text-warning",
-  danger: "bg-[#f7e9e8] text-danger",
-  info: "bg-[#e7eef3] text-info",
+  success: "bg-success-soft text-success",
+  warning: "bg-warning-soft text-warning",
+  danger: "bg-danger-soft text-danger",
+  info: "bg-info-soft text-info",
   outline: "border border-line text-graphite",
 };
 
@@ -30,7 +30,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-[2px] px-2 py-[3px] text-[11px] font-medium uppercase tracking-[0.08em]",
+        "inline-flex items-center gap-1 rounded-[2px] px-2 py-[3px] text-xs font-medium uppercase tracking-[0.08em]",
         badgeTones[tone],
         className,
       )}
@@ -172,7 +172,7 @@ export function Breadcrumbs({
   className?: string;
 }) {
   return (
-    <nav aria-label="Breadcrumb" className={cn("flex flex-wrap items-center gap-1 text-[13px]", className)}>
+    <nav aria-label={items.map((item) => item.label).join(" / ")} className={cn("flex flex-wrap items-center gap-1 text-[13px]", className)}>
       {items.map((item, i) => (
         <span key={`${item.label}-${i}`} className="flex items-center gap-1">
           {i > 0 && <ChevronRight size={13} className="text-mist" aria-hidden />}
@@ -263,10 +263,10 @@ export function Notice({
   className?: string;
 }) {
   const tones = {
-    info: "border-l-info bg-[#f2f6f9]",
-    warning: "border-l-warning bg-[#fbf6ea]",
-    success: "border-l-success bg-[#eff5f2]",
-    danger: "border-l-danger bg-[#faf0ef]",
+    info: "border-l-info bg-info-soft/60",
+    warning: "border-l-warning bg-warning-soft/60",
+    success: "border-l-success bg-success-soft/60",
+    danger: "border-l-danger bg-danger-soft/60",
   } as const;
 
   return (
@@ -301,9 +301,9 @@ export function Stat({
         className={cn(
           "font-semibold uppercase leading-tight",
           compact
-            ? "text-[9.5px] tracking-[0.08em] sm:text-[11px] sm:tracking-[0.16em]"
-            : "text-[11px] tracking-[0.16em]",
-          invert ? "text-paper/45" : "text-stone",
+            ? "text-xs tracking-[0.08em] sm:tracking-[0.16em]"
+            : "text-xs tracking-[0.16em]",
+          invert ? "text-paper/70" : "text-graphite",
         )}
       >
         {label}
@@ -318,7 +318,7 @@ export function Stat({
         {value}
       </p>
       {hint && (
-        <p className={cn("mt-1 text-xs", invert ? "text-paper/45" : "text-stone")}>{hint}</p>
+        <p className={cn("mt-1 text-xs", invert ? "text-paper/70" : "text-graphite")}>{hint}</p>
       )}
     </div>
   );

@@ -9,25 +9,27 @@ import { Card } from "@/components/ui/primitives";
 import { Checkbox, Field, Input, Textarea } from "@/components/ui/form";
 import { createReference } from "@/lib/utils";
 import { technicians } from "@/mock/content";
+import { useDict } from "@/i18n/provider";
 
 export function TechnicianPanel({ locale }: { locale: string }) {
+  const dict = useDict();
   const add = useWorkflow((s) => s.add);
   const [note, setNote] = useState("");
   const [parts, setParts] = useState("");
   const [saved, setSaved] = useState(false);
 
-  const technician = technicians[0]?.name ?? "Usta";
+  const technician = technicians[0]?.name ?? dict.accountUi.technician;
 
   return (
     <div className="container-page max-w-5xl py-8 lg:py-12">
       <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gold-600">
-        Usta kabineti
+        {dict.accountUi.technicianWorkspace}
       </p>
       <h1 className="mt-3 text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
-        İşlərim və servis qeydləri
+        {dict.accountUi.jobsAndServiceNotes}
       </h1>
       <p className="mt-2 max-w-xl text-[15px] leading-relaxed text-stone">
-        Müraciəti qəbul edin, statusunu yeniləyin və görülmüş işi qeyd edin.
+        {dict.accountUi.technicianIntro}
       </p>
 
       <Button
@@ -37,13 +39,13 @@ export function TechnicianPanel({ locale }: { locale: string }) {
           add({
             id: createReference("REP"),
             kind: "repairs",
-            title: "Menteşə tənzimlənməsi",
+            title: dict.accountUi.hingeAdjustment,
             detail: "Yasamal · 10:00–12:00",
             technician,
           })
         }
       >
-        <Wrench size={15} /> Yeni iş əlavə et
+        <Wrench size={15} /> {dict.accountUi.addJob}
       </Button>
 
       <div className="mt-8">
@@ -51,7 +53,7 @@ export function TechnicianPanel({ locale }: { locale: string }) {
       </div>
 
       <Card className="p-5 sm:p-6">
-        <h2 className="text-lg font-semibold tracking-tight text-ink">İşin tamamlanması</h2>
+        <h2 className="text-lg font-semibold tracking-tight text-ink">{dict.accountUi.jobCompletion}</h2>
         <form
           className="mt-5 space-y-4"
           onSubmit={(e) => {
@@ -59,8 +61,8 @@ export function TechnicianPanel({ locale }: { locale: string }) {
             add({
               id: createReference("SRV"),
               kind: "repairs",
-              title: "Servis tamamlama qeydi",
-              detail: `Görülən iş: ${note}\nİstifadə olunan hissələr: ${parts}`,
+              title: dict.accountUi.serviceCompletionNote,
+              detail: `${dict.accountUi.workDone}: ${note}\n${dict.accountUi.usedParts}: ${parts}`,
               technician,
             });
             setSaved(true);
@@ -68,33 +70,33 @@ export function TechnicianPanel({ locale }: { locale: string }) {
             setParts("");
           }}
         >
-          <Field label="Diaqnostika və görülən iş" required>
+          <Field label={dict.accountUi.diagnosisAndWork} required>
             <Textarea
               required
               minLength={10}
               rows={5}
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="Problemin səbəbi, aparılan əməliyyatlar…"
+              placeholder={dict.accountUi.diagnosisPlaceholder}
             />
           </Field>
 
-          <Field label="İstifadə edilən ehtiyat hissələr" required>
+          <Field label={dict.accountUi.spareParts} required>
             <Input
               required
               value={parts}
               onChange={(e) => setParts(e.target.value)}
-              placeholder="Yuxarı menteşə bilyəsi, silindr…"
+              placeholder={dict.accountUi.sparePartsPlaceholder}
             />
           </Field>
 
-          <Checkbox required label="Müştəri işi qəbul etdi" />
+          <Checkbox required label={dict.accountUi.customerAccepted} />
 
           <div className="flex flex-wrap items-center gap-3">
-            <Button type="submit">Servis qeydini saxla</Button>
+            <Button type="submit">{dict.accountUi.saveServiceNote}</Button>
             {saved && (
               <p role="status" className="flex items-center gap-1.5 text-[13px] text-success">
-                <CheckCircle2 size={15} /> Servis tarixçəsinə əlavə edildi.
+                <CheckCircle2 size={15} /> {dict.accountUi.serviceHistoryAdded}
               </p>
             )}
           </div>

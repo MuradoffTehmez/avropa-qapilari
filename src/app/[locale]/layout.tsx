@@ -23,7 +23,7 @@ const fraunces = Fraunces({
   subsets: ["latin", "latin-ext"],
   display: "swap",
   axes: ["SOFT", "WONK", "opsz"],
-  variable: "--font-display",
+  variable: "--font-fraunces",
 });
 
 export const viewport: Viewport = {

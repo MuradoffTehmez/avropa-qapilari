@@ -59,14 +59,14 @@ export function ProductCard({
   );
 
   const actions = (
-    <div className="absolute right-2.5 top-2.5 z-10 flex flex-col gap-1.5">
+    <div className="absolute right-2.5 top-2.5 z-20 flex flex-col gap-1.5">
       <button
         type="button"
         onClick={onFav}
         aria-label={dict.actions.favorites}
         aria-pressed={isFav}
         className={cn(
-          "flex h-8 w-8 items-center justify-center rounded-full border bg-paper/90 backdrop-blur transition-colors",
+          "flex h-11 w-11 items-center justify-center rounded-full border bg-paper/90 backdrop-blur transition-colors",
           isFav ? "border-gold-400 text-gold-500" : "border-line text-stone hover:text-ink",
         )}
       >
@@ -78,7 +78,7 @@ export function ProductCard({
         aria-label={dict.actions.compare}
         aria-pressed={isCmp}
         className={cn(
-          "flex h-8 w-8 items-center justify-center rounded-full border bg-paper/90 backdrop-blur transition-colors",
+          "flex h-11 w-11 items-center justify-center rounded-full border bg-paper/90 backdrop-blur transition-colors",
           isCmp ? "border-ink text-ink" : "border-line text-stone hover:text-ink",
         )}
       >
@@ -89,13 +89,13 @@ export function ProductCard({
 
   if (view === "list") {
     return (
-      <Link
-        href={r.product(product.slug)}
+      <article
         className={cn(
-          "group relative flex gap-4 border border-line bg-paper p-3 transition-colors hover:border-mist sm:gap-6 sm:p-4",
+          "product-card-motion group relative flex gap-4 border border-line bg-paper p-3 transition-colors hover:border-mist sm:gap-6 sm:p-4",
           className,
         )}
       >
+        <Link href={r.product(product.slug)} aria-label={product.name} className="absolute inset-0 z-10" />
         {badges}
         {actions}
         <div className="relative aspect-3/4 w-24 shrink-0 overflow-hidden bg-bone sm:w-36">
@@ -131,20 +131,20 @@ export function ProductCard({
             </span>
           </div>
         </div>
-      </Link>
+      </article>
     );
   }
 
   return (
-    <Link
-      href={r.product(product.slug)}
-      className={cn("group relative flex flex-col border border-line bg-paper transition-colors hover:border-mist", className)}
+    <article
+      className={cn("product-card-motion group relative flex flex-col border border-line bg-paper transition-colors hover:border-mist", className)}
     >
+      <Link href={r.product(product.slug)} aria-label={product.name} className="absolute inset-0 z-10" />
       {badges}
       {actions}
 
       <div className="door-frame border-b border-line">
-        <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-[1.03]">
+        <div className="absolute inset-0">
           <ProductMedia
             product={product}
             sizes="(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 25vw"
@@ -178,7 +178,7 @@ export function ProductCard({
           </div>
           <span
             className={cn(
-              "text-[11px] font-medium",
+              "text-xs font-medium",
               product.inStock ? "text-success" : "text-stone",
             )}
           >
@@ -186,6 +186,6 @@ export function ProductCard({
           </span>
         </div>
       </div>
-    </Link>
+    </article>
   );
 }

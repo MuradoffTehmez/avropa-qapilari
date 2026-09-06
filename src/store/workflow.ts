@@ -14,7 +14,7 @@ interface WorkflowState {
 }
 export const useWorkflow = create<WorkflowState>()(persist((set) => ({
   records: [], designs: [],
-  add: (record) => set((s) => ({ records: [{ ...record, date: new Date().toISOString(), status: "Yeni", history: [{ status: "Yeni", date: new Date().toISOString() }] }, ...s.records] })),
+  add: (record) => set((s) => ({ records: [{ ...record, date: new Date().toISOString(), status: "new", history: [{ status: "new", date: new Date().toISOString() }] }, ...s.records] })),
   update: (id, status, technician) => set((s) => ({ records: s.records.map((r) => r.id === id ? { ...r, status, technician: technician ?? r.technician, history: [...r.history, { status, date: new Date().toISOString() }] } : r) })),
   save: (design) => set((s) => ({ designs: [design, ...s.designs.filter((d) => d.id !== design.id)] })),
 }), { name: "ep-workflows-v1" }));

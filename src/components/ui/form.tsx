@@ -1,7 +1,7 @@
 "use client";
 
-import type { ComponentProps, ReactNode } from "react";
-import { useId } from "react";
+import type { ComponentProps, ReactElement, ReactNode } from "react";
+import { cloneElement, isValidElement, useId } from "react";
 import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -23,19 +23,29 @@ export function Field({
   children: ReactNode;
   className?: string;
 }) {
+  const fieldId = useId();
+  const messageId = `${fieldId}-message`;
+  const child = isValidElement<Record<string, unknown>>(children) ? children : null;
+  const controlChild = child
+    ? cloneElement(child as ReactElement<Record<string, unknown>>, {
+        id: child.props.id ?? fieldId,
+        "aria-invalid": error ? true : child.props["aria-invalid"],
+        "aria-describedby": error || hint ? messageId : child.props["aria-describedby"],
+      })
+    : children;
   return (
-    <label className={cn("flex flex-col gap-1.5", className)}>
+    <label htmlFor={fieldId} className={cn("flex flex-col gap-1.5", className)}>
       {label && (
         <span className="text-[13px] font-medium text-graphite">
           {label}
           {required && <span className="ml-0.5 text-danger">*</span>}
         </span>
       )}
-      {children}
+      {controlChild}
       {error ? (
-        <span className="text-xs text-danger">{error}</span>
+        <span id={messageId} role="alert" className="text-xs text-danger">{error}</span>
       ) : hint ? (
-        <span className="text-xs text-stone">{hint}</span>
+        <span id={messageId} className="text-xs text-stone">{hint}</span>
       ) : null}
     </label>
   );
@@ -75,7 +85,7 @@ export function Checkbox({
     <label
       htmlFor={id}
       className={cn(
-        "group flex cursor-pointer items-start gap-2.5 text-sm text-graphite",
+        "group flex min-h-11 cursor-pointer items-center gap-2.5 text-sm text-graphite",
         className,
       )}
     >
@@ -188,7 +198,7 @@ export function Toggle({
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className={cn("group flex items-center gap-2.5 text-sm text-graphite", className)}
+      className={cn("group flex min-h-11 items-center gap-2.5 text-sm text-graphite", className)}
     >
       <span
         className={cn(

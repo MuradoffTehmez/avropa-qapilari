@@ -8,7 +8,7 @@ import { cn, uid } from "@/lib/utils";
 import { priceFrom } from "@/lib/i18n-format";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { toast } from "@/components/ui/overlays";
-import { DoorVisual } from "@/components/product/DoorVisual";
+import { ProductMedia } from "@/components/product/ProductMedia";
 import { useCart } from "@/store/cart";
 
 /**
@@ -28,11 +28,20 @@ export function StickyBuyBar({
   const add = useCart((s) => s.add);
 
   const subscribe = useCallback((onChange: () => void) => {
-    window.addEventListener("scroll", onChange, { passive: true });
-    window.addEventListener("resize", onChange);
+    let frame = 0;
+    const schedule = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        onChange();
+      });
+    };
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
     return () => {
-      window.removeEventListener("scroll", onChange);
-      window.removeEventListener("resize", onChange);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      window.cancelAnimationFrame(frame);
     };
   }, []);
 
@@ -69,7 +78,7 @@ export function StickyBuyBar({
   return (
     <div
       className={cn(
-        "fixed inset-x-0 bottom-0 z-45 border-t border-line bg-paper/97 backdrop-blur-md",
+        "sticky-buy-bar mobile-fixed-action fixed inset-x-0 z-45 border-t border-line bg-paper/97 backdrop-blur-md lg:bottom-0",
         "transition-[transform,opacity] duration-300 ease-out",
       )}
       style={{
@@ -81,7 +90,7 @@ export function StickyBuyBar({
     >
       <div className="container-page safe-bottom flex items-center gap-3 py-2.5 sm:gap-4 sm:py-3">
         <span className="hidden h-12 w-9 shrink-0 overflow-hidden border border-line bg-bone sm:block">
-          <DoorVisual panelHex={product.panelHexes[0]} style={product.style} ambient={false} />
+          <ProductMedia product={product} sizes="36px" />
         </span>
 
         <span className="min-w-0 flex-1">

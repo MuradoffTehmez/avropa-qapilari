@@ -22,7 +22,7 @@ const variants: Record<Variant, string> = {
 };
 
 const sizes: Record<Size, string> = {
-  sm: "h-9 px-3.5 text-[13px]",
+  sm: "h-11 px-3.5 text-[13px] sm:h-9",
   md: "h-11 px-5 text-sm",
   lg: "h-13 px-7 text-[15px]",
 };
@@ -84,7 +84,7 @@ export function IconButton({
       aria-label={label}
       title={label}
       className={cn(
-        "inline-flex h-10 w-10 items-center justify-center rounded-[3px] text-graphite transition-colors hover:bg-bone hover:text-ink",
+        "inline-flex h-11 w-11 items-center justify-center rounded-[3px] text-graphite transition-colors hover:bg-bone hover:text-ink",
         className,
       )}
       {...props}

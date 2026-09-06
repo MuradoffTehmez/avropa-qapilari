@@ -11,12 +11,14 @@ import { Badge, Card, DataRow, Rating } from "@/components/ui/primitives";
 
 import { AdminPageHeader, DataTable } from "@/components/admin/DataTable";
 import { OrderStatusPill, RepairStatusPill } from "@/components/account/StatusPill";
-import { DoorVisual } from "@/components/product/DoorVisual";
-import { materialLabels, products } from "@/mock/products";
+import { ProductMedia } from "@/components/product/ProductMedia";
+import { products } from "@/mock/products";
 import { brands, categories } from "@/mock/taxonomy";
 import { optionGroups } from "@/mock/options";
-import { reviews, technicians } from "@/mock/content";
-import { specializationName } from "@/lib/i18n-format";
+import { optionText } from "@/mock/options.i18n";
+import { technicians } from "@/mock/content";
+import { localizedReviews } from "@/mock/content.i18n";
+import { categoryName, countryName, materialName, specializationName } from "@/lib/i18n-format";
 import {
   appointments,
   accountUser,
@@ -55,6 +57,8 @@ type Section = (typeof sections)[number];
 
 export function AdminSection({ locale, section }: { locale: Locale; section: string }) {
   const dict = getDictionary(locale);
+  const ui = dict.adminUi;
+  const label = ui.labels;
   if (!sections.includes(section as Section)) notFound();
 
   const addButton = (label: string) => <LocalManager section={section} label={label} />;
@@ -65,8 +69,8 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
       <><ActivityFeed section={section} locale={locale} manage />
         <AdminPageHeader
           title={dict.admin.products}
-          description={`${products.length} model · ${categories.length} kateqoriya`}
-          action={addButton("Yeni məhsul")}
+          description={`${products.length} ${ui.modelUnit} · ${categories.length} ${ui.categoryUnit}`}
+          action={addButton(ui.newProduct)}
         />
         <DataTable
           title={dict.admin.products}
@@ -75,11 +79,11 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
           columns={[
             {
               key: "product",
-              header: "Məhsul",
+              header: label.product,
               render: (p) => (
                 <div className="flex items-center gap-3">
                   <span className="aspect-3/4 w-9 shrink-0 overflow-hidden border border-line bg-bone">
-                    <DoorVisual panelHex={p.panelHexes[0]} style={p.style} ambient={false} />
+                    <ProductMedia product={p} sizes="36px" />
                   </span>
                   <span>
                     <span className="block font-medium text-ink">{p.name}</span>
@@ -90,27 +94,27 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
             },
             {
               key: "category",
-              header: "Kateqoriya",
+              header: label.category,
               render: (p) => (
                 <span className="text-graphite">
-                  {categories.find((c) => c.slug === p.categorySlug)?.name}
+                  {categories.find((c) => c.slug === p.categorySlug) ? categoryName(categories.find((c) => c.slug === p.categorySlug)!, dict) : "—"}
                 </span>
               ),
             },
             {
               key: "brand",
-              header: "Brend",
+              header: label.brand,
               render: (p) => (
                 <span className="text-graphite">
                   {brands.find((b) => b.slug === p.brandSlug)?.name}
                 </span>
               ),
             },
-            { key: "material", header: "Material", render: (p) => materialLabels[p.material] },
-            { key: "security", header: "Sinif", render: (p) => p.securityClass },
+            { key: "material", header: label.material, render: (p) => materialName(p.material, dict) },
+            { key: "security", header: label.securityClass, render: (p) => p.securityClass },
             {
               key: "price",
-              header: "Qiymət",
+              header: label.price,
               align: "right",
               render: (p) => (
                 <span className="font-medium tabular-nums text-ink">{formatPrice(p.basePrice)}</span>
@@ -118,11 +122,11 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
             },
             {
               key: "stock",
-              header: "Stok",
+              header: label.stock,
               align: "center",
               render: (p) => (
                 <Badge tone={p.inStock ? "success" : "neutral"}>
-                  {p.inStock ? "Var" : "Sifarişlə"}
+                  {p.inStock ? ui.available : ui.toOrder}
                 </Badge>
               ),
             },
@@ -136,20 +140,20 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   if (section === "categories") {
     return (
       <><ActivityFeed section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.categories} action={addButton("Yeni kateqoriya")} />
+        <AdminPageHeader title={dict.admin.categories} action={addButton(ui.newCategory)} />
         <DataTable
           title={dict.admin.categories}
           minWidth={640}
           rows={categories}
           columns={[
-            { key: "name", header: "Ad", render: (c) => <span className="font-medium text-ink">{c.name}</span> },
+            { key: "name", header: label.name, render: (c) => <span className="font-medium text-ink">{categoryName(c, dict)}</span> },
             { key: "slug", header: "Slug", render: (c) => <code className="text-[12px] text-stone">{c.slug}</code> },
-            { key: "count", header: "Məhsul", align: "right", render: (c) => c.productCount },
+            { key: "count", header: label.product, align: "right", render: (c) => c.productCount },
             {
               key: "featured",
-              header: "Ana səhifə",
+              header: label.homePage,
               align: "center",
-              render: (c) => (c.featured ? <Badge tone="success">Bəli</Badge> : <span className="text-mist">—</span>),
+              render: (c) => (c.featured ? <Badge tone="success">{dict.common.yes}</Badge> : <span className="text-mist">—</span>),
             },
           ]}
         />
@@ -161,18 +165,18 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   if (section === "brands") {
     return (
       <><ActivityFeed section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.brands} action={addButton("Yeni brend")} />
+        <AdminPageHeader title={dict.admin.brands} action={addButton(ui.newBrand)} />
         <DataTable
           title={dict.admin.brands}
           minWidth={640}
           rows={brands}
           columns={[
-            { key: "name", header: "Ad", render: (b) => <span className="font-medium text-ink">{b.name}</span> },
-            { key: "country", header: "Ölkə", render: (b) => b.country },
-            { key: "founded", header: "Təsis", align: "right", render: (b) => b.founded },
+            { key: "name", header: label.name, render: (b) => <span className="font-medium text-ink">{b.name}</span> },
+            { key: "country", header: dict.adminUi.fields.country, render: (b) => countryName(b, dict) },
+            { key: "founded", header: label.founded, align: "right", render: (b) => b.founded },
             {
               key: "count",
-              header: "Model",
+              header: label.model,
               align: "right",
               render: (b) => products.filter((p) => p.brandSlug === b.slug).length,
             },
@@ -189,21 +193,21 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
       <><ActivityFeed section={section} locale={locale} manage />
         <AdminPageHeader
           title={dict.admin.configurator}
-          description="Option qrupları və dəyərləri"
-          action={addButton("Yeni option")}
+          description={ui.optionsDescription}
+          action={addButton(ui.newOption)}
         />
         <div className="space-y-4">
           {groups.map((g) => (
             <DataTable
               key={g.key}
-              title={`${g.title} · ${g.key}`}
-              description={g.hint}
+              title={`${dict.configurator.steps[g.key]} · ${g.key}`}
+              description={dict.configurator.hints[g.key]}
               minWidth={720}
               rows={g.values}
               columns={[
                 {
                   key: "label",
-                  header: "Dəyər",
+                  header: label.value,
                   render: (v) => (
                     <span className="flex items-center gap-2.5">
                       {v.hex && (
@@ -212,14 +216,14 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
                           style={{ background: v.swatch ?? v.hex }}
                         />
                       )}
-                      <span className="font-medium text-ink">{v.label}</span>
+                      <span className="font-medium text-ink">{optionText(v, locale).label}</span>
                     </span>
                   ),
                 },
-                { key: "code", header: "Kod", render: (v) => <code className="text-[12px] text-stone">{v.code}</code> },
+                { key: "code", header: label.code, render: (v) => <code className="text-[12px] text-stone">{v.code}</code> },
                 {
                   key: "delta",
-                  header: "Qiymət",
+                  header: label.price,
                   align: "right",
                   render: (v) => (
                     <span className="tabular-nums text-graphite">
@@ -229,10 +233,10 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
                 },
                 {
                   key: "rules",
-                  header: "Uyğunluq",
+                  header: label.compatibility,
                   render: (v) =>
                     v.requires?.length ? (
-                      <Badge tone="warning">tələb edir: {v.requires.length}</Badge>
+                      <Badge tone="warning">{ui.requires}: {v.requires.length}</Badge>
                     ) : (
                       <span className="text-mist">—</span>
                     ),
@@ -249,31 +253,31 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   if (section === "orders") {
     return (
       <><ActivityFeed section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.orders} description={`${orders.length} sifariş`} />
+        <AdminPageHeader title={dict.admin.orders} description={`${orders.length} ${ui.orderUnit}`} />
         <DataTable
           title={dict.admin.orders}
           minWidth={860}
           rows={orders}
           columns={[
-            { key: "number", header: "Nömrə", render: (o) => <code className="text-[12px] text-graphite">{o.number}</code> },
-            { key: "date", header: "Tarix", render: (o) => formatDate(o.createdAt) },
-            { key: "customer", header: "Müştəri", render: (o) => <span className="text-ink">{o.customerName}</span> },
-            { key: "city", header: "Şəhər", render: (o) => o.city },
-            { key: "items", header: "Məhsul", align: "center", render: (o) => o.itemCount },
+            { key: "number", header: label.number, render: (o) => <code className="text-[12px] text-graphite">{o.number}</code> },
+            { key: "date", header: label.date, render: (o) => formatDate(o.createdAt) },
+            { key: "customer", header: label.customer, render: (o) => <span className="text-ink">{o.customerName}</span> },
+            { key: "city", header: label.city, render: (o) => o.city },
+            { key: "items", header: label.item, align: "center", render: (o) => o.itemCount },
             {
               key: "install",
-              header: "Quraşdırma",
+              header: label.installation,
               align: "center",
-              render: (o) => (o.installation ? <Badge tone="info">Bəli</Badge> : <span className="text-mist">—</span>),
+              render: (o) => (o.installation ? <Badge tone="info">{dict.common.yes}</Badge> : <span className="text-mist">—</span>),
             },
             {
               key: "status",
-              header: "Status",
+              header: label.status,
               render: (o) => <OrderStatusPill status={o.status} label={dict.orderStatus[o.status]} />,
             },
             {
               key: "total",
-              header: "Məbləğ",
+              header: label.amount,
               align: "right",
               render: (o) => <span className="font-medium tabular-nums text-ink">{formatPrice(o.total)}</span>,
             },
@@ -287,20 +291,20 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   if (section === "quotes") {
     return (
       <><ActivityFeed section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.quotes} description="Qiymət təklifi sorğuları" />
+        <AdminPageHeader title={dict.admin.quotes} description={ui.quoteDescription} />
         <DataTable
           title={dict.admin.quotes}
           minWidth={720}
           rows={quotes}
           columns={[
-            { key: "number", header: "Nömrə", render: (q) => <code className="text-[12px] text-graphite">{q.number}</code> },
-            { key: "date", header: "Tarix", render: (q) => formatDate(q.createdAt) },
-            { key: "customer", header: "Müştəri", render: (q) => q.customerName },
-            { key: "subject", header: "Mövzu", render: (q) => <span className="text-ink">{q.subject}</span> },
-            { key: "status", header: "Status", render: (q) => <Badge tone="gold">{q.status}</Badge> },
+            { key: "number", header: label.number, render: (q) => <code className="text-[12px] text-graphite">{q.number}</code> },
+            { key: "date", header: label.date, render: (q) => formatDate(q.createdAt) },
+            { key: "customer", header: label.customer, render: (q) => q.customerName },
+            { key: "subject", header: label.subject, render: (q) => <span className="text-ink">{q.subject}</span> },
+            { key: "status", header: label.status, render: (q) => <Badge tone="gold">{q.status === "SENT" ? dict.accountUi.quoteSent : q.status}</Badge> },
             {
               key: "amount",
-              header: "Məbləğ",
+              header: label.amount,
               align: "right",
               render: (q) => (q.amount ? formatPrice(q.amount) : <span className="text-mist">—</span>),
             },
@@ -314,25 +318,25 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   if (section === "repairs") {
     return (
       <><ActivityFeed section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.repairs} description="Təmir müraciətləri" />
+        <AdminPageHeader title={dict.admin.repairs} description={ui.repairDescription} />
         <DataTable
           title={dict.admin.repairs}
           minWidth={900}
           rows={repairRequests}
           columns={[
-            { key: "number", header: "Nömrə", render: (rp) => <code className="text-[12px] text-graphite">{rp.number}</code> },
-            { key: "date", header: "Tarix", render: (rp) => formatDate(rp.createdAt) },
-            { key: "category", header: "Problem", render: (rp) => <span className="text-ink">{dict.repair.categories[rp.category]}</span> },
-            { key: "customer", header: "Müştəri", render: (rp) => rp.customerName },
-            { key: "address", header: "Ünvan", render: (rp) => <span className="text-stone">{rp.address}</span> },
+            { key: "number", header: label.number, render: (rp) => <code className="text-[12px] text-graphite">{rp.number}</code> },
+            { key: "date", header: label.date, render: (rp) => formatDate(rp.createdAt) },
+            { key: "category", header: label.problem, render: (rp) => <span className="text-ink">{dict.repair.categories[rp.category]}</span> },
+            { key: "customer", header: label.customer, render: (rp) => rp.customerName },
+            { key: "address", header: dict.common.address, render: (rp) => <span className="text-stone">{rp.address}</span> },
             {
               key: "tech",
-              header: "Usta",
-              render: (rp) => rp.technician ?? <Badge tone="warning">Təyin edilməyib</Badge>,
+              header: label.technician,
+              render: (rp) => rp.technician ?? <Badge tone="warning">{ui.unassigned}</Badge>,
             },
             {
               key: "status",
-              header: "Status",
+              header: label.status,
               render: (rp) => <RepairStatusPill status={rp.status} label={dict.repairStatus[rp.status]} />,
             },
           ]}
@@ -345,19 +349,19 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   if (section === "measurements") {
     return (
       <><ActivityFeed section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.measurements} description="Ölçü sifarişləri" />
+        <AdminPageHeader title={dict.admin.measurements} description={ui.measurementDescription} />
         <DataTable
           title={dict.admin.measurements}
           minWidth={800}
           rows={measurements}
           columns={[
-            { key: "number", header: "Nömrə", render: (m) => <code className="text-[12px] text-graphite">{m.number}</code> },
-            { key: "property", header: "Obyekt", render: (m) => dict.measurement.property[m.propertyType] },
-            { key: "doors", header: "Qapı", align: "center", render: (m) => m.doorCount },
-            { key: "address", header: "Ünvan", render: (m) => <span className="text-stone">{m.address}</span> },
-            { key: "date", header: "Tarix", render: (m) => formatDate(m.preferredDate) },
-            { key: "tech", header: "Usta", render: (m) => m.technician ?? "—" },
-            { key: "status", header: "Status", render: (m) => <Badge tone="gold">{m.status}</Badge> },
+            { key: "number", header: label.number, render: (m) => <code className="text-[12px] text-graphite">{m.number}</code> },
+            { key: "property", header: label.object, render: (m) => dict.measurement.property[m.propertyType] },
+            { key: "doors", header: label.door, align: "center", render: (m) => m.doorCount },
+            { key: "address", header: dict.common.address, render: (m) => <span className="text-stone">{m.address}</span> },
+            { key: "date", header: label.date, render: (m) => formatDate(m.preferredDate) },
+            { key: "tech", header: label.technician, render: (m) => m.technician ?? "—" },
+            { key: "status", header: label.status, render: (m) => <Badge tone="gold">{m.status === "SCHEDULED" ? dict.accountUi.statuses.scheduled : m.status}</Badge> },
           ]}
         />
       </>
@@ -370,24 +374,24 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
       <><ActivityFeed section={section} locale={locale} manage />
         <AdminPageHeader
           title={dict.admin.appointments}
-          description="Görüş cədvəli — usta üzrə overlap serverdə bloklanır"
+          description={ui.appointmentDescription}
         />
         <DataTable
           title={dict.admin.appointments}
           minWidth={800}
           rows={appointments}
           columns={[
-            { key: "date", header: "Tarix", render: (a) => formatDate(a.date) },
-            { key: "time", header: "Saat", render: (a) => `${a.startTime} – ${a.endTime}` },
-            { key: "type", header: "Növ", render: (a) => <Badge tone="info">{a.type}</Badge> },
+            { key: "date", header: label.date, render: (a) => formatDate(a.date) },
+            { key: "time", header: label.time, render: (a) => `${a.startTime} – ${a.endTime}` },
+            { key: "type", header: label.type, render: (a) => <Badge tone="info">{a.type === "REPAIR" ? dict.services.repair : a.type === "MEASUREMENT" ? dict.services.measurement : dict.services.installation}</Badge> },
             {
               key: "tech",
-              header: "Usta",
+              header: label.technician,
               render: (a) => technicians.find((t) => t.id === a.technicianId)?.name ?? "—",
             },
-            { key: "address", header: "Ünvan", render: (a) => <span className="text-stone">{a.address}</span> },
-            { key: "ref", header: "İstinad", render: (a) => <code className="text-[12px] text-graphite">{a.reference}</code> },
-            { key: "status", header: "Status", render: (a) => <Badge tone="gold">{a.status}</Badge> },
+            { key: "address", header: dict.common.address, render: (a) => <span className="text-stone">{a.address}</span> },
+            { key: "ref", header: label.reference, render: (a) => <code className="text-[12px] text-graphite">{a.reference}</code> },
+            { key: "status", header: label.status, render: (a) => <Badge tone="gold">{a.status === "CONFIRMED" ? dict.accountUi.statuses.confirmed : dict.accountUi.statuses.scheduled}</Badge> },
           ]}
         />
       </>
@@ -398,24 +402,24 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   if (section === "technicians") {
     return (
       <><ActivityFeed section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.technicians} action={addButton("Yeni usta")} />
+        <AdminPageHeader title={dict.admin.technicians} action={addButton(ui.newTechnician)} />
         <DataTable
           title={dict.admin.technicians}
           minWidth={860}
           rows={technicians}
           columns={[
-            { key: "name", header: "Ad", render: (t) => <span className="font-medium text-ink">{t.name}</span> },
-            { key: "phone", header: "Telefon", render: (t) => t.phone },
-            { key: "spec", header: "İxtisas", render: (t) => <span className="text-stone">{t.specialization.map((k) => specializationName(k, dict)).join(", ")}</span> },
-            { key: "areas", header: "Ərazi", render: (t) => <span className="text-stone">{t.serviceAreas.join(", ")}</span> },
-            { key: "jobs", header: "İş", align: "right", render: (t) => t.completedJobs },
-            { key: "rating", header: "Reytinq", align: "right", render: (t) => <Rating value={t.rating} /> },
+            { key: "name", header: label.name, render: (t) => <span className="font-medium text-ink">{t.name}</span> },
+            { key: "phone", header: dict.common.phone, render: (t) => t.phone },
+            { key: "spec", header: label.specialization, render: (t) => <span className="text-stone">{t.specialization.map((k) => specializationName(k, dict)).join(", ")}</span> },
+            { key: "areas", header: label.area, render: (t) => <span className="text-stone">{t.serviceAreas.join(", ")}</span> },
+            { key: "jobs", header: label.job, align: "right", render: (t) => t.completedJobs },
+            { key: "rating", header: label.rating, align: "right", render: (t) => <Rating value={t.rating} /> },
             {
               key: "status",
-              header: "Status",
+              header: label.status,
               render: (t) => (
                 <Badge tone={t.status === "AVAILABLE" ? "success" : t.status === "ON_JOB" ? "gold" : "neutral"}>
-                  {t.status}
+                  {t.status === "AVAILABLE" ? ui.technicianAvailable : t.status === "ON_JOB" ? ui.technicianOnJob : ui.technicianOffDuty}
                 </Badge>
               ),
             },
@@ -427,31 +431,32 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
 
   /* ------------------------------------------------------------- ROLES */
   if (section === "roles") {
+    const roleFunctions = ui.roleFunctions;
     const permissions = [
       "product.view", "product.create", "product.update", "product.delete",
       "order.view", "order.update", "repair.assign", "user.manage", "setting.manage",
     ];
     const matrix: { fn: string; superAdmin: string; admin: string; editor: string; technician: string }[] = [
-      { fn: "Məhsullar", superAdmin: "Tam", admin: "Tam", editor: "Redaktə", technician: "Yox" },
-      { fn: "Sifarişlər", superAdmin: "Tam", admin: "Tam", editor: "Yox", technician: "Təyin olunan" },
-      { fn: "Təmir", superAdmin: "Tam", admin: "Tam", editor: "Yox", technician: "Təyin olunan" },
-      { fn: "Müştərilər", superAdmin: "Tam", admin: "Tam", editor: "Yox", technician: "Məhdud" },
-      { fn: "Maliyyə", superAdmin: "Tam", admin: "Baxış", editor: "Yox", technician: "Yox" },
-      { fn: "Rollar / RBAC", superAdmin: "Tam", admin: "Yox", editor: "Yox", technician: "Yox" },
-      { fn: "Sistem tənzimləmələri", superAdmin: "Tam", admin: "Yox", editor: "Yox", technician: "Yox" },
+      { fn: roleFunctions.products, superAdmin: ui.fullAccess, admin: ui.fullAccess, editor: ui.editAccess, technician: ui.noAccess },
+      { fn: roleFunctions.orders, superAdmin: ui.fullAccess, admin: ui.fullAccess, editor: ui.noAccess, technician: ui.assignedAccess },
+      { fn: roleFunctions.repairs, superAdmin: ui.fullAccess, admin: ui.fullAccess, editor: ui.noAccess, technician: ui.assignedAccess },
+      { fn: roleFunctions.customers, superAdmin: ui.fullAccess, admin: ui.fullAccess, editor: ui.noAccess, technician: ui.restrictedAccess },
+      { fn: roleFunctions.finance, superAdmin: ui.fullAccess, admin: ui.viewAccess, editor: ui.noAccess, technician: ui.noAccess },
+      { fn: roleFunctions.roles, superAdmin: ui.fullAccess, admin: ui.noAccess, editor: ui.noAccess, technician: ui.noAccess },
+      { fn: roleFunctions.settings, superAdmin: ui.fullAccess, admin: ui.noAccess, editor: ui.noAccess, technician: ui.noAccess },
     ];
 
     return (
       <><ActivityFeed section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.roles} description="RBAC — resource.action formatı" />
+        <AdminPageHeader title={dict.admin.roles} description={ui.rolesDescription} />
 
         <div className="space-y-4">
           <DataTable
-            title="Rol matrisi"
+            title={ui.roleMatrix}
             minWidth={720}
             rows={matrix}
             columns={[
-              { key: "fn", header: "Funksiya", render: (m) => <span className="font-medium text-ink">{m.fn}</span> },
+              { key: "fn", header: label.function, render: (m) => <span className="font-medium text-ink">{m.fn}</span> },
               { key: "sa", header: "Super Admin", align: "center", render: (m) => m.superAdmin },
               { key: "a", header: "Admin", align: "center", render: (m) => m.admin },
               { key: "e", header: "Editor", align: "center", render: (m) => m.editor },
@@ -460,7 +465,7 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
           />
 
           <Card className="p-5">
-            <h2 className="mb-4 text-[13px] font-semibold text-ink">İcazə açarları</h2>
+            <h2 className="mb-4 text-[13px] font-semibold text-ink">{ui.permissionKeys}</h2>
             <div className="flex flex-wrap gap-2">
               {permissions.map((p) => (
                 <code
@@ -488,23 +493,23 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
 
     return (
       <><ActivityFeed section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.customers} description={`${customers.length} müştəri`} />
+        <AdminPageHeader title={dict.admin.customers} description={`${customers.length} ${ui.customerUnit}`} />
         <DataTable
           title={dict.admin.customers}
           minWidth={800}
           rows={customers}
           columns={[
-            { key: "name", header: "Ad", render: (c) => <span className="font-medium text-ink">{c.name}</span> },
-            { key: "email", header: "E-poçt", render: (c) => <span className="text-stone">{c.email}</span> },
-            { key: "phone", header: "Telefon", render: (c) => c.phone },
-            { key: "orders", header: "Sifariş", align: "center", render: (c) => c.orders },
+            { key: "name", header: label.name, render: (c) => <span className="font-medium text-ink">{c.name}</span> },
+            { key: "email", header: dict.common.email, render: (c) => <span className="text-stone">{c.email}</span> },
+            { key: "phone", header: dict.common.phone, render: (c) => c.phone },
+            { key: "orders", header: label.orders, align: "center", render: (c) => c.orders },
             {
               key: "total",
-              header: "Ümumi",
+              header: label.total,
               align: "right",
               render: (c) => <span className="font-medium tabular-nums text-ink">{formatPrice(c.total)}</span>,
             },
-            { key: "since", header: "Qeydiyyat", render: (c) => formatDate(c.since) },
+            { key: "since", header: label.registration, render: (c) => formatDate(c.since) },
           ]}
         />
       </>
@@ -522,7 +527,7 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
 
     return (
       <><ActivityFeed section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.inventory} description="Stok, rezervasiya və minimum həddlər" />
+        <AdminPageHeader title={dict.admin.inventory} description={ui.inventoryDescription} />
         <DataTable
           title={dict.admin.stock}
           minWidth={780}
@@ -530,7 +535,7 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
           columns={[
             {
               key: "product",
-              header: "Məhsul",
+              header: label.product,
               render: (s) => (
                 <span>
                   <span className="block font-medium text-ink">{s.product.name}</span>
@@ -538,25 +543,25 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
                 </span>
               ),
             },
-            { key: "onHand", header: "Anbarda", align: "right", render: (s) => <span className="tabular-nums">{s.onHand}</span> },
-            { key: "reserved", header: "Rezerv", align: "right", render: (s) => <span className="tabular-nums text-stone">{s.reserved}</span> },
+            { key: "onHand", header: label.onHand, align: "right", render: (s) => <span className="tabular-nums">{s.onHand}</span> },
+            { key: "reserved", header: label.reserved, align: "right", render: (s) => <span className="tabular-nums text-stone">{s.reserved}</span> },
             {
               key: "available",
-              header: "Əlçatan",
+              header: label.available,
               align: "right",
               render: (s) => <span className="font-medium tabular-nums text-ink">{s.onHand - s.reserved}</span>,
             },
             {
               key: "state",
-              header: "Vəziyyət",
+              header: label.state,
               align: "center",
               render: (s) =>
                 s.onHand === 0 ? (
-                  <Badge tone="neutral">Sifarişlə</Badge>
+                  <Badge tone="neutral">{ui.toOrder}</Badge>
                 ) : s.onHand - s.reserved <= s.threshold ? (
-                  <Badge tone="danger">Az qalıb</Badge>
+                  <Badge tone="danger">{ui.lowStock}</Badge>
                 ) : (
-                  <Badge tone="success">Normal</Badge>
+                  <Badge tone="success">{ui.normal}</Badge>
                 ),
             },
           ]}
@@ -569,22 +574,22 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   if (section === "warranty") {
     return (
       <><ActivityFeed section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.warranty} description="Serial nömrəyə bağlı zəmanətlər" />
+        <AdminPageHeader title={dict.admin.warranty} description={ui.warrantyDescription} />
         <DataTable
           title={dict.admin.warranty}
           minWidth={860}
           rows={warranties}
           columns={[
-            { key: "number", header: "Nömrə", render: (w) => <code className="text-[12px] text-graphite">{w.number}</code> },
-            { key: "serial", header: "Serial", render: (w) => <code className="text-[12px] text-ink">{w.serialNumber}</code> },
-            { key: "product", header: "Məhsul", render: (w) => w.productName },
-            { key: "order", header: "Sifariş", render: (w) => <code className="text-[12px] text-stone">{w.orderNumber}</code> },
-            { key: "install", header: "Quraşdırma", render: (w) => formatDate(w.installationDate) },
-            { key: "end", header: "Bitmə", render: (w) => formatDate(w.endDate) },
+            { key: "number", header: label.number, render: (w) => <code className="text-[12px] text-graphite">{w.number}</code> },
+            { key: "serial", header: label.serial, render: (w) => <code className="text-[12px] text-ink">{w.serialNumber}</code> },
+            { key: "product", header: label.product, render: (w) => w.productName },
+            { key: "order", header: label.orders, render: (w) => <code className="text-[12px] text-stone">{w.orderNumber}</code> },
+            { key: "install", header: label.installation, render: (w) => formatDate(w.installationDate) },
+            { key: "end", header: label.end, render: (w) => formatDate(w.endDate) },
             {
               key: "status",
-              header: "Status",
-              render: (w) => <Badge tone={w.status === "ACTIVE" ? "success" : "neutral"}>{w.status}</Badge>,
+              header: label.status,
+              render: (w) => <Badge tone={w.status === "ACTIVE" ? "success" : "neutral"}>{w.status === "ACTIVE" ? dict.warranty.active : dict.warranty.expired}</Badge>,
             },
           ]}
         />
@@ -594,23 +599,24 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
 
   /* ----------------------------------------------------------- REVIEWS */
   if (section === "reviews") {
+    const reviews = localizedReviews(locale);
     return (
       <><ActivityFeed section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.reviews} description="Moderasiya növbəsi" />
+        <AdminPageHeader title={dict.admin.reviews} description={ui.reviewsDescription} />
         <DataTable
           title={dict.admin.reviews}
           minWidth={860}
           rows={reviews}
           columns={[
-            { key: "author", header: "Müəllif", render: (rv) => <span className="font-medium text-ink">{rv.author}</span> },
-            { key: "product", header: "Məhsul", render: (rv) => rv.productName },
-            { key: "rating", header: "Reytinq", render: (rv) => <Rating value={rv.rating} /> },
-            { key: "text", header: "Mətn", render: (rv) => <span className="line-clamp-2 max-w-md text-stone">{rv.text}</span> },
-            { key: "date", header: "Tarix", render: (rv) => formatDate(rv.date) },
+            { key: "author", header: label.author, render: (rv) => <span className="font-medium text-ink">{rv.author}</span> },
+            { key: "product", header: label.product, render: (rv) => rv.productName },
+            { key: "rating", header: label.rating, render: (rv) => <Rating value={rv.rating} /> },
+            { key: "text", header: label.text, render: (rv) => <span className="line-clamp-2 max-w-md text-stone">{rv.text}</span> },
+            { key: "date", header: label.date, render: (rv) => formatDate(rv.date) },
             {
               key: "status",
-              header: "Status",
-              render: (rv) => <Badge tone={rv.verified ? "success" : "warning"}>{rv.verified ? "Təsdiqlənib" : "Gözləyir"}</Badge>,
+              header: label.status,
+              render: (rv) => <Badge tone={rv.verified ? "success" : "warning"}>{rv.verified ? ui.verified : ui.pending}</Badge>,
             },
           ]}
         />
@@ -621,28 +627,28 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   /* ----------------------------------------------------------- CONTENT */
   if (section === "content") {
     const pages = [
-      { title: "Ana səhifə", path: "/", updated: "2026-08-30", status: "Dərc olunub" },
-      { title: "Haqqımızda", path: "/haqqimizda", updated: "2026-08-12", status: "Dərc olunub" },
-      { title: "Xidmətlər", path: "/xidmetler", updated: "2026-08-22", status: "Dərc olunub" },
-      { title: "FAQ", path: "/faq", updated: "2026-09-01", status: "Dərc olunub" },
-      { title: "Məxfilik siyasəti", path: "/legal/privacy", updated: "2026-07-05", status: "Qaralama" },
+      { title: ui.contentPages.home, path: "/", updated: "2026-08-30", published: true },
+      { title: ui.contentPages.about, path: "/haqqimizda", updated: "2026-08-12", published: true },
+      { title: ui.contentPages.services, path: "/xidmetler", updated: "2026-08-22", published: true },
+      { title: ui.contentPages.faq, path: "/faq", updated: "2026-09-01", published: true },
+      { title: ui.contentPages.privacy, path: "/legal/privacy", updated: "2026-07-05", published: false },
     ];
 
     return (
       <><ActivityFeed section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.content} action={addButton("Yeni səhifə")} />
+        <AdminPageHeader title={dict.admin.content} action={addButton(ui.newPage)} />
         <DataTable
           title={dict.admin.pages}
           minWidth={640}
           rows={pages}
           columns={[
-            { key: "title", header: "Başlıq", render: (p) => <span className="font-medium text-ink">{p.title}</span> },
-            { key: "path", header: "URL", render: (p) => <code className="text-[12px] text-stone">{p.path}</code> },
-            { key: "updated", header: "Yenilənib", render: (p) => formatDate(p.updated) },
+            { key: "title", header: label.title, render: (p) => <span className="font-medium text-ink">{p.title}</span> },
+            { key: "path", header: label.url, render: (p) => <code className="text-[12px] text-stone">{p.path}</code> },
+            { key: "updated", header: label.updated, render: (p) => formatDate(p.updated) },
             {
               key: "status",
-              header: "Status",
-              render: (p) => <Badge tone={p.status === "Dərc olunub" ? "success" : "warning"}>{p.status}</Badge>,
+              header: label.status,
+              render: (p) => <Badge tone={p.published ? "success" : "warning"}>{p.published ? ui.published : ui.draft}</Badge>,
             },
           ]}
         />
@@ -654,30 +660,30 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   if (section === "seo") {
     return (
       <><ActivityFeed section={section} locale={locale} manage />
-        <LocalManager section="seo" label="SEO məlumatı əlavə et" />
-        <AdminPageHeader title={dict.admin.seo} description="Metadata, sitemap və structured data" />
+        <LocalManager section="seo" label={ui.addSeo} />
+        <AdminPageHeader title={dict.admin.seo} description={ui.seoDescription} />
         <div className="grid gap-4 lg:grid-cols-2">
           <Card className="p-5">
-            <h2 className="mb-4 text-[13px] font-semibold text-ink">Texniki SEO vəziyyəti</h2>
+            <h2 className="mb-4 text-[13px] font-semibold text-ink">{ui.technicalSeo}</h2>
             <dl>
-              <DataRow label="Sitemap" value={<Badge tone="success">Aktiv</Badge>} />
-              <DataRow label="robots.txt" value={<Badge tone="success">Aktiv</Badge>} />
-              <DataRow label="Canonical" value={<Badge tone="success">Aktiv</Badge>} />
-              <DataRow label="hreflang (az/en/ru)" value={<Badge tone="success">Aktiv</Badge>} />
-              <DataRow label="Product schema" value={<Badge tone="success">Aktiv</Badge>} />
-              <DataRow label="FAQ schema" value={<Badge tone="success">Aktiv</Badge>} />
-              <DataRow label="Open Graph" value={<Badge tone="success">Aktiv</Badge>} />
+              <DataRow label="Sitemap" value={<Badge tone="success">{ui.active}</Badge>} />
+              <DataRow label="robots.txt" value={<Badge tone="success">{ui.active}</Badge>} />
+              <DataRow label="Canonical" value={<Badge tone="success">{ui.active}</Badge>} />
+              <DataRow label="hreflang (az/en/ru)" value={<Badge tone="success">{ui.active}</Badge>} />
+              <DataRow label="Product schema" value={<Badge tone="success">{ui.active}</Badge>} />
+              <DataRow label="FAQ schema" value={<Badge tone="success">{ui.active}</Badge>} />
+              <DataRow label="Open Graph" value={<Badge tone="success">{ui.active}</Badge>} />
             </dl>
           </Card>
 
           <Card className="p-5">
-            <h2 className="mb-4 text-[13px] font-semibold text-ink">Performans hədəfləri</h2>
+            <h2 className="mb-4 text-[13px] font-semibold text-ink">{ui.performanceTargets}</h2>
             <dl>
               <DataRow label="LCP" value="≤ 2.5 s" />
               <DataRow label="INP" value="≤ 200 ms" />
               <DataRow label="CLS" value="≤ 0.1" />
               <DataRow label="Server Components" value="Default" />
-              <DataRow label="Şəkil formatları" value="AVIF / WebP" />
+              <DataRow label={ui.imageFormats} value="AVIF / WebP" />
             </dl>
           </Card>
         </div>
@@ -688,26 +694,26 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   /* --------------------------------------------------------- ANALYTICS */
   if (section === "analytics") {
     const funnel = [
-      { step: "Kataloq baxışı", value: 12480, rate: "100%" },
-      { step: "Məhsul səhifəsi", value: 5240, rate: "42%" },
-      { step: "Konfiqurator açılışı", value: 1980, rate: "16%" },
-      { step: "Konfiqurasiya tamamlanması", value: 860, rate: "6.9%" },
-      { step: "Səbətə əlavə", value: 520, rate: "4.2%" },
-      { step: "Checkout başlanğıcı", value: 310, rate: "2.5%" },
-      { step: "Sifariş", value: 148, rate: "1.2%" },
+      { step: ui.funnelSteps.catalog, value: 12480, rate: "100%" },
+      { step: ui.funnelSteps.product, value: 5240, rate: "42%" },
+      { step: ui.funnelSteps.configurator, value: 1980, rate: "16%" },
+      { step: ui.funnelSteps.completed, value: 860, rate: "6.9%" },
+      { step: ui.funnelSteps.cart, value: 520, rate: "4.2%" },
+      { step: ui.funnelSteps.checkout, value: 310, rate: "2.5%" },
+      { step: ui.funnelSteps.order, value: 148, rate: "1.2%" },
     ];
 
     return (
       <><ActivityFeed section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.analytics} description="Konversiya hunisi" />
+        <AdminPageHeader title={dict.admin.analytics} description={ui.analyticsDescription} />
         <DataTable
-          title="Konversiya hunisi — son 30 gün"
+          title={ui.funnelTitle}
           minWidth={560}
           rows={funnel}
           columns={[
-            { key: "step", header: "Mərhələ", render: (f) => <span className="font-medium text-ink">{f.step}</span> },
-            { key: "value", header: "Say", align: "right", render: (f) => <span className="tabular-nums">{formatNumber(f.value)}</span> },
-            { key: "rate", header: "Nisbət", align: "right", render: (f) => <span className="tabular-nums text-stone">{f.rate}</span> },
+            { key: "step", header: label.step, render: (f) => <span className="font-medium text-ink">{f.step}</span> },
+            { key: "value", header: label.count, align: "right", render: (f) => <span className="tabular-nums">{formatNumber(f.value)}</span> },
+            { key: "rate", header: label.rate, align: "right", render: (f) => <span className="tabular-nums text-stone">{f.rate}</span> },
             {
               key: "bar",
               header: "",
@@ -738,17 +744,17 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
 
     return (
       <><ActivityFeed section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.auditLogs} description="Kritik əməliyyatların izi" />
+        <AdminPageHeader title={dict.admin.auditLogs} description={ui.auditDescription} />
         <DataTable
           title={dict.admin.auditLogs}
           minWidth={780}
           rows={logs}
           columns={[
-            { key: "at", header: "Vaxt", render: (l) => formatDateTime(l.at) },
-            { key: "actor", header: "İstifadəçi", render: (l) => <span className="font-medium text-ink">{l.actor}</span> },
-            { key: "action", header: "Əməliyyat", render: (l) => <code className="text-[12px] text-graphite">{l.action}</code> },
-            { key: "target", header: "Obyekt", render: (l) => <code className="text-[12px] text-stone">{l.target}</code> },
-            { key: "detail", header: "Detal", render: (l) => <span className="text-stone">{l.detail}</span> },
+            { key: "at", header: label.time, render: (l) => formatDateTime(l.at) },
+            { key: "actor", header: label.actor, render: (l) => <span className="font-medium text-ink">{l.actor}</span> },
+            { key: "action", header: label.action, render: (l) => <code className="text-[12px] text-graphite">{l.action}</code> },
+            { key: "target", header: label.target, render: (l) => <code className="text-[12px] text-stone">{l.target}</code> },
+            { key: "detail", header: label.detail, render: (l) => <span className="text-stone">{l.detail}</span> },
           ]}
         />
       </>
@@ -759,29 +765,29 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
   if (section === "settings") {
     return (
       <><ActivityFeed section={section} locale={locale} manage />
-        <LocalManager section="settings" label="Parametrləri redaktə et" />
-        <AdminPageHeader title={dict.admin.settings} description="Platforma konfiqurasiyası" />
+        <LocalManager section="settings" label={ui.editSettings} />
+        <AdminPageHeader title={dict.admin.settings} description={ui.settingsDescription} />
         <div className="grid gap-4 lg:grid-cols-2">
           <Card className="p-5">
-            <h2 className="mb-4 text-[13px] font-semibold text-ink">Ümumi</h2>
+            <h2 className="mb-4 text-[13px] font-semibold text-ink">{ui.general}</h2>
             <dl>
-              <DataRow label="Sayt adı" value="EuroPorta" />
-              <DataRow label="Valyuta" value="AZN" />
-              <DataRow label="Default dil" value="Azərbaycan" />
-              <DataRow label="Dəstəklənən dillər" value="AZ / EN / RU" />
-              <DataRow label="Vaxt zonası" value="Asia/Baku" />
+              <DataRow label={ui.siteName} value="EuroPorta" />
+              <DataRow label={ui.currency} value="AZN" />
+              <DataRow label={ui.defaultLanguage} value="AZ" />
+              <DataRow label={ui.supportedLanguages} value="AZ / EN / RU" />
+              <DataRow label={ui.timeZone} value="Asia/Baku" />
             </dl>
           </Card>
 
           <Card className="p-5">
-            <h2 className="mb-4 text-[13px] font-semibold text-ink">Planlaşdırılan inteqrasiyalar</h2>
+            <h2 className="mb-4 text-[13px] font-semibold text-ink">{ui.plannedIntegrations}</h2>
             <dl>
-              <DataRow label="Cloudflare D1" value={<Badge tone="warning">Gözləyir</Badge>} />
-              <DataRow label="Cloudflare R2" value={<Badge tone="warning">Gözləyir</Badge>} />
-              <DataRow label="Cloudflare Images" value={<Badge tone="warning">Gözləyir</Badge>} />
-              <DataRow label="Turnstile" value={<Badge tone="warning">Gözləyir</Badge>} />
-              <DataRow label="Ödəniş provayderi" value={<Badge tone="warning">Gözləyir</Badge>} />
-              <DataRow label="E-poçt Queue" value={<Badge tone="warning">Gözləyir</Badge>} />
+              <DataRow label="Cloudflare D1" value={<Badge tone="warning">{ui.pending}</Badge>} />
+              <DataRow label="Cloudflare R2" value={<Badge tone="warning">{ui.pending}</Badge>} />
+              <DataRow label="Cloudflare Images" value={<Badge tone="warning">{ui.pending}</Badge>} />
+              <DataRow label="Turnstile" value={<Badge tone="warning">{ui.pending}</Badge>} />
+              <DataRow label={ui.paymentProvider} value={<Badge tone="warning">{ui.pending}</Badge>} />
+              <DataRow label={ui.emailQueue} value={<Badge tone="warning">{ui.pending}</Badge>} />
             </dl>
           </Card>
         </div>
@@ -792,28 +798,28 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
 
   /* --------------------------------------------------------- DISCOUNTS */
   const discounts = [
-    { code: "YAZ2026", type: "Faiz", value: "10%", scope: "Bütün kataloq", from: "2026-03-01", to: "2026-04-30", status: "Bitib" },
-    { code: "SMART200", type: "Məbləğ", value: "200 AZN", scope: "Smart qapılar", from: "2026-08-01", to: "2026-09-30", status: "Aktiv" },
-    { code: "INSTALL0", type: "Xidmət", value: "Pulsuz quraşdırma", scope: "3+ qapı", from: "2026-09-01", to: "2026-10-31", status: "Aktiv" },
+    { code: "YAZ2026", type: ui.discount.percentage, value: "10%", scope: ui.discount.allCatalog, from: "2026-03-01", to: "2026-04-30", active: false },
+    { code: "SMART200", type: ui.discount.amount, value: "200 AZN", scope: ui.discount.smartDoors, from: "2026-08-01", to: "2026-09-30", active: true },
+    { code: "INSTALL0", type: ui.discount.service, value: ui.discount.freeInstallation, scope: ui.discount.threeDoors, from: "2026-09-01", to: "2026-10-31", active: true },
   ];
 
   return (
     <>
-      <AdminPageHeader title={dict.admin.discounts} action={addButton("Yeni endirim")} />
+      <AdminPageHeader title={dict.admin.discounts} action={addButton(ui.newDiscount)} />
       <DataTable
         title={dict.admin.discounts}
         minWidth={780}
         rows={discounts}
         columns={[
-          { key: "code", header: "Kod", render: (d) => <code className="text-[12px] font-semibold text-ink">{d.code}</code> },
-          { key: "type", header: "Növ", render: (d) => d.type },
-          { key: "value", header: "Dəyər", render: (d) => <span className="font-medium text-ink">{d.value}</span> },
-          { key: "scope", header: "Əhatə", render: (d) => <span className="text-stone">{d.scope}</span> },
-          { key: "period", header: "Müddət", render: (d) => `${formatDate(d.from)} – ${formatDate(d.to)}` },
+          { key: "code", header: label.code, render: (d) => <code className="text-[12px] font-semibold text-ink">{d.code}</code> },
+          { key: "type", header: label.type, render: (d) => d.type },
+          { key: "value", header: label.value, render: (d) => <span className="font-medium text-ink">{d.value}</span> },
+          { key: "scope", header: label.scope, render: (d) => <span className="text-stone">{d.scope}</span> },
+          { key: "period", header: label.period, render: (d) => `${formatDate(d.from)} – ${formatDate(d.to)}` },
           {
             key: "status",
-            header: "Status",
-            render: (d) => <Badge tone={d.status === "Aktiv" ? "success" : "neutral"}>{d.status}</Badge>,
+            header: label.status,
+            render: (d) => <Badge tone={d.active ? "success" : "neutral"}>{d.active ? ui.active : ui.expired}</Badge>,
           },
         ]}
       />

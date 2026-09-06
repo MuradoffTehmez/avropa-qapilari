@@ -8,10 +8,12 @@ export function DocumentPreview({
   title,
   model,
   details,
+  downloadLabel,
 }: {
   title: string;
   model: string;
   details: string;
+  downloadLabel: string;
 }) {
   function download() {
     const content = `${brand.name.toUpperCase()} — ${title}\n\n${model}\n\n${details}\n`;
@@ -26,12 +28,12 @@ export function DocumentPreview({
   return (
     <button
       type="button"
-      aria-label={`${title} sənədini endir`}
+      aria-label={`${title} — ${downloadLabel}`}
       onClick={download}
       className="flex shrink-0 items-center gap-1.5 text-[13px] font-medium text-gold-600 transition-colors hover:text-gold-700"
     >
       <Download size={15} />
-      Endir
+      {downloadLabel}
     </button>
   );
 }

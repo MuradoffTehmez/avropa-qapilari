@@ -89,6 +89,7 @@ const initial: RepairForm = {
 export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const r = routes(locale);
   const [step, setStep] = useState(0);
+  const [direction, setDirection] = useState<"forward" | "back">("forward");
   const [form, setForm] = useState<RepairForm>(initial);
   const [errors, setErrors] = useState<Partial<Record<keyof RepairForm, string>>>({});
   const [submitted, setSubmitted] = useState<string | null>(null);
@@ -129,6 +130,7 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
     setSubmitted(reference);
       return;
     }
+    setDirection("forward");
     setStep((s) => s + 1);
   }
 
@@ -152,7 +154,7 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
           <div className="mt-7 flex flex-wrap justify-center gap-2">
             <ButtonLink href={r.accountSection("repairs")}>{dict.account.repairs}</ButtonLink>
             <ButtonLink href={r.home} variant="secondary">
-              Ana səhifə
+              {dict.nav.home}
             </ButtonLink>
           </div>
         </div>
@@ -169,8 +171,13 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
           className="mb-8 border-b border-line"
           steps={stepIds.map((s) => dict.repair.steps[s])}
           current={step}
-          onSelect={setStep}
+          onSelect={(next) => {
+            setDirection(next < step ? "back" : "forward");
+            setStep(next);
+          }}
         />
+
+        <div key={id} className={direction === "forward" ? "motion-step-forward" : "motion-step-back"}>
 
         {id === "problem" && (
           <div>
@@ -241,7 +248,7 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
                 placeholder={dict.repair.describePlaceholder}
               />
             </Field>
-            <p className="mt-2 text-xs text-stone">{form.description.length} simvol</p>
+            <p className="mt-2 text-xs text-stone">{form.description.length} {dict.common.characterUnit}</p>
           </div>
         )}
 
@@ -341,10 +348,7 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
                 </Select>
               </Field>
             </div>
-            <Notice className="mt-4">
-              Dəqiq vaxt operator tərəfindən təsdiqlənir. Usta təyinatı və vaxt konflikti serverdə
-              yoxlanılır.
-            </Notice>
+            <Notice className="mt-4">{dict.repair.exactTimeNotice}</Notice>
           </div>
         )}
 
@@ -374,26 +378,28 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
           <div className="max-w-xl">
             <StepTitle title={dict.repair.confirmQuestion} />
             <Card className="divide-y divide-line">
-              <Row label="Problem" value={form.category ? dict.repair.categories[form.category] : "—"} />
+              <Row label={dict.repair.steps.problem} value={form.category ? dict.repair.categories[form.category] : "—"} />
               <Row label={dict.repair.steps.doorType} value={doorTypeLabel(form.doorType, dict)} />
               <Row label={dict.repair.steps.describe} value={form.description || "—"} />
-              <Row label="Fayllar" value={form.files.length ? `${form.files.length} fayl` : "—"} />
+              <Row label={dict.repair.files} value={form.files.length ? `${form.files.length} ${dict.repair.fileUnit}` : "—"} />
               <Row
                 label={dict.common.address}
                 value={[form.city, form.district, form.street, form.building, form.apartment]
                   .filter(Boolean)
                   .join(", ")}
               />
-              <Row label="Tarix" value={`${form.date} · ${form.slot}`} />
+              <Row label={dict.common.date} value={`${form.date} · ${form.slot}`} />
               <Row label={dict.repair.steps.contact} value={`${form.name} · ${form.phone}`} />
             </Card>
 
           </div>
         )}
 
+        </div>
+
         <div className="mt-8 flex gap-2">
           {step > 0 && (
-            <Button variant="secondary" onClick={() => setStep((s) => s - 1)}>
+            <Button variant="secondary" onClick={() => { setDirection("back"); setStep((s) => s - 1); }}>
               <ArrowLeft size={16} /> {dict.actions.back}
             </Button>
           )}
@@ -404,7 +410,7 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
         </div>
       </div>
 
-      <aside className="lg:sticky lg:top-24 lg:h-fit">
+      <aside className="desktop-sticky-panel">
         <Card className="p-5">
           <div className="flex items-center gap-2.5">
             <DoorOpen size={18} className="text-gold-500" />
@@ -414,9 +420,9 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
           </div>
 
           <dl className="mt-4 space-y-2.5 text-[13px]">
-            <Mini label="Problem" value={form.category ? dict.repair.categories[form.category] : "—"} />
+            <Mini label={dict.repair.steps.problem} value={form.category ? dict.repair.categories[form.category] : "—"} />
             <Mini label={dict.repair.door} value={doorTypeLabel(form.doorType, dict)} />
-            <Mini label="Tarix" value={form.date || "—"} />
+            <Mini label={dict.common.date} value={form.date || "—"} />
             <Mini label={dict.repair.steps.address} value={form.street ? `${form.city}, ${form.street}` : "—"} />
           </dl>
 

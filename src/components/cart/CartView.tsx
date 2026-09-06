@@ -10,6 +10,8 @@ import { formatPrice } from "@/lib/utils";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card, EmptyState, Notice, Skeleton } from "@/components/ui/primitives";
 import { DoorVisual } from "@/components/product/DoorVisual";
+import { ProductMedia } from "@/components/product/ProductMedia";
+import { products } from "@/mock/products";
 import { cartSubtotal, useCart } from "@/store/cart";
 import { useHydrated } from "@/lib/hooks";
 
@@ -58,13 +60,14 @@ export function CartView({ locale, dict }: { locale: Locale; dict: Dictionary })
   return (
     <div className="container-page grid gap-6 py-8 lg:grid-cols-[1.6fr_1fr] lg:gap-10 lg:py-10">
       <div className="space-y-3">
-        {items.map((item) => (
-          <Card key={item.id} className="flex gap-4 p-3 sm:gap-5 sm:p-4">
+        {items.map((item) => {
+          const product = products.find((candidate) => candidate.id === item.productId);
+          return <Card key={item.id} className="flex gap-4 p-3 sm:gap-5 sm:p-4">
             <Link
               href={r.product(item.productSlug)}
               className="relative aspect-3/4 w-20 shrink-0 overflow-hidden border border-line bg-bone sm:w-28"
             >
-              <DoorVisual panelHex={item.panelHex} ambient={false} />
+              {product ? <ProductMedia product={product} sizes="112px" /> : <DoorVisual panelHex={item.panelHex} ambient={false} />}
             </Link>
 
             <div className="flex min-w-0 flex-1 flex-col">
@@ -106,8 +109,8 @@ export function CartView({ locale, dict }: { locale: Locale; dict: Dictionary })
                   <button
                     type="button"
                     onClick={() => setQuantity(item.id, item.quantity - 1)}
-                    aria-label="Azalt"
-                    className="flex h-9 w-9 items-center justify-center text-graphite transition-colors hover:bg-bone"
+                    aria-label={dict.actions.decrease}
+                    className="flex h-11 w-11 items-center justify-center text-graphite transition-colors hover:bg-bone"
                   >
                     <Minus size={14} />
                   </button>
@@ -118,7 +121,7 @@ export function CartView({ locale, dict }: { locale: Locale; dict: Dictionary })
                     type="button"
                     onClick={() => setQuantity(item.id, item.quantity + 1)}
                     aria-label={dict.actions.increase}
-                    className="flex h-9 w-9 items-center justify-center text-graphite transition-colors hover:bg-bone"
+                    className="flex h-11 w-11 items-center justify-center text-graphite transition-colors hover:bg-bone"
                   >
                     <Plus size={14} />
                   </button>
@@ -134,11 +137,11 @@ export function CartView({ locale, dict }: { locale: Locale; dict: Dictionary })
                 </div>
               </div>
             </div>
-          </Card>
-        ))}
+          </Card>;
+        })}
       </div>
 
-      <aside className="lg:sticky lg:top-24 lg:h-fit">
+      <aside className="desktop-sticky-panel">
         <Card className="p-5">
           <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-stone">
             {dict.checkout.orderSummary}
@@ -151,11 +154,11 @@ export function CartView({ locale, dict }: { locale: Locale; dict: Dictionary })
             </div>
             <div className="flex justify-between">
               <dt className="text-stone">{dict.services.delivery}</dt>
-              <dd className="text-graphite">Növbəti addımda</dd>
+              <dd className="text-graphite">{dict.checkout.nextStep}</dd>
             </div>
             <div className="flex justify-between">
               <dt className="text-stone">{dict.services.installation}</dt>
-              <dd className="text-graphite">Növbəti addımda</dd>
+              <dd className="text-graphite">{dict.checkout.nextStep}</dd>
             </div>
           </dl>
 

@@ -13,15 +13,17 @@ export function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { locale: raw, slug } = await params;
+  const locale = (isLocale(raw) ? raw : "az") as Locale;
+  const dict = getDictionary(locale);
   const product = getProduct(slug);
   if (!product) return {};
 
   return {
-    title: `${product.name} — konfiqurator`,
-    description: `${product.name} modelini ölçü, rəng, kilid və aksesuarlarla konfiqurasiya edin.`,
+    title: `${product.name} — ${dict.configurator.title}`,
+    description: dict.pageMeta.configurator.description,
     robots: { index: false, follow: true },
   };
 }

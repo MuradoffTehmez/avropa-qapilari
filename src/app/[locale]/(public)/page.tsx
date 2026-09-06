@@ -26,6 +26,7 @@ import { localizedFaq, localizedProjects, localizedReviews } from "@/mock/conten
 import { categoryName, countryName } from "@/lib/i18n-format";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { FaqScroller } from "@/components/home/FaqScroller";
+import { Reveal } from "@/components/ui/Reveal";
 import {
   faqSchema,
   localBusinessSchema,
@@ -45,6 +46,7 @@ export default async function HomePage({
 
   const featured = getFeaturedProducts(8);
   const featuredCategories = categories.filter((c) => c.featured);
+  const featuredProjects = localizedProjects(locale).slice(0, 3);
 
   return (
     <>
@@ -86,13 +88,13 @@ export default async function HomePage({
                 {dict.configurator.title}
               </p>
               <p className="mt-1 text-[13px] font-medium text-paper sm:text-sm">
-                1000 × 2100 · Antrasit
+                1000 × 2100 · {dict.catalog.colors.anthracite}
               </p>
               <p className="text-[13px] font-semibold text-gold-300 sm:text-sm">2 890 AZN</p>
             </div>
           </div>
 
-          <div className="order-2 animate-fade-up lg:order-1">
+          <div className="hero-reveal order-2 lg:order-1">
             <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.24em] text-gold-300 sm:mb-5 sm:text-[11px] sm:tracking-[0.28em]">
               {dict.home.heroEyebrow}
             </p>
@@ -108,7 +110,7 @@ export default async function HomePage({
             <div className="mt-6 grid gap-2.5 sm:mt-8 sm:flex sm:flex-wrap sm:gap-3">
               <ButtonLink href={r.doors} variant="gold" size="lg" className="justify-center">
                 {dict.actions.selectDoor}
-                <ArrowRight size={17} />
+                <ArrowRight size={17} className="motion-arrow" />
               </ButtonLink>
               <ButtonLink
                 href={r.configurator}
@@ -138,19 +140,19 @@ export default async function HomePage({
 
       {/* -------------------------------------------------- CATEGORIES */}
       <Section>
-        <div className="container-page">
+        <Reveal className="container-page">
           <SectionHeading
-            eyebrow="Kataloq"
+            eyebrow={dict.catalog.title}
             title={dict.home.categoriesTitle}
             text={dict.home.categoriesText}
             action={
               <ButtonLink href={r.doors} variant="outline" size="sm">
-                {dict.actions.viewAll} <ArrowRight size={15} />
+                {dict.actions.viewAll} <ArrowRight size={15} className="motion-arrow" />
               </ButtonLink>
             }
           />
 
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 xs:grid-cols-2 sm:gap-4 lg:grid-cols-3">
             {featuredCategories.map((c, i) => (
               <Link
                 key={c.id}
@@ -160,12 +162,12 @@ export default async function HomePage({
                 <div className="aspect-[4/3] overflow-hidden"><DoorScene color={c.accent} variant={i} title={categoryName(c, dict)} /></div>
                 <div className="p-4 sm:p-5">
                   <h3 className="text-[15px] font-medium text-ink sm:text-lg">{categoryName(c, dict)}</h3>
-                  <p className="mt-1 text-xs text-stone">{c.productCount} model</p>
+                  <p className="mt-1 text-xs text-stone">{c.productCount} {dict.common.model}</p>
                 </div>
               </Link>
             ))}
           </div>
-        </div>
+        </Reveal>
       </Section>
 
       <TrustStrip locale={locale} dict={dict} />
@@ -175,7 +177,7 @@ export default async function HomePage({
         <div className="container-page grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
           <div className="order-2 lg:order-1">
             <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-gold-600">
-              Konfiqurator
+              {dict.configurator.title}
             </p>
             <h2 className="text-balance-heading text-2xl font-semibold leading-tight tracking-tight text-ink sm:text-3xl lg:text-[2.5rem]">
               {dict.home.configuratorTitle}
@@ -196,7 +198,7 @@ export default async function HomePage({
             </ol>
 
             <ButtonLink href={r.configurator} size="lg" className="mt-8">
-              {dict.actions.startConfigurator} <ArrowRight size={17} />
+              {dict.actions.startConfigurator} <ArrowRight size={17} className="motion-arrow" />
             </ButtonLink>
           </div>
 
@@ -222,28 +224,28 @@ export default async function HomePage({
 
       {/* ---------------------------------------------------- FEATURED */}
       <Section>
-        <div className="container-page">
+        <Reveal className="container-page">
           <SectionHeading
             eyebrow={dict.home.eyebrowFeatured}
             title={dict.home.featuredTitle}
             text={dict.home.featuredText}
             action={
               <ButtonLink href={r.doors} variant="outline" size="sm">
-                {dict.actions.viewAll} <ArrowRight size={15} />
+                {dict.actions.viewAll} <ArrowRight size={15} className="motion-arrow" />
               </ButtonLink>
             }
           />
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 xs:grid-cols-2 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
             {featured.map((p) => (
               <ProductCard key={p.id} product={p} locale={locale} dict={dict} />
             ))}
           </div>
-        </div>
+        </Reveal>
       </Section>
 
       {/* ----------------------------------------------------- REVIEWS */}
       <Section tone="bone" className="border-y border-line">
-        <div className="container-page">
+        <Reveal className="container-page">
           <SectionHeading eyebrow={dict.home.eyebrowReviews} title={dict.home.reviewsTitle} text={dict.home.reviewsText} />
           <div className="grid gap-3 sm:gap-4 lg:grid-cols-3">
             {localizedReviews(locale).slice(0, 3).map((rv) => (
@@ -261,7 +263,7 @@ export default async function HomePage({
               </figure>
             ))}
           </div>
-        </div>
+        </Reveal>
       </Section>
 
       {/* ---------------------------------------------------- SERVICES */}
@@ -310,7 +312,7 @@ export default async function HomePage({
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <ButtonLink href={r.repair} variant="gold" size="lg">
-                {dict.actions.callTechnician} <ArrowRight size={17} />
+              {dict.actions.callTechnician} <ArrowRight size={17} className="motion-arrow" />
               </ButtonLink>
               <ButtonLink
                 href={r.serviceRepair}
@@ -336,24 +338,24 @@ export default async function HomePage({
       <Section>
         <div className="container-page">
           <SectionHeading
-            eyebrow="Portfolio"
+            eyebrow={dict.nav.projects}
             title={dict.home.projectsTitle}
             text={dict.home.projectsText}
             action={
               <ButtonLink href={r.projects} variant="outline" size="sm">
-                {dict.actions.viewAll} <ArrowRight size={15} />
+                {dict.actions.viewAll} <ArrowRight size={15} className="motion-arrow" />
               </ButtonLink>
             }
           />
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {localizedProjects(locale).slice(0, 3).map((p) => (
+            {featuredProjects.map((p, index) => (
               <Link
                 key={p.id}
                 href={`${r.projects}/${p.slug}`}
                 className="group border border-line bg-paper transition-colors hover:border-mist"
               >
                 <div className="relative aspect-4/3 overflow-hidden bg-bone">
-                  <DoorScene color={p.accent} variant={localizedProjects(locale).indexOf(p)} title={p.title} />
+                  <DoorScene color={p.accent} variant={index} title={p.title} />
                   <Badge tone="dark" className="absolute left-3 top-3">
                     {p.category}
                   </Badge>
@@ -402,7 +404,7 @@ export default async function HomePage({
           eyebrow="FAQ"
           action={
             <ButtonLink href={r.faq} variant="outline" size="sm">
-              {dict.actions.viewAll} <ArrowRight size={15} />
+              {dict.actions.viewAll} <ArrowRight size={15} className="motion-arrow" />
             </ButtonLink>
           }
         />

@@ -71,7 +71,7 @@ export default async function ConfiguratorIndexPage({
             ))}
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 xs:grid-cols-2 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
             {products.map((p) => (
               <Link
                 key={p.id}
@@ -81,6 +81,7 @@ export default async function ConfiguratorIndexPage({
                 <div className="door-frame border-b border-line">
                   <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-[1.03]">
                     <DoorVisual
+                      label={p.name}
                       panelHex={p.panelHexes[0]}
                       style={p.style}
                       glass={p.hasGlass ? "SATIN" : "NONE"}

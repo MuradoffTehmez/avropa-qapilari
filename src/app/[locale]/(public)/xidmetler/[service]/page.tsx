@@ -128,7 +128,7 @@ export default async function ServiceDetailPage({
             </ul>
           </div>
 
-          <aside className="lg:sticky lg:top-24 lg:h-fit">
+          <aside className="desktop-sticky-panel">
             <Card className="p-5">
               <h2 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-stone">
                 {dict.serviceDetail.prices}

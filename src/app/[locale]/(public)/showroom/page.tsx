@@ -97,7 +97,7 @@ export default async function ShowroomPage({
     { icon: Backpack, label: dict.showroom.bring, value: dict.showroom.bringValue },
   ];
 
-  /** Rəng kitabxanası nümunəsi */
+  /** Rəng kitabxanası */
   const palette = [
     "#f1f0ea", "#e6d2b5", "#c8a678", "#a9743c", "#5b3a26", "#3a2a22",
     "#8b8d8a", "#6b665e", "#474a51", "#383e42", "#1a2b3c", "#27352a",

@@ -17,7 +17,7 @@ export function MobileNav({ locale, dict }: { locale: Locale; dict: Dictionary }
 
   // Konfiqurator, checkout və admin öz alt panellərinə malikdir
   const hidden =
-    /\/admin|\/(konfiqurator|configurator|konfigurator)\/|\/(sifaris|checkout|oformlenie)/.test(path);
+    /\/admin|\/(konfiqurator|configurator|konfigurator)(?:\/|$)|\/(sifaris|checkout|oformlenie)(?:\/|$)/.test(path);
   if (hidden) return null;
 
   const items = [
@@ -30,8 +30,8 @@ export function MobileNav({ locale, dict }: { locale: Locale; dict: Dictionary }
 
   return (
     <nav
-      aria-label="Mobil naviqasiya"
-      className="mobile-bottom-nav safe-bottom fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-line bg-paper/95 backdrop-blur-md lg:hidden"
+      aria-label={dict.actions.menu}
+      className="mobile-bottom-nav safe-bottom fixed inset-x-0 bottom-0 z-40 grid min-h-16 grid-cols-5 border-t border-line bg-paper/95 backdrop-blur-md lg:hidden"
     >
       {items.map(({ href, label, icon: Icon }) => {
         const active = path === href || (href !== r.home && path.startsWith(`${href}/`));
@@ -41,12 +41,12 @@ export function MobileNav({ locale, dict }: { locale: Locale; dict: Dictionary }
             href={href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex min-h-15 flex-col items-center justify-center gap-1 px-1 py-2 text-center text-[10px] leading-tight transition-colors",
+              "flex min-h-16 flex-col items-center justify-center gap-1 px-1 py-1.5 text-center text-xs leading-[1.1] transition-colors",
               active ? "font-semibold text-gold-600" : "text-graphite",
             )}
           >
-            <Icon size={19} strokeWidth={active ? 2.2 : 1.8} />
-            <span className="truncate">{label}</span>
+            <Icon size={19} strokeWidth={active ? 2.2 : 1.8} aria-hidden />
+            <span className="line-clamp-2">{label}</span>
           </Link>
         );
       })}

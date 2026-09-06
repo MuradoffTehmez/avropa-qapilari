@@ -11,6 +11,9 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/primitives";
 import { Toggle } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
+import { useDict } from "@/i18n/provider";
+
+const channelIds = ["orders", "service", "marketing", "sms"] as const;
 
 interface PrefsState {
   read: string[];
@@ -24,10 +27,10 @@ const usePrefs = create<PrefsState>()(
     (set) => ({
       read: [],
       channels: {
-        "Sifariş bildirişləri": true,
-        "Servis bildirişləri": true,
-        "Marketinq": false,
-        "SMS": false,
+        orders: true,
+        service: true,
+        marketing: false,
+        sms: false,
       },
       mark: (ids) => set((s) => ({ read: [...new Set([...s.read, ...ids])] })),
       toggle: (key) => set((s) => ({ channels: { ...s.channels, [key]: !s.channels[key] } })),
@@ -37,6 +40,7 @@ const usePrefs = create<PrefsState>()(
 );
 
 export function NotificationSettings() {
+  const dict = useDict();
   const prefs = usePrefs();
   const hydrated = useHydrated();
   const records = useWorkflow((s) => s.records);
@@ -59,7 +63,7 @@ export function NotificationSettings() {
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-xl font-semibold tracking-tight text-ink">
-          Bildirişlər
+          {dict.account.notifications}
           {unread > 0 && (
             <span className="ml-2 rounded-full bg-gold-500 px-2 py-0.5 align-middle text-[11px] font-semibold text-paper">
               {unread}
@@ -68,7 +72,7 @@ export function NotificationSettings() {
         </h2>
         {unread > 0 && (
           <Button variant="secondary" size="sm" onClick={() => prefs.mark(items.map((i) => i.id))}>
-            Hamısını oxunmuş et
+            {dict.accountUi.markAllRead}
           </Button>
         )}
       </div>
@@ -91,7 +95,7 @@ export function NotificationSettings() {
                 <span className="block text-[14.5px] font-medium text-ink">{n.title}</span>
                 <span className="mt-0.5 block text-[13px] text-stone">{n.body}</span>
                 <span className="mt-1.5 block text-[11.5px] text-mist">
-                  {formatDateTime(n.date)} · {read ? "Oxunub" : "Yeni"}
+                  {formatDateTime(n.date)} · {read ? dict.accountUi.read : dict.accountUi.unread}
                 </span>
               </span>
             </button>
@@ -101,15 +105,24 @@ export function NotificationSettings() {
 
       <Card className="p-5">
         <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-stone">
-          Bildiriş kanalları
+          {dict.accountUi.notificationChannels}
         </h3>
         <div className="space-y-3">
-          {Object.entries(prefs.channels).map(([key, enabled]) => (
+          {channelIds.map((key) => (
             <div
               key={key}
               className="flex items-center justify-between gap-3 border-b border-line pb-3 last:border-b-0 last:pb-0"
             >
-              <Toggle checked={enabled} onChange={() => prefs.toggle(key)} label={key} />
+              <Toggle
+                checked={prefs.channels[key] ?? false}
+                onChange={() => prefs.toggle(key)}
+                label={{
+                  orders: dict.accountUi.orderNotifications,
+                  service: dict.accountUi.serviceNotifications,
+                  marketing: dict.accountUi.marketing,
+                  sms: dict.accountUi.sms,
+                }[key]}
+              />
             </div>
           ))}
         </div>

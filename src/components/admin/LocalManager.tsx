@@ -9,6 +9,8 @@ import { Modal, toast } from "@/components/ui/overlays";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/primitives";
 import { Field, Input, Textarea } from "@/components/ui/form";
+import { useDict } from "@/i18n/provider";
+import type { Dictionary } from "@/i18n";
 
 type Row = { id: string; values: Record<string, string> };
 
@@ -25,32 +27,35 @@ const useEntries = create<{
   ),
 );
 
-const fields: Record<string, string[]> = {
-  products: ["Məhsul adı", "SKU", "Kateqoriya", "Qiymət (AZN)", "Stok", "Təsvir"],
-  categories: ["Kateqoriya adı", "Slug", "Təsvir"],
-  brands: ["Brend adı", "Ölkə", "Təsvir"],
-  configurator: ["Option adı", "Qrup", "Qiymət (AZN)", "Uyğun modellər"],
-  discounts: ["Endirim adı", "Promo kod", "Faiz", "Bitmə tarixi"],
-  addresses: ["Ünvan adı", "Şəhər", "Küçə", "Bina", "Mənzil"],
-  content: ["Başlıq", "URL", "Məzmun", "Status"],
-  inventory: ["Komponent", "SKU", "Stok", "Minimum stok", "Təchizatçı"],
-  seo: ["Səhifə URL", "SEO başlığı", "Meta təsvir", "Canonical"],
-  settings: ["Sayt adı", "Telefon", "E-poçt", "Ünvan"],
-  technicians: ["Usta adı", "Telefon", "İxtisas", "Xidmət ərazisi"],
-  suppliers: ["Təchizatçı adı", "Əlaqə", "Ölkə", "Çatdırılma müddəti"],
+type FieldKey = keyof Dictionary["adminUi"]["fields"];
+
+const fields: Record<string, FieldKey[]> = {
+  products: ["productName", "sku", "category", "price", "stock", "description"],
+  categories: ["categoryName", "slug", "description"],
+  brands: ["brandName", "country", "description"],
+  configurator: ["optionName", "group", "price", "compatibleModels"],
+  discounts: ["discountName", "promoCode", "percentage", "endDate"],
+  addresses: ["addressName", "city", "street", "building", "apartment"],
+  content: ["title", "pageUrl", "content", "status"],
+  inventory: ["component", "sku", "stock", "minimum", "supplier"],
+  seo: ["pageUrl", "seoTitle", "metaDescription", "canonical"],
+  settings: ["siteName", "phone", "email", "address"],
+  technicians: ["name", "phone", "specialization", "serviceArea"],
+  suppliers: ["supplierName", "contact", "country", "deliveryTime"],
 };
 
-const longField = /Təsvir|Məzmun|Qeyd/;
-const numberField = /Qiymət|Stok|Faiz/;
-const dateField = /tarixi/;
+const longFields = new Set<FieldKey>(["description", "shortDescription", "content", "text", "note", "metaDescription"]);
+const numberFields = new Set<FieldKey>(["price", "basePrice", "priceDelta", "stock", "minimum", "percentage", "amount", "total", "rating", "warrantyYears"]);
+const dateFields = new Set<FieldKey>(["endDate"]);
 
 export function LocalManager({
   section,
-  label = "Yeni qeyd",
+  label,
 }: {
   section: string;
   label?: string;
 }) {
+  const dict = useDict();
   const state = useEntries();
   const hydrated = useHydrated();
   const [open, setOpen] = useState(false);
@@ -58,7 +63,8 @@ export function LocalManager({
   const [values, setValues] = useState<Record<string, string>>({});
   const [query, setQuery] = useState("");
 
-  const names = fields[section] ?? ["Ad", "Status", "Qeyd"];
+  const names = fields[section] ?? (["name", "status", "note"] as FieldKey[]);
+  const buttonLabel = label ?? dict.adminUi.newRecord;
   const rows = hydrated ? (state.data[section] ?? []) : [];
 
   function begin(row?: Row) {
@@ -67,22 +73,22 @@ export function LocalManager({
     setOpen(true);
   }
 
-  const q = query.toLocaleLowerCase("az");
+  const q = query.toLowerCase();
   const visible = rows.filter((r) =>
-    Object.values(r.values).join(" ").toLocaleLowerCase("az").includes(q),
+    Object.values(r.values).join(" ").toLowerCase().includes(q),
   );
 
   return (
     <div className="mb-4 space-y-3">
       <Button variant="secondary" size="sm" onClick={() => begin()}>
-        <Plus size={14} /> {label}
+        <Plus size={14} /> {buttonLabel}
       </Button>
 
       {rows.length > 0 && (
         <Card className="p-4">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-[13px] font-semibold text-ink">
-              Əlavə edilmiş qeydlər ({rows.length})
+              {dict.adminUi.addedRecords} ({rows.length})
             </h3>
             <div className="relative w-full sm:w-56">
               <Search
@@ -90,8 +96,8 @@ export function LocalManager({
                 className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-mist"
               />
               <Input
-                aria-label="Qeydləri axtar"
-                placeholder="Axtar…"
+                aria-label={dict.adminUi.searchRecords}
+                placeholder={dict.adminUi.search}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 className="h-9 pl-8 text-[13px]"
@@ -114,7 +120,7 @@ export function LocalManager({
                 </div>
                 <div className="flex shrink-0 gap-1">
                   <Button size="sm" variant="ghost" onClick={() => begin(r)}>
-                    <Pencil size={13} /> Redaktə
+                    <Pencil size={13} /> {dict.adminUi.edit}
                   </Button>
                   <Button
                     size="sm"
@@ -122,7 +128,7 @@ export function LocalManager({
                     className="text-danger"
                     onClick={() => {
                       state.put(section, rows.filter((x) => x.id !== r.id));
-                      toast("Qeyd silindi");
+                      toast(dict.adminUi.deleted);
                     }}
                   >
                     <Trash2 size={13} />
@@ -131,13 +137,13 @@ export function LocalManager({
               </li>
             ))}
             {visible.length === 0 && (
-              <li className="py-4 text-[13px] text-stone">Axtarışa uyğun qeyd yoxdur.</li>
+              <li className="py-4 text-[13px] text-stone">{dict.adminUi.noMatchingRecord}</li>
             )}
           </ul>
         </Card>
       )}
 
-      <Modal open={open} onClose={() => setOpen(false)} title={editing ? "Qeydi redaktə et" : label}>
+      <Modal open={open} onClose={() => setOpen(false)} title={editing ? dict.adminUi.editRecord : buttonLabel}>
         <form
           className="space-y-4"
           onSubmit={(e) => {
@@ -148,12 +154,12 @@ export function LocalManager({
               editing ? rows.map((r) => (r.id === editing ? row : r)) : [...rows, row],
             );
             setOpen(false);
-            toast("Yadda saxlanıldı");
+            toast(dict.adminUi.saved);
           }}
         >
           {names.map((name) => (
-            <Field key={name} label={name} required={!longField.test(name)}>
-              {longField.test(name) ? (
+            <Field key={name} label={dict.adminUi.fields[name]} required={!longFields.has(name)}>
+              {longFields.has(name) ? (
                 <Textarea
                   value={values[name] ?? ""}
                   onChange={(e) => setValues({ ...values, [name]: e.target.value })}
@@ -162,9 +168,9 @@ export function LocalManager({
                 <Input
                   required
                   type={
-                    numberField.test(name) ? "number" : dateField.test(name) ? "date" : "text"
+                    numberFields.has(name) ? "number" : dateFields.has(name) ? "date" : "text"
                   }
-                  min={numberField.test(name) ? 0 : undefined}
+                  min={numberFields.has(name) ? 0 : undefined}
                   value={values[name] ?? ""}
                   onChange={(e) => setValues({ ...values, [name]: e.target.value })}
                 />
@@ -173,7 +179,7 @@ export function LocalManager({
           ))}
 
           <Button type="submit" full>
-            Yadda saxla
+            {dict.actions.save}
           </Button>
         </form>
       </Modal>

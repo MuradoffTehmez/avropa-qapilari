@@ -9,6 +9,7 @@ import { ProductCard } from "@/components/product/ProductCard";
 import { brands, getBrand } from "@/mock/taxonomy";
 import { products } from "@/mock/products";
 import { brandDescription, countryName } from "@/lib/i18n-format";
+import { formatPrice } from "@/lib/utils";
 
 export function generateStaticParams() {
   return locales.flatMap((locale) => brands.map((b) => ({ locale, slug: b.slug })));
@@ -69,8 +70,8 @@ export default async function BrandPage({
           <div className="mt-8 grid grid-cols-2 gap-6 border-t border-line pt-6 sm:grid-cols-4">
             <Stat label={dict.about.country} value={countryName(b, dict)} />
             <Stat label={dict.about.founded} value={b.founded} />
-            <Stat label="Model" value={list.length} />
-            <Stat label="Orta reytinq" value={avgRating.toFixed(1)} hint={`${minPrice} AZN-dən`} />
+            <Stat label={dict.common.model} value={list.length} />
+            <Stat label={dict.projectDetail.averageRating} value={avgRating.toFixed(1)} hint={`${formatPrice(minPrice)} ${dict.common.from}`} />
           </div>
         </div>
       </div>
@@ -78,9 +79,9 @@ export default async function BrandPage({
       <Section>
         <div className="container-page">
           <h2 className="mb-6 text-lg font-semibold tracking-tight text-ink">
-            {b.name} modelləri
+            {b.name} {dict.projectDetail.models}
           </h2>
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 xs:grid-cols-2 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
             {list.map((p) => (
               <ProductCard key={p.id} product={p} locale={locale} dict={dict} />
             ))}

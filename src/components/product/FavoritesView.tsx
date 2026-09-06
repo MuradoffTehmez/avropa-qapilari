@@ -19,7 +19,7 @@ export function FavoritesView({ locale, dict }: { locale: Locale; dict: Dictiona
 
   if (!hydrated) {
     return (
-      <div className="container-page grid grid-cols-2 gap-3 py-10 sm:gap-4 lg:grid-cols-4">
+      <div className="container-page grid grid-cols-1 gap-3 py-10 xs:grid-cols-2 sm:gap-4 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <Skeleton key={i} className="aspect-3/4" />
         ))}
@@ -54,7 +54,7 @@ export function FavoritesView({ locale, dict }: { locale: Locale; dict: Dictiona
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 xs:grid-cols-2 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
         {list.map((p) => (
           <ProductCard key={p.id} product={p} locale={locale} dict={dict} />
         ))}

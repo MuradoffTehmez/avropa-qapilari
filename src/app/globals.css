@@ -46,10 +46,14 @@
   --color-warning: #a4700f;
   --color-danger: #a32d2d;
   --color-info: #1f5b86;
+  --color-success-soft: #e8f2ec;
+  --color-warning-soft: #faf1de;
+  --color-danger-soft: #f7e9e8;
+  --color-info-soft: #e7eef3;
 
   /* Tipoqrafiya */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, "Segoe UI", sans-serif;
-  --font-display: var(--font-display), Georgia, "Times New Roman", serif;
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
 
   /* Radiuslar — arxitektural: az yumşaldılmış */
   --radius-xs: 2px;
@@ -71,6 +75,12 @@
   --background: var(--color-paper);
   --foreground: var(--color-ink);
   --header-h: 4rem;
+  --mobile-nav-h: 4rem;
+  --motion-fast: 160ms;
+  --motion-normal: 260ms;
+  --motion-reveal: 560ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasized: cubic-bezier(0.22, 1, 0.36, 1);
   color-scheme: light;
 }
 
@@ -203,8 +213,85 @@ svg {
 }
 
 @utility animate-fade-up {
-  animation: fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: fade-up var(--motion-reveal) var(--ease-emphasized) both;
 }
+
+@keyframes overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes drawer-right-in {
+  from { opacity: 0; transform: translateX(1.5rem); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes drawer-left-in {
+  from { opacity: 0; transform: translateX(-1.5rem); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes sheet-in {
+  from { opacity: 0; transform: translateY(1.5rem); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes step-forward-in {
+  from { opacity: 0; transform: translateX(0.75rem); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes step-back-in {
+  from { opacity: 0; transform: translateX(-0.75rem); }
+  to { opacity: 1; transform: none; }
+}
+
+.motion-overlay { animation: overlay-in var(--motion-normal) var(--ease-standard) both; }
+.motion-drawer-right { animation: drawer-right-in var(--motion-normal) var(--ease-emphasized) both; }
+.motion-drawer-left { animation: drawer-left-in var(--motion-normal) var(--ease-emphasized) both; }
+.motion-sheet { animation: sheet-in var(--motion-normal) var(--ease-emphasized) both; }
+.motion-modal { animation: fade-up var(--motion-normal) var(--ease-emphasized) both; }
+.motion-popover[data-state="open"] { animation: overlay-in var(--motion-fast) var(--ease-standard) both; }
+.motion-step-forward { animation: step-forward-in var(--motion-normal) var(--ease-emphasized) both; }
+.motion-step-back { animation: step-back-in var(--motion-normal) var(--ease-emphasized) both; }
+
+[data-reveal-ready="true"]:not([data-reveal-visible="true"]) {
+  opacity: 0;
+  transform: translateY(1rem);
+}
+
+[data-reveal-ready="true"] {
+  transition:
+    opacity var(--motion-reveal) var(--ease-emphasized),
+    transform var(--motion-reveal) var(--ease-emphasized);
+}
+
+.motion-preview { animation: overlay-in var(--motion-normal) var(--ease-standard) both; }
+
+@media (hover: hover) {
+  .product-card-motion {
+    transition: transform var(--motion-normal) var(--ease-emphasized);
+  }
+  .product-card-motion:hover { transform: translateY(-3px); }
+  .product-card-motion img,
+  .product-card-motion svg {
+    transition: transform var(--motion-reveal) var(--ease-emphasized);
+  }
+  .product-card-motion:hover img,
+  .product-card-motion:hover svg { transform: scale(1.025); }
+  .group:hover .motion-arrow { transform: translateX(3px); }
+}
+
+.product-card-motion:focus-within { transform: translateY(-2px); }
+.motion-arrow { transition: transform var(--motion-fast) var(--ease-standard); }
+
+.hero-reveal > * {
+  animation: fade-up var(--motion-reveal) var(--ease-emphasized) both;
+}
+.hero-reveal > :nth-child(2) { animation-delay: 80ms; }
+.hero-reveal > :nth-child(3) { animation-delay: 140ms; }
+.hero-reveal > :nth-child(4) { animation-delay: 200ms; }
+.hero-reveal > :nth-child(5) { animation-delay: 260ms; }
 
 ::selection {
   background: var(--color-gold-200);
@@ -214,7 +301,37 @@ svg {
 /* Aşağı naviqasiya olan səhifələrdə kontent alta yapışmasın */
 @media (width < 64rem) {
   body:has(.mobile-bottom-nav) {
-    padding-bottom: calc(3.75rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .mobile-fixed-action {
+    bottom: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom, 0px));
+  }
+
+  body:has(.cookie-consent) .sticky-buy-bar {
+    pointer-events: none;
+    opacity: 0 !important;
+    transform: translateY(110%) !important;
+  }
+
+  .toast-host {
+    bottom: calc(var(--mobile-nav-h) + 1rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  body:has(.sticky-buy-bar[aria-hidden="false"]) .toast-host {
+    bottom: calc(var(--mobile-nav-h) + 5.5rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (width >= 64rem) {
+  .toast-host { bottom: 1.5rem; }
+}
+
+@media (width >= 64rem) and (height >= 48rem) {
+  .desktop-sticky-panel {
+    position: sticky;
+    top: calc(var(--header-h) + 1.5rem);
+    height: fit-content;
   }
 }
 

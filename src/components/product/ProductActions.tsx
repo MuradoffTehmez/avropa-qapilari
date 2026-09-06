@@ -83,7 +83,7 @@ export function ProductActions({
           size="sm"
           onClick={() => {
             const res = toggleCmp(product.id);
-            if (res === "full") toast(`Müqayisədə maksimum ${COMPARE_LIMIT} məhsul ola bilər`);
+            if (res === "full") toast(dict.product.compareFull.replace("4", String(COMPARE_LIMIT)));
             else toast(res === "added" ? dict.product.addedToCompare : dict.product.removedFromCompare);
           }}
           className={cn("flex-1 border border-line", isCmp && "text-ink")}

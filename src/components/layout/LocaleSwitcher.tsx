@@ -9,6 +9,7 @@ import { swapLocaleInPath } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { useEscapeKey } from "@/lib/hooks";
 import { FlagIcon } from "@/components/ui/FlagIcons";
+import { useDict } from "@/i18n/provider";
 
 const LOCALE_COOKIE = "ep-locale";
 
@@ -34,6 +35,7 @@ export function LocaleSwitcher({
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const dict = useDict();
 
   useEscapeKey(() => setOpen(false), open);
 
@@ -45,7 +47,7 @@ export function LocaleSwitcher({
 
   if (variant === "inline") {
     return (
-      <div className={cn("flex items-center gap-1.5", className)} role="group" aria-label="Dil">
+      <div className={cn("flex items-center gap-1.5", className)} role="group" aria-label={dict.actions.language}>
         {locales.map((l) => (
           <button
             key={l}
@@ -74,7 +76,7 @@ export function LocaleSwitcher({
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-haspopup="menu"
-        aria-label={`${localeNames[locale]} — dili dəyiş`}
+        aria-label={`${dict.actions.language}: ${localeNames[locale]}`}
         className="flex h-11 items-center gap-1.5 px-1.5 text-[13px] font-medium text-graphite transition-colors hover:text-ink sm:px-2"
       >
         <FlagIcon locale={locale} />

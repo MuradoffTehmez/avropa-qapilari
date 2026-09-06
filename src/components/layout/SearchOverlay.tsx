@@ -1,15 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/types";
 import { routes } from "@/lib/routes";
-import { useEscapeKey, useLockBodyScroll } from "@/lib/hooks";
+import { useDialogFocus, useEscapeKey, useLockBodyScroll } from "@/lib/hooks";
 import { products } from "@/mock/products";
 import { brands, categories } from "@/mock/taxonomy";
-import { DoorVisual } from "@/components/product/DoorVisual";
+import { ProductMedia } from "@/components/product/ProductMedia";
 import { categoryName, priceFrom } from "@/lib/i18n-format";
 
 /** Axtarış və avtotamamlama. */
@@ -25,10 +25,12 @@ export function SearchOverlay({
   dict: Dictionary;
 }) {
   const [query, setQuery] = useState("");
+  const panelRef = useRef<HTMLDivElement>(null);
   const r = routes(locale);
 
   useEscapeKey(onClose, open);
   useLockBodyScroll(open);
+  useDialogFocus(panelRef, open);
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -56,10 +58,10 @@ export function SearchOverlay({
     results.brands.length === 0;
 
   return (
-    <div className="fixed inset-0 z-100" role="dialog" aria-modal="true" aria-label={dict.actions.search}>
-      <button type="button" aria-label={dict.actions.close} onClick={onClose} className="absolute inset-0 bg-obsidian/50 backdrop-blur-[3px]" />
+    <div className="fixed inset-0 z-100">
+      <button type="button" aria-label={dict.actions.close} onClick={onClose} className="motion-overlay absolute inset-0 bg-obsidian/50 backdrop-blur-[3px]" />
 
-      <div className="relative mx-auto flex max-h-[85vh] w-full max-w-2xl flex-col bg-paper shadow-2xl sm:mt-24">
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={dict.actions.search} tabIndex={-1} className="motion-modal relative mx-auto flex max-h-dvh w-full max-w-2xl flex-col bg-paper pb-[env(safe-area-inset-bottom,0px)] shadow-2xl outline-none sm:mt-24 sm:max-h-[85dvh]">
         <div className="flex h-16 shrink-0 items-center gap-3 border-b border-line px-4 sm:px-5">
           <Search size={19} className="shrink-0 text-stone" aria-hidden />
           <input
@@ -70,7 +72,7 @@ export function SearchOverlay({
             aria-label={dict.actions.search}
             className="h-full flex-1 bg-transparent text-[15px] text-ink outline-none placeholder:text-mist"
           />
-          <button type="button" onClick={onClose} aria-label={dict.actions.close} className="-mr-1 flex h-9 w-9 items-center justify-center text-stone hover:text-ink">
+          <button type="button" onClick={onClose} aria-label={dict.actions.close} className="-mr-1 flex h-11 w-11 items-center justify-center text-stone hover:text-ink">
             <X size={18} />
           </button>
         </div>
@@ -112,10 +114,10 @@ export function SearchOverlay({
                   key={p.id}
                   href={r.product(p.slug)}
                   onClick={onClose}
-                  className="flex items-center gap-3 rounded-[3px] p-2 transition-colors hover:bg-bone"
+                  className="flex min-h-11 items-center gap-3 rounded-[3px] p-2 transition-colors hover:bg-bone"
                 >
                   <span className="h-14 w-11 shrink-0 overflow-hidden bg-bone">
-                    <DoorVisual panelHex={p.panelHexes[0]} style={p.style} ambient={false} />
+                    <ProductMedia product={p} sizes="44px" />
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-medium text-ink">{p.name}</span>
@@ -137,7 +139,7 @@ export function SearchOverlay({
                   </p>
                   <div className="flex flex-col gap-1.5">
                     {results.categories.map((c) => (
-                      <Link key={c.id} href={r.category(c.slug)} onClick={onClose} className="text-sm text-graphite hover:text-ink">
+                      <Link key={c.id} href={r.category(c.slug)} onClick={onClose} className="flex min-h-11 items-center text-sm text-graphite hover:text-ink">
                         {categoryName(c, dict)}
                       </Link>
                     ))}
@@ -151,7 +153,7 @@ export function SearchOverlay({
                   </p>
                   <div className="flex flex-col gap-1.5">
                     {results.brands.map((b) => (
-                      <Link key={b.id} href={r.brand(b.slug)} onClick={onClose} className="text-sm text-graphite hover:text-ink">
+                      <Link key={b.id} href={r.brand(b.slug)} onClick={onClose} className="flex min-h-11 items-center text-sm text-graphite hover:text-ink">
                         {b.name}
                       </Link>
                     ))}

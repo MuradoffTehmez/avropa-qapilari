@@ -8,10 +8,9 @@ import { Button } from "@/components/ui/Button";
 import { Download, Search } from "lucide-react";
 import { Card } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
+import { useDict } from "@/i18n/provider";
 
 const useTables = create<{ tables: Record<string, unknown[]>; save: (key: string, rows: unknown[]) => void }>()(persist((set) => ({ tables: {}, save: (key, rows) => set((s) => ({ tables: { ...s.tables, [key]: rows } })) }), { name: "ep-admin-tables-v1" }));
-const editLabels: Record<string, string> = { name: "Ad", title: "Başlıq", slug: "URL adı", sku: "Artikul", basePrice: "Baza qiyməti (AZN)", priceDelta: "Qiymət əlavəsi", stock: "Stok", minimum: "Minimum stok", status: "Status", technician: "Usta", technicianId: "Usta kodu", description: "Təsvir", shortDescription: "Qısa təsvir", phone: "Telefon", email: "E-poçt", address: "Ünvan", categorySlug: "Kateqoriya", brandSlug: "Brend", customerName: "Müştəri", amount: "Məbləğ", total: "Cəmi", country: "Ölkə", label: "Başlıq", code: "Kod", rating: "Reytinq", verified: "Təsdiqlənmiş", inStock: "Stokda", featured: "Seçilmiş", onSale: "Endirimdə", warrantyYears: "Zəmanət (il)", text: "Mətn", active: "Aktiv" };
-
 export interface Column<T> {
   key: string;
   header: string;
@@ -27,7 +26,7 @@ export function DataTable<T>({
   rows,
   actions,
   minWidth = 720,
-  empty = "Məlumat yoxdur",
+  empty,
 }: {
   title: string;
   description?: string;
@@ -37,6 +36,7 @@ export function DataTable<T>({
   minWidth?: number;
   empty?: string;
 }) {
+  const dict = useDict();
   const state = useTables();
   const hydrated = useHydrated();
   const data = hydrated && state.tables[title] ? state.tables[title] as T[] : rows;
@@ -44,7 +44,7 @@ export function DataTable<T>({
   const [page, setPage] = useState(0);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [draft, setDraft] = useState<Record<string, unknown>>({});
-  const filtered = data.map((row, index) => ({ row, index })).filter(({ row }) => JSON.stringify(row).toLocaleLowerCase("az").includes(query.toLocaleLowerCase("az")));
+  const filtered = data.map((row, index) => ({ row, index })).filter(({ row }) => JSON.stringify(row).toLowerCase().includes(query.toLowerCase()));
   const visible = filtered.slice(page * 8, page * 8 + 8);
   const editable = !/audit|əməliyyatların|konversiya|permission|icazə|RBAC/i.test(title);
   return (
@@ -69,9 +69,9 @@ export function DataTable<T>({
               setQuery(e.target.value);
               setPage(0);
             }}
-            aria-label={`${title} axtarışı`}
-            placeholder="Cədvəldə axtar…"
-            className="h-9 w-full rounded-[3px] border border-line bg-bone pl-8 pr-3 text-[13px] text-ink outline-none placeholder:text-mist focus:border-ink"
+            aria-label={`${title} ${dict.adminUi.searchSuffix}`}
+            placeholder={dict.adminUi.searchTable}
+            className="h-11 w-full rounded-[3px] border border-line bg-bone pl-8 pr-3 text-[13px] text-ink outline-none placeholder:text-mist focus:border-ink sm:h-9"
           />
         </div>
         <Button
@@ -89,17 +89,17 @@ export function DataTable<T>({
           }}
         >
           <Download size={14} />
-          <span className="hidden sm:inline">İxrac</span>
+          <span className="hidden sm:inline">{dict.adminUi.export}</span>
         </Button>
       </div>
 
       {filtered.length === 0 ? (
-        <p className="px-5 py-10 text-center text-[13px] text-stone">{empty}</p>
+        <p className="px-5 py-10 text-center text-[13px] text-stone">{empty ?? dict.adminUi.empty}</p>
       ) : (
-        <div className="hidden overflow-x-auto md:block">
+        <div className="hidden overflow-x-auto md:block" tabIndex={0} role="region" aria-label={title}>
           <table className="w-full text-[13px]" style={{ minWidth }}>
             <thead>
-              <tr className="border-b border-line bg-bone/60 text-[11px] uppercase tracking-[0.1em] text-stone">
+              <tr className="border-b border-line bg-bone/60 text-xs uppercase tracking-[0.1em] text-graphite">
                 {columns.map((c) => (
                   <th
                     key={c.key}
@@ -111,7 +111,7 @@ export function DataTable<T>({
                     {c.header}
                   </th>
                 ))}
-                {editable && <th className="px-4">Əməliyyat</th>}
+                {editable && <th className="px-4">{dict.adminUi.operation}</th>}
               </tr>
             </thead>
             <tbody>
@@ -129,16 +129,16 @@ export function DataTable<T>({
                       {c.render(row)}
                     </td>
                   ))}
-                  {editable && <td className="px-4"><Button size="sm" variant="ghost" onClick={() => { setEditIndex(index); setDraft({ ...row } as Record<string, unknown>); }}>Bax / redaktə et</Button></td>}
+                  {editable && <td className="px-4"><Button size="sm" variant="ghost" onClick={() => { setEditIndex(index); setDraft({ ...row } as Record<string, unknown>); }}>{dict.adminUi.viewEdit}</Button></td>}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
-      <div className="grid gap-3 p-3 md:hidden">{visible.map(({row,index}) => <article key={index} className="rounded-lg border bg-bone p-4"><dl className="space-y-3">{columns.filter(c=>c.header).map(c=><div key={c.key} className="flex flex-wrap items-start justify-between gap-2 border-b pb-2 last:border-0"><dt className="text-xs text-stone">{c.header}</dt><dd className="max-w-full text-sm">{c.render(row)}</dd></div>)}</dl>{editable && <Button full variant="secondary" className="mt-3" onClick={()=>{setEditIndex(index);setDraft({...row} as Record<string,unknown>);}}>Bax / redaktə et</Button>}</article>)}</div>
-      <div className="flex items-center justify-between gap-3 border-t p-3 text-xs"><span>{filtered.length} qeyd · Səhifə {page + 1}</span><div className="flex gap-2"><Button size="sm" variant="ghost" disabled={page===0} onClick={() => setPage(page-1)}>Əvvəlki</Button><Button size="sm" variant="ghost" disabled={(page+1)*8>=filtered.length} onClick={() => setPage(page+1)}>Növbəti</Button></div></div>
-      <Modal open={editIndex!==null} onClose={() => setEditIndex(null)} title="Qeydi redaktə et"><form className="space-y-3" onSubmit={(e) => { e.preventDefault(); state.save(title, data.map((r,i) => i===editIndex ? draft : r)); setEditIndex(null); toast("Dəyişikliklər saxlanıldı"); }}>{Object.entries(draft).filter(([key,value]) => key!=="id" && (typeof value==="string" || typeof value==="number" || typeof value==="boolean")).map(([key,value]) => <label key={key} className="block text-sm">{editLabels[key] ?? key}{typeof value==="boolean" ? <input className="ml-3" type="checkbox" checked={value} onChange={(e) => setDraft({...draft,[key]:e.target.checked})}/> : <input className="mt-1 w-full border p-2" type={typeof value==="number" ? "number" : "text"} step="any" value={String(value)} onChange={(e) => setDraft({...draft,[key]:typeof value==="number" ? Number(e.target.value) : e.target.value})}/>}</label>)}<Button type="submit">Yadda saxla</Button></form></Modal>
+      <div className="grid gap-3 p-3 md:hidden">{visible.map(({row,index}) => <article key={index} className="rounded-[3px] border bg-bone p-4"><dl className="space-y-3">{columns.filter(c=>c.header).map(c=><div key={c.key} className="flex flex-wrap items-start justify-between gap-2 border-b pb-2 last:border-0"><dt className="text-xs text-graphite">{c.header}</dt><dd className="max-w-full text-sm">{c.render(row)}</dd></div>)}</dl>{editable && <Button full variant="secondary" className="mt-3" onClick={()=>{setEditIndex(index);setDraft({...row} as Record<string,unknown>);}}>{dict.adminUi.viewEdit}</Button>}</article>)}</div>
+      <div className="flex items-center justify-between gap-3 border-t p-3 text-xs"><span>{filtered.length} {dict.adminUi.records} · {dict.adminUi.page} {page + 1}</span><div className="flex gap-2"><Button size="sm" variant="ghost" disabled={page===0} onClick={() => setPage(page-1)}>{dict.adminUi.previous}</Button><Button size="sm" variant="ghost" disabled={(page+1)*8>=filtered.length} onClick={() => setPage(page+1)}>{dict.adminUi.next}</Button></div></div>
+      <Modal open={editIndex!==null} onClose={() => setEditIndex(null)} title={dict.adminUi.editRecord}><form className="space-y-3" onSubmit={(e) => { e.preventDefault(); state.save(title, data.map((r,i) => i===editIndex ? draft : r)); setEditIndex(null); toast(dict.adminUi.changesSaved); }}>{Object.entries(draft).filter(([key,value]) => key!=="id" && (typeof value==="string" || typeof value==="number" || typeof value==="boolean")).map(([key,value]) => <label key={key} className="block text-sm">{dict.adminUi.fields[key as keyof typeof dict.adminUi.fields] ?? key}{typeof value==="boolean" ? <input className="ml-3" type="checkbox" checked={value} onChange={(e) => setDraft({...draft,[key]:e.target.checked})}/> : <input className="mt-1 h-11 w-full rounded-[3px] border border-line px-3" type={typeof value==="number" ? "number" : "text"} step="any" value={String(value)} onChange={(e) => setDraft({...draft,[key]:typeof value==="number" ? Number(e.target.value) : e.target.value})}/>}</label>)}<Button type="submit">{dict.actions.save}</Button></form></Modal>
     </Card>
   );
 }

@@ -41,7 +41,7 @@ export function AccountNav({ locale, dict }: { locale: Locale; dict: Dictionary 
   ];
 
   return (
-    <nav aria-label={dict.account.title} className="lg:sticky lg:top-24 lg:h-fit">
+    <nav aria-label={dict.account.title} className="desktop-sticky-panel">
       <ul className="hide-scrollbar -mx-4 flex gap-1 overflow-x-auto px-4 lg:mx-0 lg:flex-col lg:px-0">
         {items.map(({ icon: Icon, label, href }) => {
           const active = pathname === href;

@@ -7,7 +7,7 @@ import type { Locale, Product } from "@/types";
 import { routes } from "@/lib/routes";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { EmptyState, Skeleton } from "@/components/ui/primitives";
-import { DoorVisual } from "@/components/product/DoorVisual";
+import { ProductMedia } from "@/components/product/ProductMedia";
 import { useCompare } from "@/store/lists";
 import { useHydrated } from "@/lib/hooks";
 import { products } from "@/mock/products";
@@ -53,19 +53,19 @@ export function CompareView({ locale, dict }: { locale: Locale; dict: Dictionary
     { label: dict.catalog.soundInsulation, render: (p) => `${p.soundInsulationDb} dB` },
     { label: dict.catalog.thermal, render: (p) => `${p.thermalW} W/m²K` },
     { label: dict.catalog.fireRating, render: (p) => p.fireRating ?? <Minus size={14} className="mx-auto text-mist" /> },
-    { label: dict.common.warranty, render: (p) => `${p.warrantyYears} il` },
+    { label: dict.common.warranty, render: (p) => `${p.warrantyYears} ${dict.common.years}` },
     { label: dict.catalog.style, render: (p) => styleName(p.style, dict) },
-    { label: dict.catalog.smartLock, render: (p) => <Bool value={p.smartLockReady} /> },
-    { label: dict.catalog.glass, render: (p) => <Bool value={p.hasGlass} /> },
-    { label: dict.catalog.customSize, render: (p) => <Bool value={p.customSizeAvailable} /> },
-    { label: dict.catalog.installationAvailable, render: (p) => <Bool value={p.installationAvailable} /> },
+    { label: dict.catalog.smartLock, render: (p) => <Bool value={p.smartLockReady} yes={dict.common.yes} no={dict.common.no} /> },
+    { label: dict.catalog.glass, render: (p) => <Bool value={p.hasGlass} yes={dict.common.yes} no={dict.common.no} /> },
+    { label: dict.catalog.customSize, render: (p) => <Bool value={p.customSizeAvailable} yes={dict.common.yes} no={dict.common.no} /> },
+    { label: dict.catalog.installationAvailable, render: (p) => <Bool value={p.installationAvailable} yes={dict.common.yes} no={dict.common.no} /> },
     {
       label: dict.product.availability,
       render: (p) => (p.inStock ? dict.common.inStock : dict.common.madeToOrder),
     },
     {
       label: dict.product.deliveryEstimate,
-      render: (p) => `${p.deliveryDays[0]}–${p.deliveryDays[1]} gün`,
+      render: (p) => `${p.deliveryDays[0]}–${p.deliveryDays[1]} ${dict.common.days}`,
     },
   ];
 
@@ -80,7 +80,12 @@ export function CompareView({ locale, dict }: { locale: Locale; dict: Dictionary
         </Button>
       </div>
 
-      <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+      <div
+        className="-mx-4 overflow-x-auto px-4 focus-visible:outline-offset-[-2px] sm:mx-0 sm:px-0"
+        tabIndex={0}
+        role="region"
+        aria-label={`${dict.pageMeta.compare.title}: ${dict.compare.feature}`}
+      >
         <table className="w-full min-w-[640px] border-collapse">
           <thead>
             <tr>
@@ -95,19 +100,14 @@ export function CompareView({ locale, dict }: { locale: Locale; dict: Dictionary
                     <button
                       type="button"
                       onClick={() => remove(p.id)}
-                      aria-label={`${p.name} — sil`}
-                      className="absolute right-0 top-0 z-10 flex h-7 w-7 items-center justify-center border border-line bg-paper text-stone transition-colors hover:text-danger"
+                      aria-label={`${p.name} — ${dict.actions.remove}`}
+                      className="absolute right-0 top-0 z-20 flex h-11 w-11 items-center justify-center border border-line bg-paper text-stone transition-colors hover:text-danger"
                     >
                       <X size={13} />
                     </button>
                     <Link href={r.product(p.slug)} className="block">
                       <span className="door-frame block border border-line">
-                        <DoorVisual
-                          panelHex={p.panelHexes[0]}
-                          style={p.style}
-                          glass={p.hasGlass ? "SATIN" : "NONE"}
-                          ambient={false}
-                        />
+                        <ProductMedia product={p} sizes="160px" />
                       </span>
                       <span className="mt-2 block text-left text-[13.5px] font-medium leading-snug text-ink">
                         {p.name}
@@ -151,10 +151,10 @@ export function CompareView({ locale, dict }: { locale: Locale; dict: Dictionary
   );
 }
 
-function Bool({ value }: { value: boolean }) {
+function Bool({ value, yes, no }: { value: boolean; yes: string; no: string }) {
   return value ? (
-    <Check size={15} className="mx-auto text-success" />
+    <span><Check size={15} className="mx-auto text-success" aria-hidden /><span className="sr-only">{yes}</span></span>
   ) : (
-    <Minus size={14} className="mx-auto text-mist" />
+    <span><Minus size={14} className="mx-auto text-mist" aria-hidden /><span className="sr-only">{no}</span></span>
   );
 }

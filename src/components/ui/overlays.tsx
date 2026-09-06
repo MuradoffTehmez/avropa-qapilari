@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useEscapeKey, useHydrated, useLockBodyScroll } from "@/lib/hooks";
+import { useDialogFocus, useEscapeKey, useHydrated, useLockBodyScroll } from "@/lib/hooks";
 import { useDict } from "@/i18n/provider";
 
 function Portal({ children }: { children: ReactNode }) {
@@ -31,36 +31,45 @@ export function Drawer({
   widthClass?: string;
 }) {
   const dict = useDict();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
   const close = useCallback(() => onClose(), [onClose]);
   useEscapeKey(close, open);
   useLockBodyScroll(open);
+  useDialogFocus(panelRef, open);
 
   if (!open) return null;
 
   return (
     <Portal>
-      <div className="fixed inset-0 z-100" role="dialog" aria-modal="true" aria-label={title}>
+      <div className="fixed inset-0 z-100">
         <button
           type="button"
           aria-label={dict.actions.close}
           onClick={close}
-          className="absolute inset-0 bg-obsidian/45 backdrop-blur-[2px]"
+          className="motion-overlay absolute inset-0 bg-obsidian/45 backdrop-blur-[2px]"
         />
         <div
+          ref={panelRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={title ? titleId : undefined}
+          aria-label={title ? undefined : dict.actions.menu}
+          tabIndex={-1}
           className={cn(
-            "absolute flex flex-col bg-paper shadow-2xl",
-            side === "right" && cn("inset-y-0 right-0 animate-fade-up", widthClass),
-            side === "left" && cn("inset-y-0 left-0 animate-fade-up", widthClass),
-            side === "bottom" && "inset-x-0 bottom-0 max-h-[88vh] animate-fade-up rounded-t-[10px]",
+            "absolute flex max-h-[100dvh] flex-col bg-paper shadow-2xl outline-none",
+            side === "right" && cn("inset-y-0 right-0 motion-drawer-right", widthClass),
+            side === "left" && cn("inset-y-0 left-0 motion-drawer-left", widthClass),
+            side === "bottom" && "inset-x-0 bottom-0 max-h-[88dvh] motion-sheet rounded-t-[10px] pb-[env(safe-area-inset-bottom,0px)]",
           )}
         >
           <div className="flex h-14 shrink-0 items-center justify-between border-b border-line px-4 sm:px-5">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-ink">{title}</h2>
+            <h2 id={titleId} className="text-sm font-semibold uppercase tracking-[0.12em] text-ink">{title}</h2>
             <button
               type="button"
               onClick={close}
               aria-label={dict.actions.close}
-              className="-mr-2 flex h-9 w-9 items-center justify-center text-stone transition-colors hover:text-ink"
+              className="-mr-2 flex h-11 w-11 items-center justify-center text-stone transition-colors hover:text-ink"
             >
               <X size={18} />
             </button>
@@ -89,9 +98,12 @@ export function Modal({
   footer?: ReactNode;
 }) {
   const dict = useDict();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
   const close = useCallback(() => onClose(), [onClose]);
   useEscapeKey(close, open);
   useLockBodyScroll(open);
+  useDialogFocus(panelRef, open);
 
   if (!open) return null;
 
@@ -102,21 +114,23 @@ export function Modal({
           type="button"
           aria-label={dict.actions.close}
           onClick={close}
-          className="absolute inset-0 bg-obsidian/45 backdrop-blur-[2px]"
+          className="motion-overlay absolute inset-0 bg-obsidian/45 backdrop-blur-[2px]"
         />
         <div
+          ref={panelRef}
           role="dialog"
           aria-modal="true"
-          aria-label={title}
-          className="relative flex max-h-[90vh] w-full max-w-lg animate-fade-up flex-col bg-paper shadow-2xl"
+          aria-labelledby={titleId}
+          tabIndex={-1}
+          className="motion-modal relative flex max-h-[calc(100dvh-env(safe-area-inset-bottom,0px))] w-full max-w-lg flex-col bg-paper pb-[env(safe-area-inset-bottom,0px)] shadow-2xl outline-none sm:max-h-[90dvh]"
         >
           <div className="flex h-14 shrink-0 items-center justify-between border-b border-line px-5">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-ink">{title}</h2>
+            <h2 id={titleId} className="text-sm font-semibold uppercase tracking-[0.12em] text-ink">{title}</h2>
             <button
               type="button"
               onClick={close}
               aria-label={dict.actions.close}
-              className="-mr-2 flex h-9 w-9 items-center justify-center text-stone transition-colors hover:text-ink"
+              className="-mr-2 flex h-11 w-11 items-center justify-center text-stone transition-colors hover:text-ink"
             >
               <X size={18} />
             </button>
@@ -159,11 +173,13 @@ export function ToastHost() {
     <Portal>
       <div
         aria-live="polite"
-        className="pointer-events-none fixed inset-x-0 bottom-24 z-200 flex flex-col items-center gap-2 px-4 sm:bottom-6"
+        aria-atomic="true"
+        className="toast-host pointer-events-none fixed inset-x-0 z-200 flex flex-col items-center gap-2 px-4"
       >
         {messages.map((m) => (
           <div
             key={m.id}
+            role="status"
             className="animate-fade-up rounded-[3px] bg-ink px-4 py-2.5 text-[13px] font-medium text-paper shadow-lg"
           >
             {m.text}

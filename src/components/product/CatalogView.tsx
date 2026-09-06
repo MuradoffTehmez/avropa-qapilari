@@ -191,7 +191,7 @@ export function CatalogView({
             <div
               className={cn(
                 view === "grid"
-                  ? "grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4"
+                  ? "grid grid-cols-1 gap-3 xs:grid-cols-2 sm:gap-4 md:grid-cols-3 xl:grid-cols-4"
                   : "flex flex-col gap-3",
               )}
             >

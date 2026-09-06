@@ -93,7 +93,7 @@ export function DoorVisual({
   widthMm = 960,
   heightMm = 2050,
   className,
-  label = "Qapı önizləməsi",
+  label,
   ambient = true,
 }: DoorVisualProps) {
   const uid = useId().replace(/[^a-z0-9]/gi, "");
@@ -130,8 +130,9 @@ export function DoorVisual({
   return (
     <svg
       viewBox="0 0 300 400"
-      role="img"
+      role={label ? "img" : undefined}
       aria-label={label}
+      aria-hidden={label ? undefined : true}
       className={cn("h-full w-full", className)}
       preserveAspectRatio="xMidYMid meet"
     >

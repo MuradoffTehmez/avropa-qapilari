@@ -18,6 +18,7 @@ import { useHydrated } from "@/lib/hooks";
 import { useSession } from "@/store/session";
 import { bakuDistricts, cities } from "@/mock/content";
 import { optionGroups } from "@/mock/options";
+import { optionText } from "@/mock/options.i18n";
 
 type StepId = "customer" | "address" | "delivery" | "installation" | "payment" | "confirmation";
 
@@ -75,6 +76,7 @@ export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionar
   const user = useSession((s) => s.user);
 
   const [step, setStep] = useState(0);
+  const [direction, setDirection] = useState<"forward" | "back">("forward");
   const [form, setForm] = useState<CheckoutState>(initial);
   // Giriş edilibsə ad və e-poçt sessiyadan bir dəfə doldurulur.
   const [prefilled, setPrefilled] = useState(false);
@@ -183,11 +185,12 @@ export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionar
 
     if (current === "confirmation") {
       const number = createReference("ORD");
-      useWorkflow.getState().add({ id: number, kind: "orders", title: "Qapı sifarişi", total, detail: items.map((i) => `${i.productName} · ${i.quantity} ədəd · ${i.snapshot.width}×${i.snapshot.height} mm`).join("\n") });
+      useWorkflow.getState().add({ id: number, kind: "orders", title: dict.checkout.workflowTitle, total, detail: items.map((i) => `${i.productName} · ${i.quantity} ${dict.common.piece} · ${i.snapshot.width}×${i.snapshot.height} mm`).join("\n") });
       clear();
       setPlacedOrder(number);
       return;
     }
+    setDirection("forward");
     setStep((s) => Math.min(s + 1, stepOrder.length - 1));
   }
 
@@ -200,8 +203,13 @@ export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionar
           className="mb-8 border-b border-line"
           steps={stepOrder.map((s) => dict.checkout.steps[s])}
           current={step}
-          onSelect={setStep}
+          onSelect={(next) => {
+            setDirection(next < step ? "back" : "forward");
+            setStep(next);
+          }}
         />
+
+        <div key={current} className={direction === "forward" ? "motion-step-forward" : "motion-step-back"}>
 
         {current === "customer" && (
           <div className="max-w-xl space-y-4">
@@ -287,7 +295,7 @@ export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionar
                 <Textarea
                   value={form.note}
                   onChange={(e) => set("note", e.target.value)}
-                  placeholder="Domofon kodu, giriş qeydləri…"
+                  placeholder={dict.checkout.intercomPlaceholder}
                 />
               </Field>
             </div>
@@ -302,7 +310,7 @@ export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionar
                 <RadioCard
                   key={v.id}
                   name="delivery"
-                  label={v.label}
+                  label={optionText(v, locale).label}
                   checked={form.delivery === v.id}
                   onChange={() => set("delivery", v.id)}
                   price={v.priceDelta === 0 ? dict.common.free : formatPrice(v.priceDelta)}
@@ -320,9 +328,9 @@ export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionar
                 <RadioCard
                   key={v.id}
                   name="installation"
-                  label={v.label}
-                  description={v.description}
-                  badge={v.badge}
+                  label={optionText(v, locale).label}
+                  description={optionText(v, locale).description}
+                  badge={optionText(v, locale).badge}
                   checked={form.installation === v.id}
                   onChange={() => set("installation", v.id)}
                   price={v.priceDelta === 0 ? dict.common.free : formatPrice(v.priceDelta)}
@@ -330,7 +338,7 @@ export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionar
               ))}
             </div>
             <Notice>
-              Quraşdırma seçilərsə, sifariş çatdıqdan sonra ayrıca quraşdırma görüşü yaradılır.
+              {dict.checkout.installationAppointmentNotice}
             </Notice>
           </div>
         )}
@@ -372,7 +380,7 @@ export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionar
                 label={dict.checkout.steps.address}
                 value={
                   form.delivery === "dl-pickup"
-                    ? "Anbardan götürmə"
+                    ? dict.checkout.pickupSummary
                     : [form.city, form.district, form.street, form.building, form.apartment]
                         .filter(Boolean)
                         .join(", ")
@@ -380,11 +388,11 @@ export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionar
               />
               <SummaryRow
                 label={dict.checkout.steps.delivery}
-                value={optionGroups.DELIVERY.values.find((v) => v.id === form.delivery)?.label ?? "—"}
+                value={optionGroups.DELIVERY.values.find((v) => v.id === form.delivery) ? optionText(optionGroups.DELIVERY.values.find((v) => v.id === form.delivery)!, locale).label : "—"}
               />
               <SummaryRow
                 label={dict.checkout.steps.installation}
-                value={optionGroups.INSTALLATION.values.find((v) => v.id === form.installation)?.label ?? "—"}
+                value={optionGroups.INSTALLATION.values.find((v) => v.id === form.installation) ? optionText(optionGroups.INSTALLATION.values.find((v) => v.id === form.installation)!, locale).label : "—"}
               />
               <SummaryRow
                 label={dict.checkout.steps.payment}
@@ -405,11 +413,11 @@ export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionar
                     <Link href={r.legal("terms")} className="underline underline-offset-2">
                       {dict.footer.terms}
                     </Link>{" "}
-                    və{" "}
+                    {dict.checkout.termsConnector}{" "}
                     <Link href={r.legal("privacy")} className="underline underline-offset-2">
                       {dict.footer.privacy}
                     </Link>{" "}
-                    ilə razıyam
+                    {dict.checkout.termsConsent}
                   </>
                 }
                 checked={form.terms}
@@ -420,9 +428,11 @@ export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionar
           </div>
         )}
 
+        </div>
+
         <div className="mt-8 flex gap-2">
           {step > 0 && (
-            <Button variant="secondary" onClick={() => setStep((s) => s - 1)}>
+            <Button variant="secondary" onClick={() => { setDirection("back"); setStep((s) => s - 1); }}>
               <ArrowLeft size={16} /> {dict.actions.back}
             </Button>
           )}
@@ -434,7 +444,7 @@ export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionar
       </div>
 
       {/* ---------------------------------------------------- SUMMARY */}
-      <aside className="lg:sticky lg:top-24 lg:h-fit">
+      <aside className="desktop-sticky-panel">
         <Card className="p-5">
           <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-stone">
             {dict.checkout.orderSummary}
@@ -446,7 +456,7 @@ export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionar
                 <span className="min-w-0">
                   <span className="block truncate font-medium text-ink">{item.productName}</span>
                   <span className="text-stone">
-                    {item.snapshot.width}×{item.snapshot.height} · {item.quantity} əd.
+                    {item.snapshot.width}×{item.snapshot.height} · {item.quantity} {dict.common.piece}
                   </span>
                 </span>
                 <span className="shrink-0 tabular-nums text-graphite">

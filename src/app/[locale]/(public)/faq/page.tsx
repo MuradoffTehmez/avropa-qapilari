@@ -61,7 +61,7 @@ export default async function FaqPage({
 
       <Section>
         <div className="container-page grid gap-10 lg:grid-cols-[1fr_2fr] lg:gap-16">
-          <div className="lg:sticky lg:top-24 lg:h-fit">
+          <div className="desktop-sticky-panel">
             <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-stone">
               {dict.common.sections}
             </p>

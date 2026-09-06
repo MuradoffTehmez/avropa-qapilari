@@ -52,7 +52,7 @@ export function MeasurementForm({ locale, dict }: { locale: Locale; dict: Dictio
     if (Object.keys(next).length > 0) return;
 
     const reference = createReference("MSR");
-    useWorkflow.getState().add({ id: reference, kind: "measurements", title: dict.measurement.title, detail: `${form.doorCount} qapı · ${form.city}, ${form.street} · ${form.date} ${form.slot}` });
+    useWorkflow.getState().add({ id: reference, kind: "measurements", title: dict.measurement.title, detail: `${form.doorCount} ${dict.common.doorUnit} · ${form.city}, ${form.street} · ${form.date} ${form.slot}` });
     setSubmitted(reference);
   }
 
@@ -165,7 +165,7 @@ export function MeasurementForm({ locale, dict }: { locale: Locale; dict: Dictio
         </section>
 
         <section>
-          <h2 className="mb-4 text-lg font-semibold tracking-tight text-ink">Vaxt</h2>
+          <h2 className="mb-4 text-lg font-semibold tracking-tight text-ink">{dict.measurement.timeTitle}</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label={dict.measurement.preferredDate} required error={errors.date}>
               <Input
@@ -197,7 +197,7 @@ export function MeasurementForm({ locale, dict }: { locale: Locale; dict: Dictio
         </Button>
       </div>
 
-      <aside className="lg:sticky lg:top-24 lg:h-fit">
+      <aside className="desktop-sticky-panel">
         <Card className="p-5">
           <div className="flex items-center gap-2.5">
             <Ruler size={18} className="text-gold-500" />

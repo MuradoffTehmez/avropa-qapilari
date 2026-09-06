@@ -59,7 +59,7 @@ export function ShowroomBooking({ locale, dict }: { locale: Locale; dict: Dictio
       id: reference,
       kind: "measurements",
       title: dict.showroom.title,
-      detail: `${form.date} ${form.time} · ${form.people} nəfər · ${interest}${form.note ? `\n${form.note}` : ""}`,
+      detail: `${form.date} ${form.time} · ${form.people} ${dict.common.personUnit} · ${interest}${form.note ? `\n${form.note}` : ""}`,
     });
     setBooked(reference);
   }

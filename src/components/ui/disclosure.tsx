@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useId, useState, type KeyboardEvent, type ReactNode } from "react";
 import { Check, Minus, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +16,7 @@ export function Accordion({
   className?: string;
 }) {
   const [open, setOpen] = useState(defaultOpen);
+  const accordionId = useId();
 
   return (
     <div className={cn("divide-y divide-line border-y border-line", className)}>
@@ -25,9 +26,11 @@ export function Accordion({
           <div key={item.id}>
             <h3>
               <button
+                id={`${accordionId}-trigger-${i}`}
                 type="button"
                 onClick={() => setOpen(isOpen ? -1 : i)}
                 aria-expanded={isOpen}
+                aria-controls={`${accordionId}-panel-${i}`}
                 className="flex w-full items-center justify-between gap-4 py-4 text-left sm:py-5"
               >
                 <span className="text-[15px] font-medium text-ink">{item.title}</span>
@@ -36,9 +39,20 @@ export function Accordion({
                 </span>
               </button>
             </h3>
-            {isOpen && (
-              <div className="pb-5 pr-8 text-sm leading-relaxed text-graphite">{item.content}</div>
-            )}
+            <div
+              id={`${accordionId}-panel-${i}`}
+              role="region"
+              aria-labelledby={`${accordionId}-trigger-${i}`}
+              aria-hidden={!isOpen}
+              className={cn(
+                "grid transition-[grid-template-rows,opacity] duration-300",
+                isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+              )}
+            >
+              <div className="overflow-hidden">
+                <div className="pb-5 pr-8 text-sm leading-relaxed text-graphite">{item.content}</div>
+              </div>
+            </div>
           </div>
         );
       })}
@@ -56,7 +70,23 @@ export function Tabs({
   className?: string;
 }) {
   const [active, setActive] = useState(tabs[0]?.id);
+  const tabsId = useId();
   const current = tabs.find((t) => t.id === active) ?? tabs[0];
+
+  function onTabKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number) {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    event.preventDefault();
+    const nextIndex =
+      event.key === "Home"
+        ? 0
+        : event.key === "End"
+          ? tabs.length - 1
+          : (index + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+    const next = tabs[nextIndex];
+    if (!next) return;
+    setActive(next.id);
+    document.getElementById(`${tabsId}-tab-${next.id}`)?.focus();
+  }
 
   return (
     <div className={className}>
@@ -64,12 +94,16 @@ export function Tabs({
         role="tablist"
         className="hide-scrollbar -mx-4 flex gap-1 overflow-x-auto border-b border-line px-4 sm:mx-0 sm:px-0"
       >
-        {tabs.map((tab) => (
+        {tabs.map((tab, index) => (
           <button
             key={tab.id}
+            id={`${tabsId}-tab-${tab.id}`}
             role="tab"
             aria-selected={tab.id === active}
+            aria-controls={`${tabsId}-panel-${tab.id}`}
+            tabIndex={tab.id === active ? 0 : -1}
             onClick={() => setActive(tab.id)}
+            onKeyDown={(event) => onTabKeyDown(event, index)}
             className={cn(
               "relative whitespace-nowrap px-3.5 py-3 text-[13px] font-medium transition-colors sm:text-sm",
               tab.id === active ? "text-ink" : "text-stone hover:text-graphite",
@@ -82,7 +116,13 @@ export function Tabs({
           </button>
         ))}
       </div>
-      <div role="tabpanel" className="pt-6 sm:pt-8">
+      <div
+        id={`${tabsId}-panel-${current?.id}`}
+        role="tabpanel"
+        aria-labelledby={`${tabsId}-tab-${current?.id}`}
+        tabIndex={0}
+        className="pt-6 outline-none sm:pt-8"
+      >
         {current?.content}
       </div>
     </div>

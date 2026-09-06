@@ -43,7 +43,7 @@ export function QuoteForm({ locale, dict }: { locale: Locale; dict: Dictionary }
     setErrors(next);
     if (Object.keys(next).length > 0) return;
     const reference = createReference("QTE");
-    useWorkflow.getState().add({ id: reference, kind: "quotes", title: dict.quote.title, detail: `${form.message} · ${form.quantity} ədəd · ${form.width} × ${form.height} mm` });
+    useWorkflow.getState().add({ id: reference, kind: "quotes", title: dict.quote.title, detail: `${form.message} · ${form.quantity} ${dict.common.piece} · ${form.width} × ${form.height} mm` });
     setSubmitted(reference);
   }
 
@@ -61,7 +61,7 @@ export function QuoteForm({ locale, dict }: { locale: Locale; dict: Dictionary }
             <p className="mt-1 font-mono text-lg font-semibold text-ink">{submitted}</p>
           </div>
           <ButtonLink href={r.home} variant="secondary" className="mt-7">
-            Ana səhifə
+            {dict.nav.home}
           </ButtonLink>
         </div>
       </div>
@@ -92,7 +92,7 @@ export function QuoteForm({ locale, dict }: { locale: Locale; dict: Dictionary }
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Model" className="sm:col-span-2">
+          <Field label={dict.common.model} className="sm:col-span-2">
             <Select value={form.product} onChange={(e) => set("product", e.target.value)}>
               <option value="">{dict.quote.noModel}</option>
               {products.map((p) => (
@@ -102,7 +102,7 @@ export function QuoteForm({ locale, dict }: { locale: Locale; dict: Dictionary }
               ))}
             </Select>
           </Field>
-          <Field label="En (mm)">
+          <Field label={dict.quote.widthMm}>
             <Input
               type="number"
               inputMode="numeric"
@@ -118,7 +118,7 @@ export function QuoteForm({ locale, dict }: { locale: Locale; dict: Dictionary }
               onChange={(e) => set("height", e.target.value)}
             />
           </Field>
-          <Field label="Say">
+          <Field label={dict.common.quantity}>
             <Input
               type="number"
               inputMode="numeric"
@@ -143,7 +143,7 @@ export function QuoteForm({ locale, dict }: { locale: Locale; dict: Dictionary }
         </Button>
       </div>
 
-      <aside className="lg:sticky lg:top-24 lg:h-fit">
+      <aside className="desktop-sticky-panel">
         <Card className="p-5">
           <div className="flex items-center gap-2.5">
             <FileText size={18} className="text-gold-500" />

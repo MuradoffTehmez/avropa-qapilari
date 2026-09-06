@@ -36,7 +36,7 @@ export function ContactForm({ dict }: { dict: Dictionary }) {
         <CheckCircle2 size={40} className="text-success" />
         <h2 className="mt-4 text-xl font-semibold tracking-tight text-ink">{dict.common.messageSent}</h2>
         <p className="mt-2 max-w-sm text-[14px] text-stone">
-          Operatorumuz 1 iş günü ərzində sizinlə əlaqə saxlayacaq.
+          {dict.common.contactResponseTime}
         </p>
       </Card>
     );
