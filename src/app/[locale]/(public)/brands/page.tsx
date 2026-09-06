@@ -66,7 +66,7 @@ export default async function BrandsPage({
                 <p className="mt-3 flex-1 text-[14px] leading-relaxed text-stone">{brandDescription(b, dict)}</p>
                 <div className="mt-5 flex items-center justify-between border-t border-line pt-4">
                   <span className="text-[13px] text-graphite">
-                    {count} model · {b.founded}-ci ildən
+                    {count} {dict.about.models} · {dict.about.since.replace("{year}", String(b.founded))}
                   </span>
                   <ArrowRight size={15} className="text-gold-600" />
                 </div>

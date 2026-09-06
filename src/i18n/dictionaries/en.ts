@@ -198,6 +198,8 @@ export const en: Dictionary = {
     color: "Colour",
     sections: "Sections",
     noAnswerFound: "Didn't find your answer?",
+    lastUpdated: "Last updated",
+    operatorHelp: "Our operator will help you.",
   },
 
   home: {
@@ -235,6 +237,54 @@ export const en: Dictionary = {
     eyebrowServices: "Services",
     eyebrowReviews: "Reviews",
     repairScope: ["Lock", "Hinge", "Frame", "Glass", "Smart lock", "Adjustment"],
+  },
+
+  about: {
+    heroTitle: "A door is not a product — it is a long relationship",
+    heroText:
+      "After the sale, installation, warranty, servicing and repair are all managed in one system. Every door has a serial number and a full service history.",
+    statDoors: "Doors installed",
+    statDoorsHint: "Since 2008",
+    statYears: "Years of experience",
+    statYearsHint: "Baku and the regions",
+    statBrands: "European brands",
+    statBrandsHint: "Official supply",
+    statTechnicians: "Certified technicians",
+    statTechniciansHint: "A permanent crew",
+    approachEyebrow: "Approach",
+    approachTitle: "How we work",
+    approach1:
+      "Choosing a door often turns into a chain of problems that starts with a wrong measurement. That is why we begin with the measurement: a technician comes to your address, measures the opening and only then proposes models that fit.",
+    approach2:
+      "The configurator shows the customer in real time how each choice affects the price — so there are no unexpected additions later.",
+    approach3:
+      "After installation the door is given a unique serial number. Every piece of service work is tied to that number, so the door's history stays available years later.",
+    valueSupply: "Official supply",
+    valueSupplyText: "Direct contracts with 12 European manufacturers.",
+    valueTeam: "Our own service team",
+    valueTeamText: "No subcontractors — a permanent, certified crew.",
+    valueWarranty: "Documented warranty",
+    valueWarrantyText: "Tied to a serial number and verifiable by QR code.",
+    valueSupport: "Support for life",
+    valueSupportText: "Servicing continues after the warranty ends.",
+    partnersEyebrow: "Partners",
+    partnersTitle: "The brands we represent",
+    teamEyebrow: "Team",
+    teamTitle: "The service crew",
+    teamText: "The technicians who come to your address.",
+    since: "Since {year}",
+    jobs: "jobs",
+    country: "Country",
+    founded: "Founded",
+    models: "models",
+    specializations: {
+      lock: "Lock",
+      smartLock: "Smart lock",
+      alignment: "Adjustment",
+      frame: "Frame",
+      glass: "Glass",
+      hinge: "Hinge",
+    },
   },
 
   services: {
@@ -441,6 +491,17 @@ export const en: Dictionary = {
     step5: "Warranty",
     step5Text: "The door gets a serial number; every service record is tied to it.",
     step5Meta: "3–10 years",
+  },
+
+  blog: {
+    readMinutes: "min read",
+    otherPosts: "Other posts",
+    whyItMatters: "Why it matters",
+    whyItMattersText:
+      "The decision about a door usually forms around three parameters: security, insulation and design. The balance between them shifts with the type of property — sound insulation matters most for an apartment entrance, while the thermal figure takes priority for a villa.",
+    practicalTip: "A practical tip",
+    practicalTipText:
+      "Always have a technician take the measurement. The diagonal difference of the opening, the wall thickness and the frame depth decide whether the door sits correctly; a mistake in those parameters later shows up as creaking, draughts and lock problems.",
   },
 
   catalog: {
@@ -880,6 +941,7 @@ export const en: Dictionary = {
       "Matching models and a price range are proposed on the spot.",
       "The measurement is free when you place an order.",
     ],
+    notifyNote: "Once the technician's arrival time is confirmed you will get an SMS and an email.",
   },
 
   quote: {
@@ -920,6 +982,9 @@ export const en: Dictionary = {
     noOrders: "You have no orders yet",
     noRepairs: "You have no repair requests",
     noWarranties: "You have no warranty records",
+    activeWarranties: "active warranties",
+    plannedAppointments: "scheduled",
+    orderProgress: "Order progress",
   },
 
   favorites: {
@@ -973,6 +1038,12 @@ export const en: Dictionary = {
     serialNumber: "Serial number",
     coverage: "Coverage",
     validUntil: "Valid until",
+    coverageDefault: "Construction, coating, hinges and the lock mechanism",
+    historySale: "Order",
+    historyInstallation: "Installation",
+    historyWarranty: "Warranty opened",
+    historyMaintenance: "Preventive maintenance",
+    historyRepair: "Repair",
   },
 
   service: {

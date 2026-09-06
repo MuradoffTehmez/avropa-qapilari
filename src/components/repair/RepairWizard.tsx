@@ -421,8 +421,7 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
           </dl>
 
           <div className="mt-5 border-t border-line pt-4 text-[13px] text-stone">
-            <p>Diaqnostika ünvanda aparılır. Ustanın gəlişi 25 AZN — təmir sifariş edilərsə məbləğ
-            ümumi qiymətdən çıxılır.</p>
+            <p>{dict.repair.diagnosticNote}</p>
           </div>
         </Card>
       </aside>

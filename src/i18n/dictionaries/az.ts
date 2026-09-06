@@ -196,6 +196,8 @@ export const az = {
     color: "Rəng",
     sections: "Bölmələr",
     noAnswerFound: "Cavab tapmadınız?",
+    lastUpdated: "Son yenilənmə",
+    operatorHelp: "Operatorumuz kömək edəcək.",
   },
 
   home: {
@@ -233,6 +235,54 @@ export const az = {
     eyebrowServices: "Xidmətlər",
     eyebrowReviews: "Rəylər",
     repairScope: ["Kilid", "Menteşə", "Çərçivə", "Şüşə", "Smart lock", "Tənzimləmə"],
+  },
+
+  about: {
+    heroTitle: "Qapı bir məhsul deyil — uzunmüddətli münasibətdir",
+    heroText:
+      "Satışdan sonra quraşdırma, zəmanət, servis və təmir — hamısı bir sistem daxilində idarə olunur. Hər qapının serial nömrəsi və tam xidmət tarixçəsi var.",
+    statDoors: "Quraşdırılmış qapı",
+    statDoorsHint: "2008-ci ildən bəri",
+    statYears: "İl təcrübə",
+    statYearsHint: "Bakı və regionlar",
+    statBrands: "Avropa brendi",
+    statBrandsHint: "Rəsmi təchizat",
+    statTechnicians: "Sertifikatlı usta",
+    statTechniciansHint: "Daimi briqada",
+    approachEyebrow: "Yanaşma",
+    approachTitle: "Necə işləyirik",
+    approach1:
+      "Qapı seçimi çox vaxt yanlış ölçüdən başlayan problemlər zəncirinə çevrilir. Ona görə prosesi ölçüdən başlayırıq: usta ünvana gəlir, açırımı ölçür və yalnız uyğun modelləri təklif edir.",
+    approach2:
+      "Konfiqurator müştəriyə seçimin qiymətə təsirini real vaxtda göstərir — sonradan gözlənilməz əlavələr olmur.",
+    approach3:
+      "Quraşdırmadan sonra qapıya unikal serial nömrə verilir. Bütün servis işləri həmin nömrəyə bağlanır, beləliklə illər sonra da qapının tarixçəsi əlçatan qalır.",
+    valueSupply: "Rəsmi təchizat",
+    valueSupplyText: "12 Avropa istehsalçısı ilə birbaşa müqavilə.",
+    valueTeam: "Öz servis komandamız",
+    valueTeamText: "Subpodrat yox — daimi, sertifikatlı briqada.",
+    valueWarranty: "Sənədli zəmanət",
+    valueWarrantyText: "Serial nömrəyə bağlı, QR ilə yoxlanılan.",
+    valueSupport: "Ömürlük dəstək",
+    valueSupportText: "Zəmanət bitəndən sonra da servis.",
+    partnersEyebrow: "Partnyorlar",
+    partnersTitle: "Təmsil etdiyimiz brendlər",
+    teamEyebrow: "Komanda",
+    teamTitle: "Servis briqadası",
+    teamText: "Ünvana gələn ustalarımız.",
+    since: "{year}-ci ildən",
+    jobs: "iş",
+    country: "Ölkə",
+    founded: "Təsis",
+    models: "model",
+    specializations: {
+      lock: "Kilid",
+      smartLock: "Smart lock",
+      alignment: "Tənzimləmə",
+      frame: "Çərçivə",
+      glass: "Şüşə",
+      hinge: "Menteşə",
+    },
   },
 
   services: {
@@ -438,6 +488,17 @@ export const az = {
     step5: "Zəmanət",
     step5Text: "Qapıya serial nömrə verilir; bütün servis işləri həmin nömrəyə bağlanır.",
     step5Meta: "3–10 il",
+  },
+
+  blog: {
+    readMinutes: "dəq oxu",
+    otherPosts: "Digər yazılar",
+    whyItMatters: "Nə üçün vacibdir",
+    whyItMattersText:
+      "Qapı seçimində qərar adətən üç parametr ətrafında formalaşır: təhlükəsizlik, izolyasiya və dizayn. Bu üçlüyün balansı obyektin tipindən asılı olaraq dəyişir — mənzil girişi üçün səs izolyasiyası, villa üçün isə termo göstərici prioritet olur.",
+    practicalTip: "Praktik tövsiyə",
+    practicalTipText:
+      "Ölçünü mütləq usta götürsün. Açırımın diaqonal fərqi, divar qalınlığı və çərçivə dərinliyi qapının düzgün oturmasını müəyyən edir; bu parametrlərdəki səhv sonradan cırıltı, keçmə və kilid problemləri yaradır.",
   },
 
   catalog: {
@@ -878,6 +939,7 @@ export const az = {
       "Uyğun modellər və qiymət aralığı yerində təklif edilir.",
       "Sifariş verildiyi halda ölçü xidməti pulsuzdur.",
     ],
+    notifyNote: "Ustanın gəliş vaxtı təsdiqləndikdən sonra SMS və e-poçt bildirişi göndərilir.",
   },
 
   quote: {
@@ -918,6 +980,9 @@ export const az = {
     noOrders: "Hələ sifarişiniz yoxdur",
     noRepairs: "Təmir müraciətiniz yoxdur",
     noWarranties: "Zəmanət qeydiniz yoxdur",
+    activeWarranties: "aktiv zəmanət",
+    plannedAppointments: "planlanmış",
+    orderProgress: "Sifariş vəziyyəti",
   },
 
   favorites: {
@@ -971,6 +1036,12 @@ export const az = {
     serialNumber: "Serial nömrə",
     coverage: "Əhatə",
     validUntil: "Etibarlıdır",
+    coverageDefault: "Konstruksiya, örtük, menteşə və kilid mexanizmi",
+    historySale: "Sifariş",
+    historyInstallation: "Quraşdırma",
+    historyWarranty: "Zəmanət açıldı",
+    historyMaintenance: "Profilaktik baxım",
+    historyRepair: "Təmir",
   },
 
   service: {

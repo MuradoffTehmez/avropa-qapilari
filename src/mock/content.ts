@@ -106,7 +106,7 @@ export const technicians: Technician[] = [
     id: "tc-1",
     name: "Usta 1",
     phone: "+994 00 000 00 00",
-    specialization: ["Kilid", "Smart lock", "Tənzimləmə"],
+    specialization: ["lock", "smartLock", "alignment"],
     serviceAreas: ["Yasamal", "Nəsimi", "Nərimanov"],
     rating: 4.9,
     completedJobs: 412,

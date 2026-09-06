@@ -121,7 +121,9 @@ export default async function ProductPage({
             items={[
               { label: dict.nav.home, href: r.home },
               { label: dict.catalog.title, href: r.doors },
-              ...(category ? [{ label: category.name, href: r.category(category.slug) }] : []),
+              ...(category
+                ? [{ label: categoryName(category, dict), href: r.category(category.slug) }]
+                : []),
               { label: product.name },
             ]}
           />

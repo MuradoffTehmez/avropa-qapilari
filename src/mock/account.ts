@@ -26,23 +26,23 @@ export const accountUser = {
   memberSince: "2026-01-15",
 };
 
-const timelineOrder: { status: OrderStatus; label: string }[] = [
-  { status: "CONFIRMED", label: "Sifariş yaradıldı" },
-  { status: "PAID", label: "Ödəniş təsdiqləndi" },
-  { status: "MANUFACTURING", label: "Hazırlanır" },
-  { status: "SHIPPED", label: "Çatdırılma hazırlanır" },
-  { status: "INSTALLATION_SCHEDULED", label: "Quraşdırma" },
-  { status: "COMPLETED", label: "Tamamlandı" },
+/** Sıralama; ad `dict.orderStatus`-dan gəlir. */
+const timelineOrder: OrderStatus[] = [
+  "CONFIRMED",
+  "PAID",
+  "MANUFACTURING",
+  "SHIPPED",
+  "INSTALLATION_SCHEDULED",
+  "COMPLETED",
 ];
 
 function buildTimeline(reachedIndex: number, startIso: string): OrderTimelineEntry[] {
   const start = new Date(startIso);
-  return timelineOrder.map((step, i) => {
+  return timelineOrder.map((status, i) => {
     const d = new Date(start);
     d.setDate(d.getDate() + i * 6);
     return {
-      status: step.status,
-      label: step.label,
+      status,
       date: i <= reachedIndex ? d.toISOString() : null,
       state: i < reachedIndex ? "done" : i === reachedIndex ? "current" : "pending",
     };
@@ -142,7 +142,7 @@ export const warranties: Warranty[] = [
     installationDate: "2026-06-04",
     startDate: "2026-06-04",
     endDate: "2033-06-04",
-    coverage: "Konstruksiya, örtük, menteşə və kilid mexanizmi",
+    
     status: "ACTIVE",
   },
 ];
@@ -169,10 +169,10 @@ export const doorAssets: DoorAsset[] = [
     warrantyStatus: "ACTIVE",
     warrantyEnd: "2033-06-04",
     privateHistory: [
-      { type: "SALE", date: "2026-05-18", title: "Sifariş", detail: "ORD-2026-000101" },
-      { type: "INSTALLATION", date: "2026-06-04", title: "Quraşdırma", detail: "Usta 1 · 4 saat" },
-      { type: "WARRANTY", date: "2026-06-04", title: "Zəmanət açıldı", detail: "WAR-2026-000101 · 7 il" },
-      { type: "MAINTENANCE", date: "2026-08-20", title: "Profilaktik baxım", detail: "Menteşə yağlanması, kontur yoxlanışı" },
+      { type: "SALE", date: "2026-05-18", detail: "ORD-2026-000101" },
+      { type: "INSTALLATION", date: "2026-06-04", detail: "Usta 1 · 4 saat" },
+      { type: "WARRANTY", date: "2026-06-04", detail: "WAR-2026-000101 · 7 il" },
+      { type: "MAINTENANCE", date: "2026-08-20", detail: "Menteşə yağlanması, kontur yoxlanışı" },
     ],
   },
 ];

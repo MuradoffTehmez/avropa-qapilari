@@ -53,10 +53,10 @@ export default async function AccountDashboardPage({
           <Stat label={dict.account.repairs} value={repairRequests.length} hint={`${activeRepairs.length} aktiv`} />
         </Card>
         <Card className="p-5">
-          <Stat label={dict.account.warranties} value={warranties.length} hint="aktiv zəmanət" />
+          <Stat label={dict.account.warranties} value={warranties.length} hint={dict.account.activeWarranties} />
         </Card>
         <Card className="p-5">
-          <Stat label={dict.account.appointments} value={appointments.length} hint="planlanmış" />
+          <Stat label={dict.account.appointments} value={appointments.length} hint={dict.account.plannedAppointments} />
         </Card>
       </div>
 

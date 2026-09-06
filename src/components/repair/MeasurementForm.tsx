@@ -202,17 +202,16 @@ export function MeasurementForm({ locale, dict }: { locale: Locale; dict: Dictio
           <div className="flex items-center gap-2.5">
             <Ruler size={18} className="text-gold-500" />
             <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-stone">
-              Ölçü xidməti
+              {dict.serviceDetail.measurement.title}
             </h2>
           </div>
           <ul className="mt-4 space-y-3 text-[13.5px] leading-relaxed text-graphite">
-            <li>Usta ünvana gəlir və açırımın dəqiq ölçülərini götürür.</li>
-            <li>Divar qalınlığı, çərçivə dərinliyi və açılma istiqaməti qeyd olunur.</li>
-            <li>Uyğun modellər və qiymət aralığı yerində təklif edilir.</li>
-            <li>Sifariş verildiyi halda ölçü xidməti pulsuzdur.</li>
+            {dict.measurement.facts.map((f) => (
+              <li key={f}>{f}</li>
+            ))}
           </ul>
           <Notice className="mt-5">
-            Ustanın gəliş vaxtı təsdiqləndikdən sonra SMS və e-poçt bildirişi göndərilir.
+            {dict.measurement.notifyNote}
           </Notice>
         </Card>
       </aside>

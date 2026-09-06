@@ -60,8 +60,8 @@ export default async function BrandPage({
           <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-stone">{brandDescription(b, dict)}</p>
 
           <div className="mt-8 grid grid-cols-2 gap-6 border-t border-line pt-6 sm:grid-cols-4">
-            <Stat label="Ölkə" value={countryName(b, dict)} />
-            <Stat label="Təsis" value={b.founded} />
+            <Stat label={dict.about.country} value={countryName(b, dict)} />
+            <Stat label={dict.about.founded} value={b.founded} />
             <Stat label="Model" value={list.length} />
             <Stat label="Orta reytinq" value={avgRating.toFixed(1)} hint={`${minPrice} AZN-dən`} />
           </div>

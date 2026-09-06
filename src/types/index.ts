@@ -251,7 +251,6 @@ export type OrderStatus =
 
 export interface OrderTimelineEntry {
   status: OrderStatus;
-  label: string;
   date: string | null;
   state: "done" | "current" | "pending";
 }
@@ -372,14 +371,22 @@ export interface Warranty {
   installationDate: string;
   startDate: string;
   endDate: string;
-  coverage: string;
+  /** Boşdursa `warranty.coverageDefault` göstərilir. */
+  coverage?: string;
   status: "ACTIVE" | "EXPIRED" | "VOID";
 }
 
+export type DoorAssetEventType =
+  | "SALE"
+  | "INSTALLATION"
+  | "WARRANTY"
+  | "REPAIR"
+  | "PART"
+  | "MAINTENANCE";
+
 export interface DoorAssetEvent {
-  type: "SALE" | "INSTALLATION" | "WARRANTY" | "REPAIR" | "PART" | "MAINTENANCE";
+  type: DoorAssetEventType;
   date: string;
-  title: string;
   detail: string;
 }
 

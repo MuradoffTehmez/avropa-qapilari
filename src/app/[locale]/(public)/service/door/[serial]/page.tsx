@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { Lock, Phone, QrCode as QrIcon, ShieldCheck } from "lucide-react";
 
 import { getDictionary, isLocale, locales } from "@/i18n";
-import type { Locale } from "@/types";
+import type { Dictionary } from "@/i18n";
+import type { DoorAssetEventType, Locale } from "@/types";
 import { routes } from "@/lib/routes";
 import { formatDate } from "@/lib/utils";
 import { brand } from "@/config/brand";
@@ -129,7 +130,7 @@ export default async function DoorPassportPage({
                     <li key={`${e.type}-${e.date}`} className="flex gap-3 text-[13px]">
                       <span className="w-20 shrink-0 text-stone">{formatDate(e.date)}</span>
                       <span>
-                        <span className="block font-medium text-ink">{e.title}</span>
+                        <span className="block font-medium text-ink">{historyTitle(e.type, dict)}</span>
                         <span className="block text-stone">{e.detail}</span>
                       </span>
                     </li>
@@ -194,4 +195,20 @@ export default async function DoorPassportPage({
       </Section>
     </>
   );
+}
+
+/** Servis hadisəsinin adı — dilə uyğun. */
+function historyTitle(type: DoorAssetEventType, dict: Dictionary): string {
+  switch (type) {
+    case "SALE":
+      return dict.warranty.historySale;
+    case "INSTALLATION":
+      return dict.warranty.historyInstallation;
+    case "WARRANTY":
+      return dict.warranty.historyWarranty;
+    case "MAINTENANCE":
+      return dict.warranty.historyMaintenance;
+    default:
+      return dict.warranty.historyRepair;
+  }
 }

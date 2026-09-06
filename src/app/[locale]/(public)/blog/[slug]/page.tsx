@@ -57,7 +57,7 @@ export default async function BlogPostPage({
             {post.title}
           </h1>
           <p className="mt-3 text-[13px] text-stone">
-            {formatDate(post.date)} · {post.readMinutes} dəq oxu
+            {formatDate(post.date)} · {post.readMinutes} {dict.blog.readMinutes}
           </p>
         </div>
       </div>
@@ -66,23 +66,15 @@ export default async function BlogPostPage({
         <div className="container-page">
           <article className="max-w-2xl space-y-5 text-[16px] leading-[1.75] text-graphite">
             <p className="text-[18px] leading-relaxed text-ink">{post.excerpt}</p>
-            <h2 className="pt-4 text-xl font-semibold tracking-tight text-ink">Nə üçün vacibdir</h2>
-            <p>
-              Qapı seçimində qərar adətən üç parametr ətrafında formalaşır: təhlükəsizlik, izolyasiya
-              və dizayn. Bu üçlüyün balansı obyektin tipindən asılı olaraq dəyişir — mənzil girişi
-              üçün səs izolyasiyası, villa üçün isə termo göstərici prioritet olur.
-            </p>
+            <h2 className="pt-4 text-xl font-semibold tracking-tight text-ink">{dict.blog.whyItMatters}</h2>
+            <p>{dict.blog.whyItMattersText}</p>
 
-            <h2 className="pt-4 text-xl font-semibold tracking-tight text-ink">Praktik tövsiyə</h2>
-            <p>
-              Ölçünü mütləq usta götürsün. Açırımın diaqonal fərqi, divar qalınlığı və çərçivə
-              dərinliyi qapının düzgün oturmasını müəyyən edir; bu parametrlərdəki səhv sonradan
-              cırıltı, keçmə və kilid problemləri yaradır.
-            </p>
+            <h2 className="pt-4 text-xl font-semibold tracking-tight text-ink">{dict.blog.practicalTip}</h2>
+            <p>{dict.blog.practicalTipText}</p>
           </article>
 
           <div className="mt-14 border-t border-line pt-10">
-            <h2 className="mb-6 text-lg font-semibold tracking-tight text-ink">Digər yazılar</h2>
+            <h2 className="mb-6 text-lg font-semibold tracking-tight text-ink">{dict.blog.otherPosts}</h2>
             <div className="grid gap-3 sm:grid-cols-3">
               {others.map((p) => (
                 <Link

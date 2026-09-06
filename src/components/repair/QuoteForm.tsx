@@ -152,10 +152,9 @@ export function QuoteForm({ locale, dict }: { locale: Locale; dict: Dictionary }
             </h2>
           </div>
           <ul className="mt-4 space-y-3 text-[13.5px] leading-relaxed text-graphite">
-            <li>Standart aralıqdan kənar fərdi ölçülər.</li>
-            <li>Toplu sifarişlər (5+ qapı).</li>
-            <li>Qeyri-standart rəng, şpon və ya vitraj.</li>
-            <li>Kommersiya obyektləri və layihə təchizatı.</li>
+            {dict.quote.useCases.map((u) => (
+              <li key={u}>{u}</li>
+            ))}
           </ul>
         </Card>
       </aside>

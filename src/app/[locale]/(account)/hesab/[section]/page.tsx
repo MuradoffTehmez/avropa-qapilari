@@ -110,11 +110,11 @@ export default async function AccountSectionPage({
               {/* order timeline */}
               <div className="border-t border-line pt-4 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
                 <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-stone">
-                  Sifariş vəziyyəti
+                  {dict.account.orderProgress}
                 </p>
                 <Timeline
                   items={o.timeline.map((t) => ({
-                    label: t.label,
+                    label: dict.orderStatus[t.status],
                     date: t.date ? formatDate(t.date) : null,
                     state: t.state,
                   }))}
@@ -310,7 +310,10 @@ export default async function AccountSectionPage({
               <DataRow label="Sifariş" value={w.orderNumber} />
               <DataRow label="Quraşdırma" value={formatDate(w.installationDate)} />
               <DataRow label={dict.warranty.validUntil} value={formatDate(w.endDate)} />
-              <DataRow label={dict.warranty.coverage} value={w.coverage} />
+              <DataRow
+                label={dict.warranty.coverage}
+                value={w.coverage ?? dict.warranty.coverageDefault}
+              />
             </dl>
 
             <ButtonLink

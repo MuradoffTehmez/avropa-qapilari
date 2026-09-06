@@ -16,6 +16,7 @@ import { materialLabels, products } from "@/mock/products";
 import { brands, categories } from "@/mock/taxonomy";
 import { optionGroups } from "@/mock/options";
 import { reviews, technicians } from "@/mock/content";
+import { specializationName } from "@/lib/i18n-format";
 import {
   appointments,
   accountUser,
@@ -405,7 +406,7 @@ export function AdminSection({ locale, section }: { locale: Locale; section: str
           columns={[
             { key: "name", header: "Ad", render: (t) => <span className="font-medium text-ink">{t.name}</span> },
             { key: "phone", header: "Telefon", render: (t) => t.phone },
-            { key: "spec", header: "İxtisas", render: (t) => <span className="text-stone">{t.specialization.join(", ")}</span> },
+            { key: "spec", header: "İxtisas", render: (t) => <span className="text-stone">{t.specialization.map((k) => specializationName(k, dict)).join(", ")}</span> },
             { key: "areas", header: "Ərazi", render: (t) => <span className="text-stone">{t.serviceAreas.join(", ")}</span> },
             { key: "jobs", header: "İş", align: "right", render: (t) => t.completedJobs },
             { key: "rating", header: "Reytinq", align: "right", render: (t) => <Rating value={t.rating} /> },

@@ -75,7 +75,7 @@ export default async function FaqPage({
 
             <div className="mt-8 border border-line bg-bone p-5">
               <p className="text-[14px] font-medium text-ink">{dict.common.noAnswerFound}</p>
-              <p className="mt-1.5 text-[13px] text-stone">Operatorumuz kömək edəcək.</p>
+              <p className="mt-1.5 text-[13px] text-stone">{dict.common.operatorHelp}</p>
               <ButtonLink href={r.contact} size="sm" className="mt-4">
                 {dict.nav.contact}
               </ButtonLink>

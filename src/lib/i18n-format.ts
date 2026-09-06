@@ -54,3 +54,9 @@ export function productShort(product: Product, dict: Dictionary): string {
 export function productDescription(product: Product, dict: Dictionary): string {
   return `${productShort(product, dict)} ${dict.taxonomy.productLong.replace("{name}", product.name)}`;
 }
+
+/** Ustanın ixtisas sahəsi — dilə uyğun. */
+export function specializationName(key: string, dict: Dictionary): string {
+  const map = dict.about.specializations;
+  return key in map ? map[key as keyof typeof map] : key;
+}

@@ -69,7 +69,7 @@ export default async function BlogPage({
                   {post.excerpt}
                 </p>
                 <p className="mt-4 text-xs text-mist">
-                  {formatDate(post.date)} · {post.readMinutes} dəq oxu
+                  {formatDate(post.date)} · {post.readMinutes} {dict.blog.readMinutes}
                 </p>
               </div>
             </Link>
