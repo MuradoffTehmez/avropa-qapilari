@@ -11,30 +11,43 @@ import { slugify } from "@/lib/utils";
 
 /** TEST DATA — hər kateqoriyadan bir model. Backend qoşulanda əvəzlənəcək. */
 
+/** Giriş və villa qapıları — tam konfiqurasiya. */
 const entranceGroups: OptionGroupKey[] = [
   "SIZE",
   "OPENING_DIRECTION",
+  "PANEL_STYLE",
   "OUTSIDE_COLOR",
   "INSIDE_COLOR",
   "FRAME",
+  "SIDELIGHT",
   "GLASS",
+  "GLASS_PATTERN",
   "HANDLE",
+  "HINGE",
   "LOCK",
+  "CYLINDER",
   "SMART_LOCK",
+  "THRESHOLD",
+  "INSULATION",
   "ACCESSORY",
   "INSTALLATION",
   "DELIVERY",
 ];
 
+/** İnteryer qapıları — təhlükəsizlik və astana qrupları yoxdur. */
 const interiorGroups: OptionGroupKey[] = [
   "SIZE",
   "OPENING_DIRECTION",
+  "PANEL_STYLE",
   "OUTSIDE_COLOR",
   "INSIDE_COLOR",
   "FRAME",
   "GLASS",
+  "GLASS_PATTERN",
   "HANDLE",
+  "HINGE",
   "LOCK",
+  "INSULATION",
   "ACCESSORY",
   "INSTALLATION",
   "DELIVERY",

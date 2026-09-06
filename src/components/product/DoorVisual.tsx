@@ -14,6 +14,9 @@ import type { SurfaceStyle } from "@/types";
 export type GlassKind = "NONE" | "SATIN" | "CLEAR" | "BRONZE" | "TRIPLEX";
 export type HandleKind = "INOX" | "BLACK" | "BRASS" | "BAR";
 export type SideKind = "LEFT" | "RIGHT";
+export type GlassPattern = "PLAIN" | "LINES" | "VERTICAL" | "GRID" | "EDGE";
+export type HingeKind = "STD" | "HEAVY" | "HIDDEN";
+export type SidelightKind = "NONE" | "LEFT" | "RIGHT" | "BOTH" | "TRANSOM";
 
 export interface DoorVisualProps {
   panelHex: string;
@@ -25,6 +28,9 @@ export interface DoorVisualProps {
   /** Qat görünüşündə dəstəyi gizlətmək üçün */
   hideHandle?: boolean;
   side?: SideKind;
+  glassPattern?: GlassPattern;
+  hinge?: HingeKind;
+  sidelight?: SidelightKind;
   smartLock?: boolean;
   viewer?: boolean;
   houseNumber?: boolean;
@@ -76,6 +82,9 @@ export function DoorVisual({
   handleHex,
   hideHandle = false,
   side = "RIGHT",
+  glassPattern = "PLAIN",
+  hinge = "STD",
+  sidelight = "NONE",
   smartLock = false,
   viewer = false,
   houseNumber = false,
@@ -89,10 +98,21 @@ export function DoorVisual({
   // Vizual proporsiya: geniş qapılar daha enli görünür
   const ratio = widthMm / heightMm;
   const panelW = Math.round(190 * (ratio / (960 / 2050)));
-  const clampedW = Math.max(150, Math.min(250, panelW));
-  const panelX = (300 - clampedW) / 2;
-  const panelY = 26;
-  const panelH = 348;
+  const baseW = Math.max(150, Math.min(250, panelW));
+
+  // Yan panel varsa əsas qanad daralır ki, ümumi en dəyişməsin
+  const sideCount = sidelight === "BOTH" ? 2 : sidelight === "LEFT" || sidelight === "RIGHT" ? 1 : 0;
+  const sideW = sideCount > 0 ? 34 : 0;
+  const clampedW = Math.max(110, baseW - sideW * sideCount * 0.75);
+
+  const hasTransom = sidelight === "TRANSOM";
+  const transomH = hasTransom ? 44 : 0;
+
+  const totalW = clampedW + sideW * sideCount;
+  const groupX = (300 - totalW) / 2;
+  const panelX = groupX + (sidelight === "LEFT" || sidelight === "BOTH" ? sideW : 0);
+  const panelY = 26 + transomH;
+  const panelH = 348 - transomH;
 
   const handleColor = handleHex ?? handleFill[handle];
   const isRight = side === "RIGHT";
@@ -144,11 +164,59 @@ export function DoorVisual({
           <ellipse
             cx="150"
             cy="382"
-            rx={clampedW * 0.78}
+            rx={(clampedW + sideW * sideCount) * 0.78}
             ry="12"
             fill={`url(#floor-${uid})`}
           />
         </>
+      )}
+
+      {/* Yan və üst panellər */}
+      {(sideCount > 0 || hasTransom) && (
+        <g filter={`url(#soft-${uid})`}>
+          {hasTransom && (
+            <g>
+              <rect
+                x={groupX - 12}
+                y={14}
+                width={totalW + 24}
+                height={transomH}
+                rx="1"
+                fill={`url(#frame-${uid})`}
+              />
+              <rect
+                x={groupX - 4}
+                y={20}
+                width={totalW + 8}
+                height={transomH - 12}
+                fill="rgba(226,232,232,0.68)"
+                stroke={deeper}
+                strokeWidth="1"
+              />
+            </g>
+          )}
+
+          {(sidelight === "LEFT" || sidelight === "BOTH") && (
+            <SidePanel
+              x={groupX}
+              y={panelY}
+              w={sideW}
+              h={panelH}
+              frame={`url(#frame-${uid})`}
+              stroke={deeper}
+            />
+          )}
+          {(sidelight === "RIGHT" || sidelight === "BOTH") && (
+            <SidePanel
+              x={groupX + totalW - sideW}
+              y={panelY}
+              w={sideW}
+              h={panelH}
+              frame={`url(#frame-${uid})`}
+              stroke={deeper}
+            />
+          )}
+        </g>
       )}
 
       {/* Çərçivə */}
@@ -187,6 +255,7 @@ export function DoorVisual({
       {glass !== "NONE" && (
         <GlassInsert
           style={style}
+          pattern={glassPattern}
           x={panelX}
           y={panelY}
           w={clampedW}
@@ -196,19 +265,23 @@ export function DoorVisual({
         />
       )}
 
-      {/* Menteşələr */}
-      {[panelY + 40, panelY + panelH / 2, panelY + panelH - 40].map((cy) => (
-        <rect
-          key={cy}
-          x={hingeX - 2}
-          y={cy - 9}
-          width="4"
-          height="18"
-          rx="2"
-          fill={shade(panelHex, -60)}
-          opacity="0.85"
-        />
-      ))}
+      {/* Menteşələr — gizli variantda çəkilmir */}
+      {hinge !== "HIDDEN" &&
+        (hinge === "HEAVY"
+          ? [panelY + 34, panelY + panelH * 0.38, panelY + panelH * 0.62, panelY + panelH - 34]
+          : [panelY + 40, panelY + panelH / 2, panelY + panelH - 40]
+        ).map((cy) => (
+          <rect
+            key={cy}
+            x={hingeX - (hinge === "HEAVY" ? 2.6 : 2)}
+            y={cy - (hinge === "HEAVY" ? 11 : 9)}
+            width={hinge === "HEAVY" ? 5.2 : 4}
+            height={hinge === "HEAVY" ? 22 : 18}
+            rx="2"
+            fill={shade(panelHex, -60)}
+            opacity="0.85"
+          />
+        ))}
 
       {/* Dəstək */}
       {hideHandle ? null : handle === "BAR" ? (
@@ -405,8 +478,50 @@ function StylePattern({
   );
 }
 
+/** Yan sabit panel — şüşəli. */
+function SidePanel({
+  x,
+  y,
+  w,
+  h,
+  frame,
+  stroke,
+}: {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  frame: string;
+  stroke: string;
+}) {
+  return (
+    <g>
+      <rect x={x - 6} y={y - 12} width={w + 12} height={h + 12} rx="1" fill={frame} />
+      <rect
+        x={x + 2}
+        y={y + 6}
+        width={w - 4}
+        height={h - 18}
+        fill="rgba(226,232,232,0.62)"
+        stroke={stroke}
+        strokeWidth="1"
+      />
+      <line
+        x1={x + 2}
+        y1={y + 6 + (h - 18) / 2}
+        x2={x + w - 2}
+        y2={y + 6 + (h - 18) / 2}
+        stroke={stroke}
+        strokeWidth="0.8"
+        opacity="0.5"
+      />
+    </g>
+  );
+}
+
 function GlassInsert({
   style,
+  pattern = "PLAIN",
   x,
   y,
   w,
@@ -415,6 +530,7 @@ function GlassInsert({
   stroke,
 }: {
   style: SurfaceStyle;
+  pattern?: GlassPattern;
   x: number;
   y: number;
   w: number;
@@ -422,23 +538,138 @@ function GlassInsert({
   fill: string;
   stroke: string;
 }) {
-  if (style === "LOFT") {
-    return <rect x={x + 20} y={y + 20} width={w - 40} height={h - 40} fill={fill} opacity="0.9" />;
+  /** Şüşə sahəsi — stilə görə mövqe və ölçü. */
+  const area =
+    style === "LOFT"
+      ? { gx: x + 20, gy: y + 20, gw: w - 40, gh: h - 40 }
+      : style === "MINIMAL" || style === "MODERN"
+        ? { gx: x + w * 0.62, gy: y + 34, gw: w * 0.2, gh: h - 68 }
+        : { gx: x + 26, gy: y + 26, gw: w - 52, gh: h * 0.3 };
+
+  const { gx, gy, gw, gh } = area;
+
+  return (
+    <g>
+      <rect x={gx} y={gy} width={gw} height={gh} fill={fill} stroke={stroke} strokeWidth="1.3" />
+      <GlassPatternMarks pattern={pattern} gx={gx} gy={gy} gw={gw} gh={gh} stroke={stroke} />
+    </g>
+  );
+}
+
+/** Qumlama naxışı — şüşə sahəsinin içində. */
+function GlassPatternMarks({
+  pattern,
+  gx,
+  gy,
+  gw,
+  gh,
+  stroke,
+}: {
+  pattern: GlassPattern;
+  gx: number;
+  gy: number;
+  gw: number;
+  gh: number;
+  stroke: string;
+}) {
+  if (pattern === "PLAIN") {
+    return (
+      <line
+        x1={gx}
+        y1={gy + gh / 2}
+        x2={gx + gw}
+        y2={gy + gh / 2}
+        stroke={stroke}
+        strokeWidth="1"
+        opacity="0.45"
+      />
+    );
   }
 
-  if (style === "MINIMAL" || style === "MODERN") {
+  if (pattern === "LINES") {
+    const count = Math.max(3, Math.round(gh / 26));
     return (
-      <g>
-        <rect x={x + w * 0.62} y={y + 34} width={w * 0.2} height={h - 68} fill={fill} stroke={stroke} strokeWidth="1.2" />
-        <line x1={x + w * 0.62} y1={y + 34 + (h - 68) / 2} x2={x + w * 0.82} y2={y + 34 + (h - 68) / 2} stroke={stroke} strokeWidth="1" opacity="0.6" />
+      <g opacity="0.7">
+        {Array.from({ length: count }).map((_, i) => (
+          <rect
+            key={i}
+            x={gx + 3}
+            y={gy + (gh / (count + 1)) * (i + 1) - 2}
+            width={gw - 6}
+            height="4"
+            fill="rgba(255,255,255,0.85)"
+          />
+        ))}
       </g>
     );
   }
 
+  if (pattern === "VERTICAL") {
+    const count = Math.max(2, Math.round(gw / 16));
+    return (
+      <g opacity="0.7">
+        {Array.from({ length: count }).map((_, i) => (
+          <rect
+            key={i}
+            x={gx + (gw / (count + 1)) * (i + 1) - 1.6}
+            y={gy + 3}
+            width="3.2"
+            height={gh - 6}
+            fill="rgba(255,255,255,0.85)"
+          />
+        ))}
+      </g>
+    );
+  }
+
+  if (pattern === "GRID") {
+    const cols = Math.max(2, Math.round(gw / 26));
+    const rows = Math.max(2, Math.round(gh / 30));
+    return (
+      <g stroke="rgba(255,255,255,0.9)" strokeWidth="2" opacity="0.75">
+        {Array.from({ length: cols - 1 }).map((_, i) => (
+          <line
+            key={`c${i}`}
+            x1={gx + (gw / cols) * (i + 1)}
+            y1={gy}
+            x2={gx + (gw / cols) * (i + 1)}
+            y2={gy + gh}
+          />
+        ))}
+        {Array.from({ length: rows - 1 }).map((_, i) => (
+          <line
+            key={`r${i}`}
+            x1={gx}
+            y1={gy + (gh / rows) * (i + 1)}
+            x2={gx + gw}
+            y2={gy + (gh / rows) * (i + 1)}
+          />
+        ))}
+      </g>
+    );
+  }
+
+  // EDGE — kənarlar mat, mərkəz şəffaf
+  const inset = Math.min(gw, gh) * 0.18;
   return (
     <g>
-      <rect x={x + 26} y={y + 26} width={w - 52} height={h * 0.3} fill={fill} stroke={stroke} strokeWidth="1.4" />
-      <line x1={x + w / 2} y1={y + 26} x2={x + w / 2} y2={y + 26 + h * 0.3} stroke={stroke} strokeWidth="1" opacity="0.7" />
+      <rect
+        x={gx}
+        y={gy}
+        width={gw}
+        height={gh}
+        fill="rgba(255,255,255,0.7)"
+      />
+      <rect
+        x={gx + inset}
+        y={gy + inset}
+        width={Math.max(0, gw - inset * 2)}
+        height={Math.max(0, gh - inset * 2)}
+        fill="rgba(255,255,255,0.05)"
+        stroke={stroke}
+        strokeWidth="0.8"
+        opacity="0.6"
+      />
     </g>
   );
 }

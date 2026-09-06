@@ -139,13 +139,20 @@ export interface Product {
 export type OptionGroupKey =
   | "SIZE"
   | "OPENING_DIRECTION"
+  | "PANEL_STYLE"
   | "OUTSIDE_COLOR"
   | "INSIDE_COLOR"
   | "FRAME"
+  | "SIDELIGHT"
   | "GLASS"
+  | "GLASS_PATTERN"
   | "HANDLE"
+  | "HINGE"
   | "LOCK"
+  | "CYLINDER"
   | "SMART_LOCK"
+  | "THRESHOLD"
+  | "INSULATION"
   | "ACCESSORY"
   | "INSTALLATION"
   | "DELIVERY";
@@ -162,6 +169,8 @@ export interface OptionValue {
   swatch?: string;
   /** Uyğunluq: yalnız bu option id-lərindən biri seçilibsə mümkündür */
   requires?: string[];
+  /** Bu dəyər yalnız sadalanan qruplarda seçim varsa göstərilir */
+  requiresGroup?: OptionGroupKey;
   /** Bu dəyər seçilərsə qadağan olunan option id-ləri */
   excludes?: string[];
   badge?: string;

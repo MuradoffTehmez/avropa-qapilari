@@ -20,7 +20,14 @@ import { Field, Input, RadioCard } from "@/components/ui/form";
 import { Badge, Notice } from "@/components/ui/primitives";
 import { Stepper } from "@/components/ui/disclosure";
 import { toast } from "@/components/ui/overlays";
-import { DoorVisual, type GlassKind, type HandleKind } from "@/components/product/DoorVisual";
+import {
+  DoorVisual,
+  type GlassKind,
+  type GlassPattern,
+  type HandleKind,
+  type HingeKind,
+  type SidelightKind,
+} from "@/components/product/DoorVisual";
 import { DoorLayers, type VisualLayer } from "@/components/configurator/DoorLayers";
 import { findOptionValue, optionGroups, standardSizes } from "@/mock/options";
 import { calculatePrice, sizeRangeLabel } from "@/features/pricing/engine";
@@ -322,6 +329,15 @@ function defaultChoices(product: Product): ConfigurationSelection["choices"] {
     }
 
     // Xarici rəng üçün məhsulun öz palitrasına uyğun dəyəri seçirik
+    // Panel naxışı məhsulun öz stilindən başlayır
+    if (key === "PANEL_STYLE") {
+      const match = group.values.find((v) => v.code === product.style);
+      if (match) {
+        choices[key] = match.id;
+        continue;
+      }
+    }
+
     if (key === "OUTSIDE_COLOR") {
       const match = group.values.find((v) => v.hex === product.panelHexes[0]);
       if (match) {
@@ -357,11 +373,17 @@ function buildPreview(
   product: Product,
   hidden: Set<string> = new Set(),
 ) {
-  const outside = findOptionValue(selection.choices.OUTSIDE_COLOR as string);
-  const glassValue = findOptionValue(selection.choices.GLASS as string);
-  const handleValue = findOptionValue(selection.choices.HANDLE as string);
-  const smartLock = findOptionValue(selection.choices.SMART_LOCK as string);
-  const opening = findOptionValue(selection.choices.OPENING_DIRECTION as string);
+  const value = (key: OptionGroupKey) => findOptionValue(selection.choices[key] as string);
+
+  const outside = value("OUTSIDE_COLOR");
+  const panelStyle = value("PANEL_STYLE");
+  const glassValue = value("GLASS");
+  const glassPattern = value("GLASS_PATTERN");
+  const handleValue = value("HANDLE");
+  const hingeValue = value("HINGE");
+  const sidelightValue = value("SIDELIGHT");
+  const smartLock = value("SMART_LOCK");
+  const opening = value("OPENING_DIRECTION");
   const accessories = Array.isArray(selection.choices.ACCESSORY)
     ? (selection.choices.ACCESSORY as string[])
     : [];
@@ -370,13 +392,17 @@ function buildPreview(
 
   return {
     panelHex: off("OUTSIDE_COLOR") ? "#c7ccd3" : (outside?.hex ?? product.panelHexes[0]),
-    style: product.style,
+    style: (off("PANEL_STYLE") ? product.style : ((panelStyle?.code as Product["style"]) ?? product.style)),
     glass: (off("GLASS") ? "NONE" : (glassValue?.code ?? "NONE")) as GlassKind,
+    glassPattern: (off("GLASS_PATTERN") ? "PLAIN" : (glassPattern?.code ?? "PLAIN")) as GlassPattern,
     handle: (handleValue?.code ?? "INOX") as HandleKind,
+    handleHex: handleValue?.hex,
     hideHandle: off("HANDLE"),
+    hinge: (off("HINGE") ? "STD" : (hingeValue?.code ?? "STD")) as HingeKind,
+    sidelight: (off("SIDELIGHT") ? "NONE" : (sidelightValue?.code ?? "NONE")) as SidelightKind,
     side: (opening?.code?.startsWith("LEFT") ? "LEFT" : "RIGHT") as "LEFT" | "RIGHT",
     smartLock: !off("SMART_LOCK") && Boolean(smartLock && smartLock.code !== "NONE"),
-    viewer: !off("ACCESSORY") && accessories.includes("ac-viewer"),
+    viewer: !off("ACCESSORY") && accessories.some((a) => a.startsWith("ac-viewer")),
     houseNumber: !off("ACCESSORY") && accessories.includes("ac-number"),
     widthMm: selection.width,
     heightMm: selection.height,
@@ -401,13 +427,20 @@ function buildVisualLayers(
   ];
 
   const order: OptionGroupKey[] = [
+    "PANEL_STYLE",
     "OUTSIDE_COLOR",
     "INSIDE_COLOR",
     "FRAME",
+    "SIDELIGHT",
     "GLASS",
+    "GLASS_PATTERN",
     "HANDLE",
+    "HINGE",
     "LOCK",
+    "CYLINDER",
     "SMART_LOCK",
+    "THRESHOLD",
+    "INSULATION",
     "ACCESSORY",
   ];
 
