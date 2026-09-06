@@ -23,7 +23,7 @@ import { TrustStrip } from "@/components/home/TrustStrip";
 import { ProcessSection } from "@/components/home/ProcessSection";
 import { categories, brands } from "@/mock/taxonomy";
 import { getFeaturedProducts } from "@/mock/products";
-import { faq, projects, reviews } from "@/mock/content";
+import { localizedFaq, localizedProjects, localizedReviews } from "@/mock/content.i18n";
 import { categoryName, countryName } from "@/lib/i18n-format";
 
 export default async function HomePage({
@@ -58,7 +58,7 @@ export default async function HomePage({
             <div className="relative aspect-16/10 overflow-hidden sm:aspect-3/2 lg:aspect-4/5">
               <Image
                 src="/images/entrance-hero.webp"
-                alt="Mat qara giriş qapısı, qızıl bar dəstək"
+                alt={dict.home.heroImageAlt}
                 fill
                 priority
                 sizes="(max-width: 1024px) 100vw, 45vw"
@@ -208,7 +208,7 @@ export default async function HomePage({
       <Section>
         <div className="container-page">
           <SectionHeading
-            eyebrow="Seçilmişlər"
+            eyebrow={dict.home.eyebrowFeatured}
             title={dict.home.featuredTitle}
             text={dict.home.featuredText}
             action={
@@ -225,10 +225,33 @@ export default async function HomePage({
         </div>
       </Section>
 
-      {/* ---------------------------------------------------- SERVICES */}
+      {/* ----------------------------------------------------- REVIEWS */}
       <Section tone="bone" className="border-y border-line">
         <div className="container-page">
-          <SectionHeading eyebrow="Xidmətlər" title={dict.home.servicesTitle} text={dict.home.servicesText} />
+          <SectionHeading eyebrow={dict.home.eyebrowReviews} title={dict.home.reviewsTitle} text={dict.home.reviewsText} />
+          <div className="grid gap-3 sm:gap-4 lg:grid-cols-3">
+            {localizedReviews(locale).slice(0, 3).map((rv) => (
+              <figure key={rv.id} className="flex flex-col border border-line bg-paper p-5">
+                <Rating value={rv.rating} />
+                <blockquote className="mt-4 flex-1 text-[14px] leading-relaxed text-graphite">
+                  “{rv.text}”
+                </blockquote>
+                <figcaption className="mt-5 border-t border-line pt-4">
+                  <p className="text-sm font-medium text-ink">{rv.author}</p>
+                  <p className="mt-0.5 text-xs text-stone">
+                    {rv.city} · {rv.productName} · {formatDate(rv.date)}
+                  </p>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* ---------------------------------------------------- SERVICES */}
+      <Section>
+        <div className="container-page">
+          <SectionHeading eyebrow={dict.home.eyebrowServices} title={dict.home.servicesTitle} text={dict.home.servicesText} />
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             {[
               { icon: Ruler, title: dict.services.measurement, text: dict.services.measurementText, href: r.serviceMeasurement },
@@ -261,7 +284,7 @@ export default async function HomePage({
         <div className="container-page grid gap-8 py-14 lg:grid-cols-[1.4fr_1fr] lg:items-center lg:py-20">
           <div>
             <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-gold-300">
-              24 saat içində usta
+              {dict.trust.repairBadge}
             </p>
             <h2 className="text-balance-heading text-2xl font-semibold leading-tight tracking-tight sm:text-3xl lg:text-[2.35rem]">
               {dict.home.repairTitle}
@@ -284,7 +307,7 @@ export default async function HomePage({
           </div>
 
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-2">
-            {["Kilid", "Menteşə", "Çərçivə", "Şüşə", "Smart lock", "Tənzimləmə"].map((s) => (
+            {dict.home.repairScope.map((s) => (
               <div key={s} className="border border-paper/12 px-4 py-3 text-[13px] text-paper/70">
                 {s}
               </div>
@@ -307,14 +330,14 @@ export default async function HomePage({
             }
           />
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {projects.slice(0, 3).map((p) => (
+            {localizedProjects(locale).slice(0, 3).map((p) => (
               <Link
                 key={p.id}
                 href={`${r.projects}/${p.slug}`}
                 className="group border border-line bg-paper transition-colors hover:border-mist"
               >
                 <div className="relative aspect-4/3 overflow-hidden bg-bone">
-                  <DoorScene color={p.accent} variant={projects.indexOf(p)} title={p.title} />
+                  <DoorScene color={p.accent} variant={localizedProjects(locale).indexOf(p)} title={p.title} />
                   <Badge tone="dark" className="absolute left-3 top-3">
                     {p.category}
                   </Badge>
@@ -355,29 +378,6 @@ export default async function HomePage({
         </div>
       </Section>
 
-      {/* ----------------------------------------------------- REVIEWS */}
-      <Section>
-        <div className="container-page">
-          <SectionHeading eyebrow="Rəylər" title={dict.home.reviewsTitle} text={dict.home.reviewsText} />
-          <div className="grid gap-3 sm:gap-4 lg:grid-cols-3">
-            {reviews.slice(0, 3).map((rv) => (
-              <figure key={rv.id} className="flex flex-col border border-line bg-paper p-5">
-                <Rating value={rv.rating} />
-                <blockquote className="mt-4 flex-1 text-[14px] leading-relaxed text-graphite">
-                  “{rv.text}”
-                </blockquote>
-                <figcaption className="mt-5 border-t border-line pt-4">
-                  <p className="text-sm font-medium text-ink">{rv.author}</p>
-                  <p className="mt-0.5 text-xs text-stone">
-                    {rv.city} · {rv.productName} · {formatDate(rv.date)}
-                  </p>
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-        </div>
-      </Section>
-
       {/* --------------------------------------------------------- FAQ */}
       <Section tone="bone" className="border-t border-line">
         <div className="container-page grid gap-10 lg:grid-cols-[1fr_1.6fr] lg:gap-16">
@@ -389,7 +389,7 @@ export default async function HomePage({
           </div>
           <Accordion
             defaultOpen={0}
-            items={faq.slice(0, 6).map((f) => ({ id: f.id, title: f.question, content: f.answer }))}
+            items={localizedFaq(locale).slice(0, 6).map((f) => ({ id: f.id, title: f.question, content: f.answer }))}
           />
         </div>
       </Section>

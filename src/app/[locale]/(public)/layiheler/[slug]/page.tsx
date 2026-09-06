@@ -6,19 +6,20 @@ import { routes } from "@/lib/routes";
 import { Breadcrumbs, DataRow, Section } from "@/components/ui/primitives";
 import { ButtonLink } from "@/components/ui/Button";
 import { ProjectDetail } from "@/components/product/ProjectDetail";
-import { projects } from "@/mock/content";
+import { localizedProjects } from "@/mock/content.i18n";
 
 export function generateStaticParams() {
-  return locales.flatMap((locale) => projects.map((p) => ({ locale, slug: p.slug })));
+  return locales.flatMap((locale) => localizedProjects(locale).map((p) => ({ locale, slug: p.slug })));
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
-  const project = projects.find((p) => p.slug === slug);
+  const { locale: raw, slug } = await params;
+  const locale = (isLocale(raw) ? raw : "az") as Locale;
+  const project = localizedProjects(locale).find((p) => p.slug === slug);
   if (!project) return {};
   return {
     title: project.title,
@@ -36,7 +37,7 @@ export default async function ProjectPage({
   const dict = getDictionary(locale);
   const r = routes(locale);
 
-  const project = projects.find((p) => p.slug === slug);
+  const project = localizedProjects(locale).find((p) => p.slug === slug);
   if (!project) notFound();
 
   return (

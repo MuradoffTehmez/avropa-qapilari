@@ -5,7 +5,7 @@ import { routes } from "@/lib/routes";
 import { Badge, Breadcrumbs, Section } from "@/components/ui/primitives";
 import { DoorScene } from "@/components/product/DoorScene";
 import Link from "next/link";
-import { projects } from "@/mock/content";
+import { localizedProjects } from "@/mock/content.i18n";
 
 export async function generateMetadata({
   params,
@@ -46,10 +46,10 @@ export default async function ProjectsPage({
 
       <Section>
         <div className="container-page grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {projects.map((p) => (
+          {localizedProjects(locale).map((p) => (
             <article key={p.id} className="border border-line bg-paper">
               <div className="relative aspect-4/3 overflow-hidden bg-bone">
-                <DoorScene color={p.accent} variant={projects.indexOf(p)} title={p.title} />
+                <DoorScene color={p.accent} variant={localizedProjects(locale).indexOf(p)} title={p.title} />
                 <Badge tone="dark" className="absolute left-3 top-3">
                   {p.category}
                 </Badge>

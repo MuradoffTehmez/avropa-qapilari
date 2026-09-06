@@ -4,7 +4,7 @@ import { Award, ShieldCheck, Star, Wrench } from "lucide-react";
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/types";
 import { routes } from "@/lib/routes";
-import { reviews } from "@/mock/content";
+import { localizedReviews } from "@/mock/content.i18n";
 
 /**
  * Sosial sübut zolağı — kateqoriyalardan dərhal sonra.
@@ -12,12 +12,12 @@ import { reviews } from "@/mock/content";
  */
 export function TrustStrip({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const r = routes(locale);
-  const review = reviews[0];
+  const review = localizedReviews(locale)[0];
 
   const stats = [
     { icon: ShieldCheck, value: "RC2–RC5", label: dict.trust.securityCertified },
-    { icon: Wrench, value: "24 saat", label: dict.trust.technicianResponse },
-    { icon: Award, value: "3–10 il", label: dict.trust.warrantyRange },
+    { icon: Wrench, value: dict.trust.responseTime, label: dict.trust.technicianResponse },
+    { icon: Award, value: dict.trust.warrantyYears, label: dict.trust.warrantyRange },
   ];
 
   return (

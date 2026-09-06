@@ -214,6 +214,11 @@ export const az = {
     reviewsText: "Yalnız təsdiqlənmiş rəylər göstərilir.",
     faqTitle: "Tez-tez verilən suallar",
     faqText: "Ən çox soruşulanlar.",
+    heroImageAlt: "Mat qara giriş qapısı, qızıl bar dəstək",
+    eyebrowFeatured: "Seçilmişlər",
+    eyebrowServices: "Xidmətlər",
+    eyebrowReviews: "Rəylər",
+    repairScope: ["Kilid", "Menteşə", "Çərçivə", "Şüşə", "Smart lock", "Tənzimləmə"],
   },
 
   services: {
@@ -231,10 +236,110 @@ export const az = {
     maintenanceText: "Dövri texniki baxış, tənzimləmə və yağlama.",
   },
 
+  serviceDetail: {
+    process: "Proses",
+    included: "Xidmətə daxildir",
+    prices: "Qiymətlər",
+    priceNote: "Qiymətlər təxminidir və obyektin xüsusiyyətlərinə görə dəyişə bilər.",
+    measurement: {
+      title: "Ölçü xidməti",
+      lead: "Doğru ölçü — problemsiz quraşdırmanın 90%-i. Ustamız ünvana gəlir, açırımı ölçür və uyğun modelləri yerində təklif edir.",
+      steps: [
+        "Onlayn müraciət və ya zəng",
+        "Uyğun tarix və saat aralığının təsdiqi",
+        "Ustanın ünvana gəlişi",
+        "Açırımın ölçülməsi və qeydiyyatı",
+        "Model və qiymət təklifi",
+      ],
+      includes: [
+        "Açırımın eni, hündürlüyü və dərinliyi",
+        "Divar qalınlığı və çərçivə tipi",
+        "Açılma istiqamətinin müəyyən edilməsi",
+        "Foto qeydiyyat və ölçü protokolu",
+      ],
+      pricing: [
+        { label: "Bakı daxili", value: "25 AZN" },
+        { label: "Sifariş verildikdə", value: "Pulsuz" },
+        { label: "Regionlar", value: "Fərdi razılaşma" },
+      ],
+    },
+    installation: {
+      title: "Quraşdırma xidməti",
+      lead: "Sertifikatlı briqada Avropa standartlarına uyğun quraşdırma aparır. İş bitdikdən sonra qapı tənzimlənir və zəmanət açılır.",
+      steps: [
+        "Quraşdırma görüşünün planlanması",
+        "Köhnə qapının sökülməsi (tam paketdə)",
+        "Çərçivənin quraşdırılması və nivelirlənməsi",
+        "Panelin quraşdırılması, kilid tənzimləməsi",
+        "Təhvil, foto qeydiyyat və zəmanətin açılması",
+      ],
+      includes: [
+        "Anker bərkitmə və köpük izolyasiya",
+        "Kontur izolyasiyanın yoxlanması",
+        "Kilid və menteşələrin tənzimlənməsi",
+        "İş yerinin təmizlənməsi",
+      ],
+      pricing: [
+        { label: "Standart quraşdırma", value: "120 AZN" },
+        { label: "Tam quraşdırma", value: "220 AZN" },
+        { label: "Villa / geniş açırım", value: "Fərdi hesablama" },
+      ],
+    },
+    repair: {
+      title: "Qapı təmiri",
+      lead: "Kilid, menteşə, çərçivə, şüşə və smart lock problemləri. Bizdən alınmamış qapılara da xidmət göstəririk.",
+      steps: [
+        "Onlayn müraciət (foto/video ilə)",
+        "Operator zəngi və ilkin diaqnostika",
+        "Usta təyinatı və vaxt təsdiqi",
+        "Ünvanda diaqnostika və qiymət razılaşması",
+        "Təmir, ehtiyat hissə dəyişimi və təhvil",
+      ],
+      includes: [
+        "Kilid mexanizminin dəyişdirilməsi və ya təmiri",
+        "Menteşə tənzimləməsi və dəyişimi",
+        "Çərçivə düzəldilməsi, qapı düzləndirilməsi",
+        "İzolyasiya konturunun bərpası",
+        "Smart lock proqram və aparat problemləri",
+      ],
+      pricing: [
+        { label: "Diaqnostika", value: "25 AZN" },
+        { label: "Kilid dəyişimi", value: "60 AZN-dən" },
+        { label: "Menteşə tənzimləmə", value: "40 AZN-dən" },
+        { label: "Ehtiyat hissələr", value: "Ayrıca hesablanır" },
+      ],
+    },
+    maintenance: {
+      title: "Texniki baxım",
+      lead: "İllik profilaktik baxım qapının ömrünü uzadır və gözlənilməz nasazlıqların qarşısını alır.",
+      steps: [
+        "Baxım görüşünün planlanması",
+        "Mexanizmlərin yoxlanması",
+        "Yağlama və tənzimləmə",
+        "İzolyasiya konturunun qiymətləndirilməsi",
+        "Baxım protokolunun servis tarixçəsinə yazılması",
+      ],
+      includes: [
+        "Kilid və silindr yağlanması",
+        "Menteşə tənzimləməsi",
+        "Kontur izolyasiyanın yoxlanması",
+        "Astana və bərkidici elementlərin nəzarəti",
+      ],
+      pricing: [
+        { label: "Tək qapı", value: "60 AZN" },
+        { label: "3+ qapı", value: "45 AZN / qapı" },
+        { label: "Zəmanət dövründə", value: "İldə 1 dəfə pulsuz" },
+      ],
+    },
+  },
+
   trust: {
     securityCertified: "EN 1627 üzrə sertifikatlı təhlükəsizlik sinifləri",
     technicianResponse: "Təmir müraciətinə usta cavabı",
     warrantyRange: "Serial nömrəyə bağlı zəmanət",
+    responseTime: "24 saat",
+    warrantyYears: "3–10 il",
+    repairBadge: "24 saat içində usta",
   },
 
   showroom: {

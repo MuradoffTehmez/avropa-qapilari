@@ -216,6 +216,11 @@ export const en: Dictionary = {
     reviewsText: "Only verified reviews are shown.",
     faqTitle: "Frequently asked questions",
     faqText: "The questions we hear most.",
+    heroImageAlt: "Matt black entrance door with a golden bar handle",
+    eyebrowFeatured: "Featured",
+    eyebrowServices: "Services",
+    eyebrowReviews: "Reviews",
+    repairScope: ["Lock", "Hinge", "Frame", "Glass", "Smart lock", "Adjustment"],
   },
 
   services: {
@@ -234,10 +239,110 @@ export const en: Dictionary = {
     maintenanceText: "Periodic inspection, adjustment and lubrication.",
   },
 
+  serviceDetail: {
+    process: "Process",
+    included: "What the service includes",
+    prices: "Prices",
+    priceNote: "Prices are indicative and may change depending on the property.",
+    measurement: {
+      title: "Measurement service",
+      lead: "An accurate measurement is 90% of a trouble-free installation. Our technician comes to your address, measures the opening and suggests suitable models on the spot.",
+      steps: [
+        "Online request or a phone call",
+        "Confirming a suitable date and time slot",
+        "The technician arrives at your address",
+        "Measuring and recording the opening",
+        "Model and price proposal",
+      ],
+      includes: [
+        "Width, height and depth of the opening",
+        "Wall thickness and frame type",
+        "Determining the opening direction",
+        "Photo record and measurement protocol",
+      ],
+      pricing: [
+        { label: "Within Baku", value: "25 AZN" },
+        { label: "When you place an order", value: "Free" },
+        { label: "Regions", value: "By agreement" },
+      ],
+    },
+    installation: {
+      title: "Installation service",
+      lead: "A certified crew installs to European standards. When the work is done the door is adjusted and the warranty is opened.",
+      steps: [
+        "Scheduling the installation visit",
+        "Removing the old door (in the full package)",
+        "Fitting and levelling the frame",
+        "Hanging the panel, adjusting the lock",
+        "Handover, photo record and warranty registration",
+      ],
+      includes: [
+        "Anchor fixing and foam insulation",
+        "Checking the seal contours",
+        "Adjusting the lock and hinges",
+        "Cleaning the work area",
+      ],
+      pricing: [
+        { label: "Standard installation", value: "120 AZN" },
+        { label: "Full installation", value: "220 AZN" },
+        { label: "Villa / wide opening", value: "Individual calculation" },
+      ],
+    },
+    repair: {
+      title: "Door repair",
+      lead: "Lock, hinge, frame, glass and smart lock problems. We also service doors that were not bought from us.",
+      steps: [
+        "Online request (with photo or video)",
+        "Operator call and initial diagnosis",
+        "Technician assignment and time confirmation",
+        "On-site diagnosis and agreeing the price",
+        "Repair, parts replacement and handover",
+      ],
+      includes: [
+        "Replacing or repairing the lock mechanism",
+        "Hinge adjustment and replacement",
+        "Straightening the frame and the door",
+        "Restoring the sealing contour",
+        "Smart lock software and hardware problems",
+      ],
+      pricing: [
+        { label: "Diagnosis", value: "25 AZN" },
+        { label: "Lock replacement", value: "from 60 AZN" },
+        { label: "Hinge adjustment", value: "from 40 AZN" },
+        { label: "Spare parts", value: "Charged separately" },
+      ],
+    },
+    maintenance: {
+      title: "Technical maintenance",
+      lead: "Annual preventive maintenance extends the life of the door and prevents unexpected failures.",
+      steps: [
+        "Scheduling the maintenance visit",
+        "Checking the mechanisms",
+        "Lubrication and adjustment",
+        "Assessing the sealing contour",
+        "Writing the maintenance record into the service history",
+      ],
+      includes: [
+        "Lubricating the lock and cylinder",
+        "Hinge adjustment",
+        "Checking the seal contours",
+        "Inspecting the threshold and fixings",
+      ],
+      pricing: [
+        { label: "Single door", value: "60 AZN" },
+        { label: "3+ doors", value: "45 AZN / door" },
+        { label: "During the warranty", value: "Once a year, free" },
+      ],
+    },
+  },
+
   trust: {
     securityCertified: "Security classes certified to EN 1627",
     technicianResponse: "Technician response to a repair request",
     warrantyRange: "Warranty tied to a serial number",
+    responseTime: "24 hours",
+    warrantyYears: "3–10 years",
+    repairBadge: "A technician within 24 hours",
   },
 
   showroom: {

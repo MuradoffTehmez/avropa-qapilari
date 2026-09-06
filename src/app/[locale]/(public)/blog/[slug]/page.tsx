@@ -6,19 +6,20 @@ import type { Locale } from "@/types";
 import { routes } from "@/lib/routes";
 import { formatDate } from "@/lib/utils";
 import { Badge, Breadcrumbs, Section } from "@/components/ui/primitives";
-import { blogPosts } from "@/mock/content";
+import { localizedPosts } from "@/mock/content.i18n";
 
 export function generateStaticParams() {
-  return locales.flatMap((locale) => blogPosts.map((p) => ({ locale, slug: p.slug })));
+  return locales.flatMap((locale) => localizedPosts(locale).map((p) => ({ locale, slug: p.slug })));
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
-  const post = blogPosts.find((p) => p.slug === slug);
+  const { locale: raw, slug } = await params;
+  const locale = (isLocale(raw) ? raw : "az") as Locale;
+  const post = localizedPosts(locale).find((p) => p.slug === slug);
   if (!post) return {};
   return { title: post.title, description: post.excerpt };
 }
@@ -33,10 +34,10 @@ export default async function BlogPostPage({
   const dict = getDictionary(locale);
   const r = routes(locale);
 
-  const post = blogPosts.find((p) => p.slug === slug);
+  const post = localizedPosts(locale).find((p) => p.slug === slug);
   if (!post) notFound();
 
-  const others = blogPosts.filter((p) => p.slug !== slug).slice(0, 3);
+  const others = localizedPosts(locale).filter((p) => p.slug !== slug).slice(0, 3);
 
   return (
     <>

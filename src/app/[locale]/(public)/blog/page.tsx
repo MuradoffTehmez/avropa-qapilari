@@ -6,7 +6,7 @@ import type { Locale } from "@/types";
 import { routes } from "@/lib/routes";
 import { formatDate } from "@/lib/utils";
 import { Badge, Breadcrumbs, Section } from "@/components/ui/primitives";
-import { blogPosts } from "@/mock/content";
+import { localizedPosts } from "@/mock/content.i18n";
 
 export async function generateMetadata({
   params,
@@ -46,7 +46,7 @@ export default async function BlogPage({
 
       <Section>
         <div className="container-page grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {blogPosts.map((post) => (
+          {localizedPosts(locale).map((post) => (
             <Link
               key={post.id}
               href={r.blogPost(post.slug)}
@@ -56,7 +56,7 @@ export default async function BlogPage({
                 className="relative aspect-16/10 border-b border-line"
                 style={{ background: `linear-gradient(135deg, ${post.accent}, ${post.accent}cc)` }}
               >
-                <DoorScene color={post.accent} variant={blogPosts.indexOf(post)} title={post.title} />
+                <DoorScene color={post.accent} variant={localizedPosts(locale).indexOf(post)} title={post.title} />
                 <Badge tone="dark" className="absolute left-3 top-3">
                   {post.category}
                 </Badge>

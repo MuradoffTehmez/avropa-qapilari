@@ -36,7 +36,7 @@ import { StickyBuyBar } from "@/components/product/StickyBuyBar";
 import { ProductCard } from "@/components/product/ProductCard";
 import { getProduct, getRelatedProducts, products } from "@/mock/products";
 import { getBrand, getCategory } from "@/mock/taxonomy";
-import { faq, reviews } from "@/mock/content";
+import { localizedFaq, localizedReviews } from "@/mock/content.i18n";
 import { optionGroups } from "@/mock/options";
 import { materialName, priceFrom, styleName } from "@/lib/i18n-format";
 
@@ -79,7 +79,7 @@ export default async function ProductPage({
   const category = getCategory(product.categorySlug);
   const productBrand = getBrand(product.brandSlug);
   const related = getRelatedProducts(product);
-  const productReviews = reviews.filter((rv) => rv.productName === product.name);
+  const productReviews = localizedReviews(locale).filter((rv) => rv.productName === product.name);
 
   const specGroups = Array.from(new Set(product.specs.map((s) => s.group)));
 
@@ -438,7 +438,7 @@ export default async function ProductPage({
               ),
             },
             {
-              id: "reviews",
+              id: "localizedReviews(locale)",
               label: `${dict.product.tabs.reviews}${productReviews.length ? ` (${productReviews.length})` : ""}`,
               content:
                 productReviews.length > 0 ? (
@@ -463,12 +463,12 @@ export default async function ProductPage({
                 ),
             },
             {
-              id: "faq",
+              id: "localizedFaq(locale)",
               label: dict.product.tabs.faq,
               content: (
                 <Accordion
                   className="lg:max-w-3xl"
-                  items={faq.slice(0, 5).map((f) => ({ id: f.id, title: f.question, content: f.answer }))}
+                  items={localizedFaq(locale).slice(0, 5).map((f) => ({ id: f.id, title: f.question, content: f.answer }))}
                 />
               ),
             },

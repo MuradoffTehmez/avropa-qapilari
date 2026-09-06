@@ -5,7 +5,7 @@ import { routes } from "@/lib/routes";
 import { Accordion } from "@/components/ui/disclosure";
 import { Breadcrumbs, Section } from "@/components/ui/primitives";
 import { ButtonLink } from "@/components/ui/Button";
-import { faq } from "@/mock/content";
+import { localizedFaq } from "@/mock/content.i18n";
 
 export async function generateMetadata({
   params,
@@ -32,13 +32,13 @@ export default async function FaqPage({
   const dict = getDictionary(locale);
   const r = routes(locale);
 
-  const groups = Array.from(new Set(faq.map((f) => f.group)));
+  const groups = Array.from(new Set(localizedFaq(locale).map((f) => f.group)));
 
   /** FAQPage structured data */
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: faq.map((f) => ({
+    mainEntity: localizedFaq(locale).map((f) => ({
       "@type": "Question",
       name: f.question,
       acceptedAnswer: { "@type": "Answer", text: f.answer },
@@ -87,7 +87,7 @@ export default async function FaqPage({
               <div key={group}>
                 <h2 className="mb-4 text-lg font-semibold tracking-tight text-ink">{group}</h2>
                 <Accordion
-                  items={faq
+                  items={localizedFaq(locale)
                     .filter((f) => f.group === group)
                     .map((f) => ({ id: f.id, title: f.question, content: f.answer }))}
                 />

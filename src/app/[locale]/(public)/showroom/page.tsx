@@ -28,7 +28,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { Accordion } from "@/components/ui/disclosure";
 import { DoorVisual } from "@/components/product/DoorVisual";
 import { ShowroomBooking } from "@/components/showroom/ShowroomBooking";
-import { faq } from "@/mock/content";
+import { localizedFaq } from "@/mock/content.i18n";
 
 export async function generateMetadata({
   params,
@@ -308,7 +308,7 @@ export default async function ShowroomPage({
           />
           <Accordion
             defaultOpen={0}
-            items={faq.slice(0, 5).map((f) => ({ id: f.id, title: f.question, content: f.answer }))}
+            items={localizedFaq(locale).slice(0, 5).map((f) => ({ id: f.id, title: f.question, content: f.answer }))}
           />
         </div>
       </Section>
