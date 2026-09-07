@@ -1,6 +1,6 @@
 import type { ConfigurationSelection, Product } from "@/types";
-import { findOptionValue } from "@/mock/options";
 import { pruneIncompatible } from "./compatibility";
+import { resolveProductOption } from "./product-options";
 
 export function parseSharedDesign(raw: string | undefined, product: Product): ConfigurationSelection | undefined {
   if (!raw || raw.length > 8000) return;
@@ -12,9 +12,12 @@ export function parseSharedDesign(raw: string | undefined, product: Product): Co
       const value = input.choices[group];
       if (!value) continue;
       const values = Array.isArray(value) ? value : [value];
-      if (!values.every((id: unknown) => typeof id === "string" && findOptionValue(id)?.groupKey === group)) return;
+      if (!values.every((id: unknown) => typeof id === "string" && resolveProductOption(product, id)?.groupKey === group)) return;
       choices[group] = value;
     }
-    return pruneIncompatible({ width: input.width, height: input.height, choices }, findOptionValue);
+    return pruneIncompatible(
+      { width: input.width, height: input.height, choices },
+      (id) => resolveProductOption(product, id),
+    );
   } catch { return; }
 }

@@ -7,7 +7,7 @@ import type { Dictionary } from "@/i18n";
 import type { ConfigurationSelection, ConstructionLayer, OptionGroupKey, Product } from "@/types";
 import { cn, formatPrice } from "@/lib/utils";
 import { constructionLayers } from "@/mock/construction";
-import { findOptionValue } from "@/mock/options";
+import { resolveProductOption } from "@/features/configurator/product-options";
 import { materialName } from "@/lib/i18n-format";
 
 /** Preview-də görünən vizual qatlar (PRD §50). */
@@ -299,8 +299,8 @@ function configuredConstruction(
   hidden: Set<string>,
 ): ConstructionLayer[] {
   const stack = constructionLayers(product.material).map((layer) => ({ ...layer }));
-  const outside = findOptionValue(selection.choices.OUTSIDE_COLOR as string);
-  const inside = findOptionValue(selection.choices.INSIDE_COLOR as string);
+  const outside = resolveProductOption(product, selection.choices.OUTSIDE_COLOR as string);
+  const inside = resolveProductOption(product, selection.choices.INSIDE_COLOR as string);
 
   if (!hidden.has("OUTSIDE_COLOR") && outside?.hex && stack[0]) {
     stack[0].color = outside.hex;
@@ -310,7 +310,7 @@ function configuredConstruction(
   }
 
   if (!hidden.has("INSULATION")) {
-    const insulation = findOptionValue(selection.choices.INSULATION as string);
+    const insulation = resolveProductOption(product, selection.choices.INSULATION as string);
     const extra = insulation?.code === "MAX" ? 10 : insulation?.code === "THERMAL" ? 7 : insulation?.code === "ACOUSTIC" ? 4 : 0;
     if (extra > 0 && stack.length > 2) {
       const coreIndex = stack.reduce(

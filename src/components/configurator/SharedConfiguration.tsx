@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import { FileQuestion, Link2, ShieldCheck } from "lucide-react";
 
 import type { Dictionary } from "@/i18n";
-import type { ConfigurationSelection, Locale, OptionGroupKey } from "@/types";
+import type { ConfigurationSelection, Locale, OptionGroupKey, Product } from "@/types";
 import { routes } from "@/lib/routes";
 import { cn, formatPrice, uid } from "@/lib/utils";
 import { Badge, Card, DataRow, EmptyState, Section } from "@/components/ui/primitives";
@@ -14,13 +14,13 @@ import { Button, ButtonLink } from "@/components/ui/Button";
 import { toast } from "@/components/ui/overlays";
 import { DoorVisual, type DoorFace } from "@/components/product/DoorVisual";
 import { getProduct } from "@/mock/products";
-import { findOptionValue } from "@/mock/options";
 import { optionLabel } from "@/mock/options.i18n";
 import { parseSharedDesign } from "@/features/configurator/shared";
 import { calculatePrice } from "@/features/pricing/engine";
 import { buildPreview, snapshotKeys } from "@/components/configurator/Configurator";
 import { materialName, productShort, styleName } from "@/lib/i18n-format";
 import { useCart } from "@/store/cart";
+import { resolveProductOption } from "@/features/configurator/product-options";
 
 /**
  * Paylaşılan konfiqurasiya səhifəsi (PRD §57).
@@ -40,12 +40,14 @@ export function SharedConfiguration({
   locale,
   dict,
   saved,
+  product: serverProduct,
 }: {
   code: string;
   locale: Locale;
   dict: Dictionary;
   /** Kod bazada tapılıbsa seçimlər və məbləğ serverdən gəlir. */
   saved?: SavedConfiguration | null;
+  product?: Product | null;
 }) {
   const params = useSearchParams();
   const r = routes(locale);
@@ -57,7 +59,7 @@ export function SharedConfiguration({
   const slug = saved?.productSlug ?? params.get("p") ?? "";
   const raw = params.get("d") ?? undefined;
 
-  const product = slug ? getProduct(slug) : undefined;
+  const product = serverProduct ?? (slug ? getProduct(slug) : undefined);
   const selection = useMemo(
     () =>
       product
@@ -89,7 +91,7 @@ export function SharedConfiguration({
     ? { ...calculatePrice(product, selection, { locale, dict }), total: saved.total }
     : calculatePrice(product, selection, { locale, dict });
   const preview = buildPreview(selection, product, new Set(), previewFace);
-  const lines = summaryLines(selection, locale, dict);
+  const lines = summaryLines(selection, product, locale, dict);
 
   function copyLink() {
     navigator.clipboard?.writeText(window.location.href).then(
@@ -111,7 +113,7 @@ export function SharedConfiguration({
       snapshot: {
         width: selection!.width,
         height: selection!.height,
-        lines: snapshotKeys(selection!),
+        lines: snapshotKeys(selection!, product!),
       },
     });
     toast(dict.actions.addToCart);
@@ -221,6 +223,7 @@ export function SharedConfiguration({
 
 function summaryLines(
   selection: ConfigurationSelection,
+  product: Product,
   locale: Locale,
   dict: Dictionary,
 ) {
@@ -231,7 +234,7 @@ function summaryLines(
     const ids = Array.isArray(raw) ? raw : [raw];
     const labels = ids
       .map((id) => {
-        const v = findOptionValue(id);
+        const v = resolveProductOption(product, id);
         return v ? optionLabel(v, locale) : null;
       })
       .filter(Boolean) as string[];

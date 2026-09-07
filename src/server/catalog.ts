@@ -6,6 +6,7 @@ import type {
   Category,
   DoorMaterial,
   OptionGroupKey,
+  OptionValue,
   Product,
   SecurityClass,
   SurfaceStyle,
@@ -14,7 +15,7 @@ import { products as seedProducts } from "@/mock/products";
 import { brands as seedBrands, categories as seedCategories } from "@/mock/taxonomy";
 
 type ProductRow = Prisma.ProductGetPayload<{
-  include: { category: true; brand: true; productOptions: true };
+  include: { category: true; brand: true; productOptions: { include: { optionValue: true } } };
 }>;
 
 const materials = new Set<DoorMaterial>([
@@ -56,6 +57,21 @@ function jsonStrings(value: string): string[] {
   } catch {
     return [];
   }
+}
+
+function mapOption(row: ProductRow["productOptions"][number]["optionValue"]): OptionValue | null {
+  if (!optionGroupKeys.has(row.groupKey as OptionGroupKey)) return null;
+  return {
+    id: row.id,
+    groupKey: row.groupKey as OptionGroupKey,
+    code: row.code,
+    label: row.label,
+    description: row.description ?? undefined,
+    priceDelta: row.priceDelta,
+    hex: row.hex ?? undefined,
+    requires: row.requires ? jsonStrings(row.requires) : undefined,
+    excludes: row.excludes ? jsonStrings(row.excludes) : undefined,
+  };
 }
 
 function mapProduct(row: ProductRow): Product {
@@ -121,13 +137,17 @@ function mapProduct(row: ProductRow): Product {
     documents: fallback?.documents ?? [],
     optionGroups: groups.length > 0 ? groups : (fallback?.optionGroups ?? ["SIZE"]),
     optionValueIds: row.productOptions.filter((option) => option.enabled).map((option) => option.optionValueId),
+    optionValues: row.productOptions
+      .filter((option) => option.enabled)
+      .map((option) => mapOption(option.optionValue))
+      .filter((option): option is OptionValue => option !== null),
   };
 }
 
 export async function catalogProducts(): Promise<Product[]> {
   const rows = await db.product.findMany({
     where: { archivedAt: null, status: "PUBLISHED" },
-    include: { category: true, brand: true, productOptions: true },
+    include: { category: true, brand: true, productOptions: { include: { optionValue: true } } },
     orderBy: [{ isBestseller: "desc" }, { rating: "desc" }, { name: "asc" }],
   });
   return rows.map(mapProduct);
@@ -136,7 +156,7 @@ export async function catalogProducts(): Promise<Product[]> {
 export async function catalogProduct(slug: string): Promise<Product | null> {
   const row = await db.product.findFirst({
     where: { slug, archivedAt: null, status: "PUBLISHED" },
-    include: { category: true, brand: true, productOptions: true },
+    include: { category: true, brand: true, productOptions: { include: { optionValue: true } } },
   });
   return row ? mapProduct(row) : null;
 }
@@ -148,7 +168,7 @@ export async function featuredCatalogProducts(limit = 8): Promise<Product[]> {
 export async function relatedCatalogProducts(product: Product, limit = 4): Promise<Product[]> {
   const rows = await db.product.findMany({
     where: { category: { slug: product.categorySlug }, id: { not: product.id }, archivedAt: null, status: "PUBLISHED" },
-    include: { category: true, brand: true, productOptions: true },
+    include: { category: true, brand: true, productOptions: { include: { optionValue: true } } },
     orderBy: [{ isBestseller: "desc" }, { rating: "desc" }],
     take: limit,
   });

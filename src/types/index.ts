@@ -134,6 +134,8 @@ export interface Product {
   optionGroups: OptionGroupKey[];
   /** Bazada bu məhsula bağlanmış konfiqurator dəyərləri. Olmadıqda statik kataloq bütün qrup dəyərlərini istifadə edir. */
   optionValueIds?: string[];
+  /** Adminin yaratdığı və məhsula bağladığı canlı seçim məlumatları. */
+  optionValues?: OptionValue[];
 }
 
 /* ---------------------------- Configurator ----------------------------- */

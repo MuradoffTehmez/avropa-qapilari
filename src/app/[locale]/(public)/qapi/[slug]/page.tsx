@@ -43,7 +43,7 @@ import {
 } from "@/server/catalog";
 import { localizedFaq } from "@/mock/content.i18n";
 import { publishedReviews } from "@/server/reviews";
-import { optionGroups } from "@/mock/options";
+import { productOptionsForGroup } from "@/features/configurator/product-options";
 import { optionText } from "@/mock/options.i18n";
 import { categoryName, materialName, priceFrom, productDescription, productShort, styleName } from "@/lib/i18n-format";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -325,7 +325,7 @@ export default async function ProductPage({
                     {dict.product.colorsHint}
                   </p>
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
-                    {optionGroups.OUTSIDE_COLOR.values.map((c) => {
+                    {productOptionsForGroup(product, "OUTSIDE_COLOR").map((c) => {
                       const text = optionText(c, locale);
                       return <div key={c.id} className="border border-line">
                         <div className="h-20" style={{ background: c.swatch ?? c.hex }} />
@@ -346,7 +346,7 @@ export default async function ProductPage({
               label: dict.product.tabs.locks,
               content: (
                 <div className="grid gap-4 sm:grid-cols-2 lg:max-w-4xl">
-                  {[...optionGroups.LOCK.values, ...optionGroups.SMART_LOCK.values]
+                  {[...productOptionsForGroup(product, "LOCK"), ...productOptionsForGroup(product, "SMART_LOCK")]
                     .filter((v) => v.code !== "NONE")
                     .map((lock) => {
                       const text = optionText(lock, locale);
@@ -372,7 +372,7 @@ export default async function ProductPage({
               label: dict.product.tabs.installation,
               content: (
                 <div className="grid gap-4 sm:grid-cols-3 lg:max-w-4xl">
-                  {optionGroups.INSTALLATION.values.map((v) => {
+                  {productOptionsForGroup(product, "INSTALLATION").map((v) => {
                     const text = optionText(v, locale);
                     return <Card key={v.id} className="p-5">
                       <h3 className="text-[15px] font-medium text-ink">{text.label}</h3>
@@ -398,7 +398,7 @@ export default async function ProductPage({
                     {" "}{dict.product.deliveryAfter}
                   </p>
                   <dl className="border-t border-line">
-                    {optionGroups.DELIVERY.values.map((v) => (
+                    {productOptionsForGroup(product, "DELIVERY").map((v) => (
                       <DataRow
                         key={v.id}
                         label={optionText(v, locale).label}

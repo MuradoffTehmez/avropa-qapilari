@@ -9,8 +9,8 @@ import type {
 } from "@/types";
 import type { Dictionary } from "@/i18n";
 import { az } from "@/i18n/dictionaries/az";
-import { findOptionValue } from "@/mock/options";
 import { optionLabel } from "@/mock/options.i18n";
+import { resolveProductOption } from "@/features/configurator/product-options";
 
 /** Qiymət sətirlərinin dili; verilməzsə AZ. */
 export interface PriceContext {
@@ -70,13 +70,13 @@ export const priceRules: PriceRule[] = [
   },
 ];
 
-function collectSelected(selection: ConfigurationSelection): OptionValue[] {
+function collectSelected(product: Product, selection: ConfigurationSelection): OptionValue[] {
   const out: OptionValue[] = [];
   for (const raw of Object.values(selection.choices)) {
     if (!raw) continue;
     const ids = Array.isArray(raw) ? raw : [raw];
     for (const id of ids) {
-      const v = findOptionValue(id);
+      const v = resolveProductOption(product, id);
       if (v) out.push(v);
     }
   }
@@ -111,7 +111,7 @@ export function calculatePrice(
     lines.push({ key: "size", label: dict.configurator.sizeModifier, amount: size });
   }
 
-  const selected = collectSelected(selection);
+  const selected = collectSelected(product, selection);
 
   for (const key of groupOrder) {
     const values = selected.filter((v) => v.groupKey === key && v.priceDelta !== 0);

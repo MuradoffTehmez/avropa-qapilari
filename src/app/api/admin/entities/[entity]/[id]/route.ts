@@ -27,7 +27,11 @@ const productSchema = z.object({
   if (value.minHeight > value.defaultHeight || value.defaultHeight > value.maxHeight) context.addIssue({ code: "custom", path: ["defaultHeight"], message: "Standart hündürlük minimum və maksimum aralığında olmalıdır" });
   if (value.deliveryDaysMin > value.deliveryDaysMax) context.addIssue({ code: "custom", path: ["deliveryDaysMax"], message: "Maksimum müddət minimumdan az ola bilməz" });
 });
-const optionSchema = z.object({ groupKey: z.string().trim().min(2), code: z.string().trim().min(1), label: z.string().trim().min(1), priceDelta: z.number().int(), hex: z.string().trim().optional() });
+const optionSchema = z.object({
+  code: z.string().trim().min(1), label: z.string().trim().min(1), description: z.string().trim().optional(),
+  priceDelta: z.number().int(), hex: z.string().trim().optional(),
+  requires: z.array(z.string()).default([]), excludes: z.array(z.string()).default([]),
+});
 const appointmentSchema = z.object({ reference: z.string().trim().min(2), type: z.string().trim().min(2), date: z.string().trim().min(10), startTime: z.string().trim().min(4), endTime: z.string().trim().min(4), address: z.string().trim().min(3), technicianId: z.string().optional(), status: z.string().trim().min(2) });
 const technicianSchema = z.object({ name: z.string().trim().min(2), phone: z.string().trim(), specialization: z.string().default(""), serviceAreas: z.string().default(""), status: z.string().trim().min(2) });
 const userSchema = z.object({ name: z.string().trim().min(2), email: z.email(), phone: z.string().trim().optional() });
@@ -72,7 +76,20 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ en
         });
         break;
       }
-      case "options": { const input = optionSchema.parse(raw); await db.optionValue.update({ where: { id }, data: { ...input, hex: input.hex || null } }); break; }
+      case "options": {
+        const input = optionSchema.parse(raw);
+        const dependencyIds = [...new Set([...input.requires, ...input.excludes])];
+        if (dependencyIds.includes(id)) return fail("SELF_REFERENCE", "Option özü ilə uyğunluq qaydası yarada bilməz", 422);
+        const dependencyCount = await db.optionValue.count({ where: { id: { in: dependencyIds } } });
+        if (dependencyCount !== dependencyIds.length) return fail("OPTION_NOT_FOUND", "Uyğunluq qaydasındakı option tapılmadı", 422);
+        await db.optionValue.update({ where: { id }, data: {
+          code: input.code, label: input.label, description: input.description || null,
+          priceDelta: input.priceDelta, hex: input.hex || null,
+          requires: input.requires.length ? JSON.stringify([...new Set(input.requires)]) : null,
+          excludes: input.excludes.length ? JSON.stringify([...new Set(input.excludes)]) : null,
+        } });
+        break;
+      }
       case "appointments": {
         const input = appointmentSchema.parse(raw);
         if (input.technicianId) {
@@ -120,7 +137,21 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
       case "categories": await db.category.delete({ where: { id } }); break;
       case "brands": await db.brand.delete({ where: { id } }); break;
       case "products": await db.product.update({ where: { id }, data: { archivedAt: new Date() } }); break;
-      case "options": await db.optionValue.delete({ where: { id } }); break;
+      case "options": {
+        const [productLinks, rules] = await Promise.all([
+          db.productOption.count({ where: { optionValueId: id } }),
+          db.optionValue.findMany({
+            where: { id: { not: id }, OR: [{ requires: { not: null } }, { excludes: { not: null } }] },
+            select: { requires: true, excludes: true },
+          }),
+        ]);
+        const ruleLinks = rules.some((rule) => [...jsonIds(rule.requires), ...jsonIds(rule.excludes)].includes(id));
+        if (productLinks > 0 || ruleLinks) {
+          return fail("OPTION_IN_USE", "Option məhsuldan və uyğunluq qaydalarından ayrılmadan silinə bilməz", 409);
+        }
+        await db.optionValue.delete({ where: { id } });
+        break;
+      }
       case "appointments": await db.appointment.delete({ where: { id } }); break;
       case "technicians": {
         const technician = await db.technician.findUnique({ where: { id } });
@@ -150,4 +181,14 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
 
 function jsonList(value: string): string {
   return JSON.stringify(value.split(",").map((item) => item.trim()).filter(Boolean));
+}
+
+function jsonIds(value: string | null): string[] {
+  if (!value) return [];
+  try {
+    const parsed: unknown = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === "string") : [];
+  } catch {
+    return [];
+  }
 }

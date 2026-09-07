@@ -6,6 +6,7 @@ import { routes } from "@/lib/routes";
 import { Breadcrumbs, Skeleton } from "@/components/ui/primitives";
 import { SharedConfiguration } from "@/components/configurator/SharedConfiguration";
 import { db } from "@/server/db";
+import { catalogProduct } from "@/server/catalog";
 
 export async function generateMetadata({
   params,
@@ -48,6 +49,7 @@ export default async function SharedConfigurationPage({
         total: record.total,
       }
     : null;
+  const product = saved ? await catalogProduct(saved.productSlug) : null;
 
   return (
     <>
@@ -71,7 +73,7 @@ export default async function SharedConfigurationPage({
           </div>
         }
       >
-        <SharedConfiguration code={code} locale={locale} dict={dict} saved={saved} />
+        <SharedConfiguration code={code} locale={locale} dict={dict} saved={saved} product={product} />
       </Suspense>
     </>
   );

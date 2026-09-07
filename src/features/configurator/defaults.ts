@@ -1,5 +1,6 @@
 import type { ConfigurationSelection, Product } from "@/types";
 import { optionGroups } from "@/mock/options";
+import { productOptionsForGroup } from "./product-options";
 
 /**
  * Konfiquratorun başlanğıc seçimləri.
@@ -13,9 +14,7 @@ export function defaultChoices(product: Product): ConfigurationSelection["choice
   for (const key of product.optionGroups) {
     if (key === "SIZE") continue;
     const group = optionGroups[key];
-    const values = product.optionValueIds
-      ? group.values.filter((value) => product.optionValueIds!.includes(value.id))
-      : group.values;
+    const values = productOptionsForGroup(product, key);
 
     if (group.multi) {
       choices[key] = [];

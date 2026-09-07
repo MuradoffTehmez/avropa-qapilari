@@ -32,7 +32,11 @@ const productSchema = z.object({
   if (value.minHeight > value.defaultHeight || value.defaultHeight > value.maxHeight) context.addIssue({ code: "custom", path: ["defaultHeight"], message: "Standart hündürlük minimum və maksimum aralığında olmalıdır" });
   if (value.deliveryDaysMin > value.deliveryDaysMax) context.addIssue({ code: "custom", path: ["deliveryDaysMax"], message: "Maksimum müddət minimumdan az ola bilməz" });
 });
-const optionSchema = z.object({ id: z.string().trim().min(2), groupKey: z.string().trim().min(2), code: z.string().trim().min(1), label: z.string().trim().min(1), priceDelta: z.number().int(), hex: z.string().trim().optional() });
+const optionSchema = z.object({
+  id: z.string().trim().min(2), groupKey: z.string().trim().min(2), code: z.string().trim().min(1),
+  label: z.string().trim().min(1), description: z.string().trim().optional(), priceDelta: z.number().int(),
+  hex: z.string().trim().optional(), requires: z.array(z.string()).default([]), excludes: z.array(z.string()).default([]),
+});
 const appointmentSchema = z.object({ reference: z.string().trim().min(2), type: z.string().trim().min(2), date: z.string().trim().min(10), startTime: z.string().trim().min(4), endTime: z.string().trim().min(4), address: z.string().trim().min(3), technicianId: z.string().optional(), status: z.string().trim().min(2) });
 const technicianSchema = z.object({ name: z.string().trim().min(2), phone: z.string().trim(), email: z.email(), password: z.string().min(8), specialization: z.string().default(""), serviceAreas: z.string().default(""), status: z.string().trim().min(2) });
 const userSchema = z.object({ name: z.string().trim().min(2), email: z.email(), phone: z.string().trim().optional(), password: z.string().min(8), role: z.enum(["CUSTOMER", "TECHNICIAN", "ADMIN"]) });
@@ -88,7 +92,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ ent
       }
       case "options": {
         const input = optionSchema.parse(raw);
-        await db.optionValue.create({ data: { ...input, hex: input.hex || null } });
+        const dependencyIds = [...new Set([...input.requires, ...input.excludes])];
+        if (dependencyIds.includes(input.id)) return fail("SELF_REFERENCE", "Option özü ilə uyğunluq qaydası yarada bilməz", 422);
+        const dependencyCount = await db.optionValue.count({ where: { id: { in: dependencyIds } } });
+        if (dependencyCount !== dependencyIds.length) return fail("OPTION_NOT_FOUND", "Uyğunluq qaydasındakı option tapılmadı", 422);
+        await db.optionValue.create({ data: {
+          id: input.id, groupKey: input.groupKey, code: input.code, label: input.label,
+          description: input.description || null, priceDelta: input.priceDelta, hex: input.hex || null,
+          requires: input.requires.length ? JSON.stringify([...new Set(input.requires)]) : null,
+          excludes: input.excludes.length ? JSON.stringify([...new Set(input.excludes)]) : null,
+        } });
         target = input.id;
         break;
       }

@@ -126,11 +126,15 @@ export function AdminSection({
     { name: "founded", label: ui.fields.founded, type: "number", required: true },
   ];
   const optionFields: CrudField[] = [
-    { name: "id", label: ui.fields.optionName, required: true },
-    { name: "groupKey", label: ui.fields.group, required: true },
+    { name: "id", label: ui.fields.optionName, required: true, createOnly: true },
+    { name: "groupKey", label: ui.fields.group, type: "select", required: true, createOnly: true, options: Object.entries(dict.configurator.steps).filter(([key]) => key !== "SIZE").map(([value, label]) => ({ value, label })) },
     { name: "code", label: ui.fields.code, required: true },
     { name: "label", label: ui.fields.label, required: true },
+    { name: "description", label: ui.fields.description, type: "textarea" },
     { name: "priceDelta", label: ui.fields.priceDelta, type: "number" },
+    { name: "hex", label: ui.fields.hex },
+    { name: "requires", label: ui.fields.requiresOptions, type: "multiselect", options: productOptionChoices },
+    { name: "excludes", label: ui.fields.excludesOptions, type: "multiselect", options: productOptionChoices },
   ];
   const appointmentFields: CrudField[] = [
     { name: "reference", label: ui.fields.reference, required: true },

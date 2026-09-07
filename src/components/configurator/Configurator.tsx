@@ -3,7 +3,7 @@
 import { useWorkflow } from "@/store/workflow";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, Layers, Link2, RotateCcw, Save, X } from "lucide-react";
 
 import type { Dictionary } from "@/i18n";
@@ -44,6 +44,7 @@ import { toBreakdown } from "@/features/pricing/labels";
 import { useServerPrice } from "@/components/configurator/useServerPrice";
 import { checkCompatibility, pruneIncompatible } from "@/features/configurator/compatibility";
 import { defaultChoices } from "@/features/configurator/defaults";
+import { productOptionsForGroup, resolveProductOption } from "@/features/configurator/product-options";
 import { useCart } from "@/store/cart";
 import { useSession } from "@/store/session";
 import { ApiRequestError, apiFetch } from "@/lib/api";
@@ -61,6 +62,7 @@ export function Configurator({
 }) {
   const r = routes(locale);
   const addToCart = useCart((s) => s.add);
+  const findValue = useCallback((id: string) => resolveProductOption(product, id), [product]);
 
   const steps = useMemo(
     () => product.optionGroups,
@@ -83,7 +85,7 @@ export function Configurator({
         height: product.defaultHeight,
         choices: defaultChoices(product),
       },
-      findOptionValue,
+      findValue,
     ),
   );
 
@@ -115,7 +117,7 @@ export function Configurator({
         next.choices[group] = valueId;
       }
 
-      return pruneIncompatible(next, findOptionValue);
+      return pruneIncompatible(next, findValue);
     });
   }
 
@@ -144,7 +146,7 @@ export function Configurator({
           height: product.defaultHeight,
           choices: defaultChoices(product),
         },
-        findOptionValue,
+        findValue,
       ),
     );
     setCustomSize(false);
@@ -171,11 +173,11 @@ export function Configurator({
       panelHex: previewProps.panelHex,
       quantity: 1,
       unitPrice: price.total,
-      includedServices: [selection.choices.INSTALLATION, selection.choices.DELIVERY].reduce<number>((sum, id) => sum + (typeof id === "string" ? findOptionValue(id)?.priceDelta ?? 0 : 0), 0),
+      includedServices: [selection.choices.INSTALLATION, selection.choices.DELIVERY].reduce<number>((sum, id) => sum + (typeof id === "string" ? findValue(id)?.priceDelta ?? 0 : 0), 0),
       snapshot: {
         width: selection.width,
         height: selection.height,
-        lines: snapshotKeys(selection),
+        lines: snapshotKeys(selection, product),
       },
     });
     toast(dict.configurator.addedToCart);
@@ -183,7 +185,7 @@ export function Configurator({
 
   const previewProps = buildPreview(selection, product, hiddenLayers, previewFace);
   const visualLayers = buildVisualLayers(selection, product, dict, locale);
-  const selectedLines = summaryLines(selection, locale, dict);
+  const selectedLines = summaryLines(selection, product, locale, dict);
   const previewKey = JSON.stringify([
     selection.width,
     selection.height,
@@ -308,7 +310,7 @@ export function Configurator({
             <OptionStep
               group={currentGroup}
               selection={selection}
-              availableOptionIds={product.optionValueIds}
+              product={product}
               onSelect={setChoice}
               dict={dict}
               locale={locale}
@@ -406,11 +408,13 @@ export function Configurator({
 /* ------------------------------------------------------------------ */
 
 /** Səbətə yazılan snapshot: qrup açarı + option id (dil-müstəqil). */
-export function snapshotKeys(selection: ConfigurationSelection) {
+export function snapshotKeys(selection: ConfigurationSelection, product?: Product) {
   const lines: { group: string; value: string }[] = [];
   for (const [key, raw] of Object.entries(selection.choices)) {
     if (!raw) continue;
-    const ids = (Array.isArray(raw) ? raw : [raw]).filter((id) => findOptionValue(id));
+    const ids = (Array.isArray(raw) ? raw : [raw]).filter((id) =>
+      product ? resolveProductOption(product, id) : findOptionValue(id),
+    );
     if (ids.length === 0) continue;
     for (const id of ids) lines.push({ group: key, value: id });
   }
@@ -419,6 +423,7 @@ export function snapshotKeys(selection: ConfigurationSelection) {
 
 function summaryLines(
   selection: ConfigurationSelection,
+  product: Product,
   locale: Locale,
   dict: Dictionary,
 ) {
@@ -430,7 +435,7 @@ function summaryLines(
     const ids = Array.isArray(raw) ? raw : [raw];
     const labels = ids
       .map((id) => {
-        const v = findOptionValue(id);
+        const v = resolveProductOption(product, id);
         return v ? optionLabel(v, locale) : null;
       })
       .filter(Boolean) as string[];
@@ -447,7 +452,7 @@ export function buildPreview(
   hidden: Set<string> = new Set(),
   face: DoorFace = "OUTSIDE",
 ) {
-  const value = (key: OptionGroupKey) => findOptionValue(selection.choices[key] as string);
+  const value = (key: OptionGroupKey) => resolveProductOption(product, selection.choices[key] as string);
 
   const outside = value("OUTSIDE_COLOR");
   const inside = value("INSIDE_COLOR");
@@ -561,7 +566,7 @@ function buildVisualLayers(
     if (!raw) continue;
 
     const ids = Array.isArray(raw) ? raw : [raw];
-    const values = ids.map(findOptionValue).filter(Boolean) as NonNullable<
+    const values = ids.map((id) => resolveProductOption(product, id)).filter(Boolean) as NonNullable<
       ReturnType<typeof findOptionValue>
     >[];
     if (values.length === 0) continue;
@@ -691,14 +696,14 @@ function SizeStep({
 function OptionStep({
   group,
   selection,
-  availableOptionIds,
+  product,
   onSelect,
   dict,
   locale,
 }: {
   group: OptionGroupKey;
   selection: ConfigurationSelection;
-  availableOptionIds?: string[];
+  product: Product;
   onSelect: (group: OptionGroupKey, valueId: string, multi: boolean) => void;
   dict: Dictionary;
   locale: Locale;
@@ -708,16 +713,14 @@ function OptionStep({
   const current = selection.choices[group];
 
   const labelOf = (id: string) => {
-    const v = findOptionValue(id);
+    const v = resolveProductOption(product, id);
     return v ? optionLabel(v, locale) : id;
   };
 
-  const availableValues = availableOptionIds
-    ? def.values.filter((value) => availableOptionIds.includes(value.id))
-    : def.values;
+  const availableValues = productOptionsForGroup(product, group);
   const withCompat = availableValues.map((v) => ({
     value: v,
-    compat: checkCompatibility(v, selection, findOptionValue, labelOf, dict),
+    compat: checkCompatibility(v, selection, (id) => resolveProductOption(product, id), labelOf, dict),
   }));
 
   return (

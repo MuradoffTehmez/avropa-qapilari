@@ -139,6 +139,9 @@ export interface AdminOptionRow {
   label: string;
   priceDelta: number;
   hex: string | null;
+  description: string;
+  requires: string[];
+  excludes: string[];
   requiresCount: number;
 }
 
@@ -159,7 +162,10 @@ export async function adminOptionGroups(): Promise<AdminOptionGroup[]> {
       label: v.label,
       priceDelta: v.priceDelta,
       hex: v.hex,
-      requiresCount: v.requires ? (JSON.parse(v.requires) as string[]).length : 0,
+      description: v.description ?? "",
+      requires: parseStringList(v.requires),
+      excludes: parseStringList(v.excludes),
+      requiresCount: parseStringList(v.requires).length,
     });
     groups.set(v.groupKey, list);
   }
@@ -168,6 +174,16 @@ export async function adminOptionGroups(): Promise<AdminOptionGroup[]> {
     groupKey: groupKey as OptionGroupKey,
     values,
   }));
+}
+
+function parseStringList(value: string | null): string[] {
+  if (!value) return [];
+  try {
+    const parsed: unknown = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === "string") : [];
+  } catch {
+    return [];
+  }
 }
 
 export interface AdminOrderRow {
