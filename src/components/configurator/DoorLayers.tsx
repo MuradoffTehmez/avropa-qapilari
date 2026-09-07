@@ -4,9 +4,10 @@ import { useState } from "react";
 import { Eye, EyeOff, Layers, Ruler, Scissors } from "lucide-react";
 
 import type { Dictionary } from "@/i18n";
-import type { ConstructionLayer, OptionGroupKey, Product } from "@/types";
+import type { ConfigurationSelection, ConstructionLayer, OptionGroupKey, Product } from "@/types";
 import { cn, formatPrice } from "@/lib/utils";
-import { constructionLayers, totalThickness } from "@/mock/construction";
+import { constructionLayers } from "@/mock/construction";
+import { findOptionValue } from "@/mock/options";
 import { materialName } from "@/lib/i18n-format";
 
 /** Preview-də görünən vizual qatlar (PRD §50). */
@@ -26,6 +27,7 @@ export function DoorLayers({
   layers,
   hidden,
   onToggle,
+  selection,
   className,
 }: {
   product: Product;
@@ -33,10 +35,11 @@ export function DoorLayers({
   layers: VisualLayer[];
   hidden: Set<string>;
   onToggle: (key: string) => void;
+  selection: ConfigurationSelection;
   className?: string;
 }) {
   const [tab, setTab] = useState<"visual" | "section">("visual");
-  const stack = constructionLayers(product.material);
+  const stack = configuredConstruction(product, selection, hidden);
 
   return (
     <div className={cn("flex min-h-0 flex-col border-t border-line bg-paper", className)}>
@@ -187,7 +190,7 @@ function CrossSection({
         <p className="flex items-center gap-1.5 text-[12px] text-stone">
           <Ruler size={13} className="text-gold-500" />
           {dict.configurator.totalThickness}:{" "}
-          <span className="font-semibold text-ink">{totalThickness(product.material)} mm</span>
+          <span className="font-semibold text-ink">{Math.round(total)} mm</span>
         </p>
         <p className="text-[12px] text-stone">{materialName(product.material, dict)}</p>
       </div>
@@ -288,4 +291,35 @@ function CrossSection({
       </ul>
     </div>
   );
+}
+
+function configuredConstruction(
+  product: Product,
+  selection: ConfigurationSelection,
+  hidden: Set<string>,
+): ConstructionLayer[] {
+  const stack = constructionLayers(product.material).map((layer) => ({ ...layer }));
+  const outside = findOptionValue(selection.choices.OUTSIDE_COLOR as string);
+  const inside = findOptionValue(selection.choices.INSIDE_COLOR as string);
+
+  if (!hidden.has("OUTSIDE_COLOR") && outside?.hex && stack[0]) {
+    stack[0].color = outside.hex;
+  }
+  if (!hidden.has("INSIDE_COLOR") && inside?.hex && stack.at(-1)) {
+    stack[stack.length - 1].color = inside.hex;
+  }
+
+  if (!hidden.has("INSULATION")) {
+    const insulation = findOptionValue(selection.choices.INSULATION as string);
+    const extra = insulation?.code === "MAX" ? 10 : insulation?.code === "THERMAL" ? 7 : insulation?.code === "ACOUSTIC" ? 4 : 0;
+    if (extra > 0 && stack.length > 2) {
+      const coreIndex = stack.reduce(
+        (best, layer, index) => (layer.thicknessMm > stack[best].thicknessMm ? index : best),
+        0,
+      );
+      stack[coreIndex].thicknessMm += extra;
+    }
+  }
+
+  return stack;
 }

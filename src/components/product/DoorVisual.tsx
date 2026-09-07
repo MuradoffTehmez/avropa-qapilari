@@ -17,10 +17,20 @@ export type SideKind = "LEFT" | "RIGHT";
 export type GlassPattern = "PLAIN" | "LINES" | "VERTICAL" | "GRID" | "EDGE";
 export type HingeKind = "STD" | "HEAVY" | "HIDDEN";
 export type SidelightKind = "NONE" | "LEFT" | "RIGHT" | "BOTH" | "TRANSOM";
+export type DoorFace = "OUTSIDE" | "INSIDE";
+export type OpeningKind = "INWARD" | "OUTWARD";
+export type FrameKind = "STD" | "TELE" | "WIDE" | "HIDDEN";
+export type LockKind = "3P" | "5P" | "MP" | "MOTOR";
+export type CylinderKind = "STD" | "KNOB" | "ANTI_DRILL" | "CARD";
+export type ThresholdKind = "STD" | "THERMAL" | "LOW" | "DROP";
+export type SurfaceTexture = "SOLID" | "WOOD" | "CONCRETE";
 
 export interface DoorVisualProps {
   panelHex: string;
   insideHex?: string;
+  texture?: SurfaceTexture;
+  insideTexture?: SurfaceTexture;
+  face?: DoorFace;
   style?: SurfaceStyle;
   glass?: GlassKind;
   handle?: HandleKind;
@@ -31,9 +41,25 @@ export interface DoorVisualProps {
   glassPattern?: GlassPattern;
   hinge?: HingeKind;
   sidelight?: SidelightKind;
+  opening?: OpeningKind;
+  frame?: FrameKind;
+  lock?: LockKind;
+  cylinder?: CylinderKind;
+  threshold?: ThresholdKind;
+  hidePattern?: boolean;
+  hideLock?: boolean;
+  hideCylinder?: boolean;
+  showThreshold?: boolean;
+  showOpeningGuide?: boolean;
   smartLock?: boolean;
   viewer?: boolean;
   houseNumber?: boolean;
+  closer?: boolean;
+  chain?: boolean;
+  letterbox?: boolean;
+  kickplate?: boolean;
+  bell?: boolean;
+  camera?: boolean;
   /** Panel eni/hündürlüyü nisbətini vizual olaraq əks etdirir */
   widthMm?: number;
   heightMm?: number;
@@ -78,6 +104,10 @@ function shade(hex: string, amount: number): string {
 
 export function DoorVisual({
   panelHex,
+  insideHex,
+  texture = "SOLID",
+  insideTexture,
+  face = "OUTSIDE",
   style = "MODERN",
   glass = "NONE",
   handle = "INOX",
@@ -87,9 +117,25 @@ export function DoorVisual({
   glassPattern = "PLAIN",
   hinge = "STD",
   sidelight = "NONE",
+  opening = "INWARD",
+  frame = "STD",
+  lock = "3P",
+  cylinder = "STD",
+  threshold = "STD",
+  hidePattern = false,
+  hideLock = false,
+  hideCylinder = false,
+  showThreshold = false,
+  showOpeningGuide = false,
   smartLock = false,
   viewer = false,
   houseNumber = false,
+  closer = false,
+  chain = false,
+  letterbox = false,
+  kickplate = false,
+  bell = false,
+  camera = false,
   widthMm = 960,
   heightMm = 2050,
   className,
@@ -118,14 +164,17 @@ export function DoorVisual({
   const panelH = 348 - transomH;
 
   const handleColor = handleHex ?? handleFill[handle];
-  const isRight = side === "RIGHT";
+  const isRight = face === "INSIDE" ? side !== "RIGHT" : side === "RIGHT";
   // Menteşə açılma tərəfində, dəstək əks tərəfdə
   const handleX = isRight ? panelX + clampedW - 16 : panelX + 16;
   const hingeX = isRight ? panelX + 5 : panelX + clampedW - 5;
 
-  const light = shade(panelHex, 22);
-  const dark = shade(panelHex, -26);
-  const deeper = shade(panelHex, -46);
+  const surfaceHex = face === "INSIDE" ? (insideHex ?? panelHex) : panelHex;
+  const surfaceTexture = face === "INSIDE" ? (insideTexture ?? texture) : texture;
+  const light = shade(surfaceHex, 22);
+  const dark = shade(surfaceHex, -26);
+  const deeper = shade(surfaceHex, -46);
+  const frameOutset = frame === "HIDDEN" ? 3 : frame === "WIDE" ? 17 : frame === "TELE" ? 14 : 12;
 
   return (
     <svg
@@ -139,7 +188,7 @@ export function DoorVisual({
       <defs>
         <linearGradient id={`panel-${uid}`} x1="0" y1="0" x2="1" y2="0.35">
           <stop offset="0%" stopColor={light} />
-          <stop offset="45%" stopColor={panelHex} />
+          <stop offset="45%" stopColor={surfaceHex} />
           <stop offset="100%" stopColor={dark} />
         </linearGradient>
         <linearGradient id={`frame-${uid}`} x1="0" y1="0" x2="1" y2="0">
@@ -158,6 +207,10 @@ export function DoorVisual({
         </linearGradient>
         <filter id={`soft-${uid}`} x="-20%" y="-20%" width="140%" height="140%">
           <feDropShadow dx="0" dy="6" stdDeviation="7" floodColor="#0e0e0d" floodOpacity="0.16" />
+        </filter>
+        <filter id={`concrete-${uid}`} x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" seed="8" />
+          <feColorMatrix type="saturate" values="0" />
         </filter>
       </defs>
 
@@ -226,10 +279,10 @@ export function DoorVisual({
       {/* Çərçivə */}
       <g filter={`url(#soft-${uid})`}>
         <rect
-          x={panelX - 12}
-          y={panelY - 12}
-          width={clampedW + 24}
-          height={panelH + 12}
+          x={panelX - frameOutset}
+          y={panelY - frameOutset}
+          width={clampedW + frameOutset * 2}
+          height={panelH + frameOutset}
           rx="2"
           fill={`url(#frame-${uid})`}
         />
@@ -244,16 +297,43 @@ export function DoorVisual({
         />
       </g>
 
+      {/* Rəng seçimində göstərilən səth materialı */}
+      {surfaceTexture === "WOOD" && (
+        <g fill="none" stroke={deeper} strokeWidth="0.8" opacity="0.2">
+          {Array.from({ length: 8 }).map((_, index) => {
+            const x = panelX + ((index + 1) * clampedW) / 9;
+            return (
+              <path
+                key={index}
+                d={`M ${x} ${panelY + 4} C ${x - 4} ${panelY + panelH * 0.28}, ${x + 5} ${panelY + panelH * 0.62}, ${x} ${panelY + panelH - 4}`}
+              />
+            );
+          })}
+        </g>
+      )}
+      {surfaceTexture === "CONCRETE" && (
+        <rect
+          x={panelX}
+          y={panelY}
+          width={clampedW}
+          height={panelH}
+          filter={`url(#concrete-${uid})`}
+          opacity="0.09"
+        />
+      )}
+
       {/* Stil naxışı */}
-      <StylePattern
-        style={style}
-        x={panelX}
-        y={panelY}
-        w={clampedW}
-        h={panelH}
-        light={light}
-        dark={deeper}
-      />
+      {!hidePattern && (
+        <StylePattern
+          style={style}
+          x={panelX}
+          y={panelY}
+          w={clampedW}
+          h={panelH}
+          light={light}
+          dark={deeper}
+        />
+      )}
 
       {/* Şüşə */}
       {glass !== "NONE" && (
@@ -282,7 +362,7 @@ export function DoorVisual({
             width={hinge === "HEAVY" ? 5.2 : 4}
             height={hinge === "HEAVY" ? 22 : 18}
             rx="2"
-            fill={shade(panelHex, -60)}
+            fill={shade(surfaceHex, -60)}
             opacity="0.85"
           />
         ))}
@@ -314,13 +394,39 @@ export function DoorVisual({
         </g>
       )}
 
-      {/* Kilid silindri */}
-      <circle
-        cx={isRight ? handleX - 4 : handleX + 4}
-        cy={panelY + panelH / 2 + 24}
-        r="3.4"
-        fill={shade(panelHex, -70)}
-      />
+      {/* Kilid nöqtələri və silindr tipi */}
+      {!hideLock && lock !== "3P" &&
+        (lock === "5P" ? [0.22, 0.5, 0.78] : [0.14, 0.32, 0.5, 0.68, 0.86]).map((position) => (
+          <rect
+            key={position}
+            x={isRight ? panelX + clampedW - 3 : panelX}
+            y={panelY + panelH * position - 2}
+            width="3"
+            height="4"
+            rx="1"
+            fill={lock === "MOTOR" ? "#ad7d38" : shade(surfaceHex, -68)}
+          />
+        ))}
+      {!hideCylinder && <g>
+        <circle
+          cx={isRight ? handleX - 4 : handleX + 4}
+          cy={panelY + panelH / 2 + 24}
+          r={cylinder === "ANTI_DRILL" ? 5.2 : 3.8}
+          fill={cylinder === "CARD" ? "#ad7d38" : shade(surfaceHex, -70)}
+          stroke={cylinder === "ANTI_DRILL" ? "#b9bcc0" : "none"}
+          strokeWidth="1.8"
+        />
+        {cylinder === "KNOB" && (
+          <rect
+            x={(isRight ? handleX - 4 : handleX + 4) - 1.4}
+            y={panelY + panelH / 2 + 16}
+            width="2.8"
+            height="16"
+            rx="1.4"
+            fill={handleColor}
+          />
+        )}
+      </g>}
 
       {/* Smart lock klaviaturası */}
       {smartLock && (
@@ -332,7 +438,7 @@ export function DoorVisual({
             height="36"
             rx="4"
             fill="#131315"
-            stroke={shade(panelHex, -70)}
+            stroke={shade(surfaceHex, -70)}
             strokeWidth="0.6"
           />
           <rect
@@ -366,7 +472,7 @@ export function DoorVisual({
             cy={panelY + 118}
             r="7"
             fill="#17171a"
-            stroke={shade(panelHex, -60)}
+            stroke={shade(surfaceHex, -60)}
             strokeWidth="0.8"
           />
           <circle cx={panelX + clampedW / 2} cy={panelY + 118} r="3" fill="#3a4c52" />
@@ -382,12 +488,72 @@ export function DoorVisual({
           fontSize="15"
           fontWeight="500"
           letterSpacing="2"
-          fill={shade(panelHex, 70)}
+          fill={shade(surfaceHex, 70)}
           opacity="0.85"
         >
           48
         </text>
       )}
+
+      {/* Astana */}
+      {showThreshold && threshold !== "DROP" && (
+        <rect
+          x={panelX - 3}
+          y={panelY + panelH - (threshold === "LOW" ? 3 : 6)}
+          width={clampedW + 6}
+          height={threshold === "LOW" ? 3 : 6}
+          fill={threshold === "THERMAL" ? "#ad7d38" : "#8d9094"}
+          opacity="0.92"
+        />
+      )}
+
+      {/* Aksesuarlar */}
+      {closer && (
+        <g fill={handleColor}>
+          <rect x={panelX + clampedW * 0.34} y={panelY + 14} width={clampedW * 0.32} height="8" rx="2" />
+          <path d={`M ${panelX + clampedW * 0.5} ${panelY + 22} L ${panelX + clampedW * 0.72} ${panelY + 34}`} stroke={handleColor} strokeWidth="2" />
+        </g>
+      )}
+      {chain && (
+        <path
+          d={`M ${isRight ? panelX + 22 : panelX + clampedW - 22} ${panelY + 150} q ${isRight ? 22 : -22} 14 0 30`}
+          fill="none"
+          stroke="#b9bcc0"
+          strokeWidth="2"
+          strokeDasharray="2 2"
+        />
+      )}
+      {letterbox && (
+        <rect x={panelX + clampedW * 0.28} y={panelY + panelH * 0.66} width={clampedW * 0.44} height="13" rx="2" fill={handleColor} />
+      )}
+      {kickplate && (
+        <rect x={panelX + 8} y={panelY + panelH - 52} width={clampedW - 16} height="38" rx="1" fill={handleColor} opacity="0.72" />
+      )}
+      {bell && (
+        <g>
+          <circle cx={isRight ? panelX + clampedW - 18 : panelX + 18} cy={panelY + 92} r="6" fill="#ad7d38" />
+          <circle cx={isRight ? panelX + clampedW - 18 : panelX + 18} cy={panelY + 92} r="2" fill="#f4e4bf" />
+        </g>
+      )}
+      {camera && (
+        <g>
+          <rect x={panelX + clampedW / 2 - 10} y={panelY + 90} width="20" height="13" rx="3" fill="#17171a" />
+          <circle cx={panelX + clampedW / 2} cy={panelY + 96.5} r="3" fill="#48616b" />
+        </g>
+      )}
+
+      {/* İçəri/çölə açılmanı göstərən üst görünüş işarəsi */}
+      {showOpeningGuide && <g transform="translate(18 16)" opacity="0.78">
+        <path d="M0 18 H24" stroke="#8d9094" strokeWidth="1.5" />
+        <path
+          d={opening === "INWARD" ? "M2 18 A20 20 0 0 1 22 0" : "M2 18 A20 20 0 0 0 22 36"}
+          fill="none"
+          stroke="#ad7d38"
+          strokeWidth="1.5"
+          strokeDasharray="3 2"
+        />
+        <path d={isRight ? "M23 18 V1" : "M1 18 V1"} stroke="#101f33" strokeWidth="2" />
+      </g>}
     </svg>
   );
 }

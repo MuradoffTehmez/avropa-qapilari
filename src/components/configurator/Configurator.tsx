@@ -23,11 +23,18 @@ import { Stepper } from "@/components/ui/disclosure";
 import { toast } from "@/components/ui/overlays";
 import {
   DoorVisual,
+  type CylinderKind,
+  type DoorFace,
+  type FrameKind,
   type GlassKind,
   type GlassPattern,
   type HandleKind,
   type HingeKind,
+  type LockKind,
+  type OpeningKind,
   type SidelightKind,
+  type SurfaceTexture,
+  type ThresholdKind,
 } from "@/components/product/DoorVisual";
 import { DoorLayers, type VisualLayer } from "@/components/configurator/DoorLayers";
 import { findOptionValue, optionGroups, standardSizes } from "@/mock/options";
@@ -64,6 +71,7 @@ export function Configurator({
   const [hiddenLayers, setHiddenLayers] = useState<Set<string>>(new Set());
   const [layersOpen, setLayersOpen] = useState(false);
   const [customSize, setCustomSize] = useState(false);
+  const [previewFace, setPreviewFace] = useState<DoorFace>("OUTSIDE");
 
   // Başlanğıc seçim də uyğunluq qaydalarından keçirilir: bəzi qruplarda
   // (məsələn şüşə naxışı) bütün dəyərlər ilkin şərt tələb edir, ona görə
@@ -93,6 +101,8 @@ export function Configurator({
   const isSummary = stepIndex >= steps.length;
 
   function setChoice(group: OptionGroupKey, valueId: string, multi: boolean) {
+    if (group === "INSIDE_COLOR") setPreviewFace("INSIDE");
+    if (group === "OUTSIDE_COLOR") setPreviewFace("OUTSIDE");
     setSelection((prev) => {
       const next: ConfigurationSelection = { ...prev, choices: { ...prev.choices } };
 
@@ -140,7 +150,15 @@ export function Configurator({
     setCustomSize(false);
     setStepIndex(0);
     setHiddenLayers(new Set());
+    setPreviewFace("OUTSIDE");
     toast(dict.configurator.resetDone);
+  }
+
+  function goToStep(index: number) {
+    const target = steps[index];
+    if (target === "INSIDE_COLOR") setPreviewFace("INSIDE");
+    if (target === "OUTSIDE_COLOR") setPreviewFace("OUTSIDE");
+    setStepIndex(index);
   }
 
   function addConfiguredToCart() {
@@ -163,15 +181,15 @@ export function Configurator({
     toast(dict.configurator.addedToCart);
   }
 
-  const previewProps = buildPreview(selection, product, hiddenLayers);
+  const previewProps = buildPreview(selection, product, hiddenLayers, previewFace);
   const visualLayers = buildVisualLayers(selection, product, dict, locale);
-  if (currentGroup === "INSIDE_COLOR") previewProps.panelHex = findOptionValue(selection.choices.INSIDE_COLOR as string)?.hex ?? previewProps.panelHex;
   const selectedLines = summaryLines(selection, locale, dict);
   const previewKey = JSON.stringify([
     selection.width,
     selection.height,
     selection.choices,
     [...hiddenLayers].sort(),
+    previewFace,
   ]);
 
   return (
@@ -193,6 +211,23 @@ export function Configurator({
             <p className="text-[13px] text-stone">
               {selection.width} × {selection.height} mm
             </p>
+          </div>
+
+          <div className="absolute bottom-3 left-3 flex border border-line bg-paper p-0.5 sm:bottom-4 sm:left-4 lg:bottom-4 lg:left-1/2 lg:-translate-x-1/2">
+            {(["OUTSIDE", "INSIDE"] as DoorFace[]).map((face) => (
+              <button
+                key={face}
+                type="button"
+                onClick={() => setPreviewFace(face)}
+                aria-pressed={previewFace === face}
+                className={cn(
+                  "min-h-8 px-3 text-[11px] font-medium transition-colors",
+                  previewFace === face ? "bg-ink text-paper" : "text-stone hover:text-ink",
+                )}
+              >
+                {face === "OUTSIDE" ? dict.configurator.outside : dict.configurator.inside}
+              </button>
+            ))}
           </div>
 
           {/* Qat paneli açarı */}
@@ -234,6 +269,7 @@ export function Configurator({
             layers={visualLayers}
             hidden={hiddenLayers}
             onToggle={toggleLayer}
+            selection={selection}
             className="max-h-[45dvh] shrink-0 lg:max-h-[52%]"
           />
         )}
@@ -245,7 +281,7 @@ export function Configurator({
           <Stepper
             steps={[...steps.map((s) => dict.configurator.steps[s]), dict.configurator.summary]}
             current={stepIndex}
-            onSelect={setStepIndex}
+            onSelect={goToStep}
           />
         </div>
 
@@ -342,7 +378,7 @@ export function Configurator({
 
               <div className="flex gap-2">
                 {stepIndex > 0 && (
-                  <Button variant="secondary" onClick={() => setStepIndex((i) => i - 1)}>
+                  <Button variant="secondary" onClick={() => goToStep(stepIndex - 1)}>
                     <ArrowLeft size={16} />
                     <span className="hidden sm:inline">{dict.actions.back}</span>
                   </Button>
@@ -352,7 +388,7 @@ export function Configurator({
                     {dict.actions.addToCart}
                   </Button>
                 ) : (
-                  <Button onClick={() => setStepIndex((i) => i + 1)}>
+                  <Button onClick={() => goToStep(stepIndex + 1)}>
                     <span className="inline">{dict.actions.continue}</span>
                     <ArrowRight size={16} />
                   </Button>
@@ -404,14 +440,17 @@ function summaryLines(
   return lines;
 }
 
-function buildPreview(
+export function buildPreview(
   selection: ConfigurationSelection,
   product: Product,
   hidden: Set<string> = new Set(),
+  face: DoorFace = "OUTSIDE",
 ) {
   const value = (key: OptionGroupKey) => findOptionValue(selection.choices[key] as string);
 
   const outside = value("OUTSIDE_COLOR");
+  const inside = value("INSIDE_COLOR");
+  const frame = value("FRAME");
   const panelStyle = value("PANEL_STYLE");
   const glassValue = value("GLASS");
   const glassPattern = value("GLASS_PATTERN");
@@ -419,16 +458,30 @@ function buildPreview(
   const hingeValue = value("HINGE");
   const sidelightValue = value("SIDELIGHT");
   const smartLock = value("SMART_LOCK");
+  const lock = value("LOCK");
+  const cylinder = value("CYLINDER");
+  const threshold = value("THRESHOLD");
   const opening = value("OPENING_DIRECTION");
   const accessories = Array.isArray(selection.choices.ACCESSORY)
     ? (selection.choices.ACCESSORY as string[])
     : [];
 
   const off = (key: string) => hidden.has(key);
+  const textureOf = (code?: string): SurfaceTexture => {
+    if (!code) return "SOLID";
+    if (/OAK|WALNUT|WENGE|WOOD/.test(code)) return "WOOD";
+    if (code.includes("CONCRETE")) return "CONCRETE";
+    return "SOLID";
+  };
 
   return {
     panelHex: off("OUTSIDE_COLOR") ? "#c7ccd3" : (outside?.hex ?? product.panelHexes[0]),
+    insideHex: off("INSIDE_COLOR") ? "#c7ccd3" : (inside?.hex ?? outside?.hex ?? product.panelHexes[0]),
+    texture: off("OUTSIDE_COLOR") ? "SOLID" as const : textureOf(outside?.code),
+    insideTexture: off("INSIDE_COLOR") ? "SOLID" as const : textureOf(inside?.code),
+    face,
     style: (off("PANEL_STYLE") ? product.style : ((panelStyle?.code as Product["style"]) ?? product.style)),
+    hidePattern: off("PANEL_STYLE"),
     glass: (off("GLASS") ? "NONE" : (glassValue?.code ?? "NONE")) as GlassKind,
     glassPattern: (off("GLASS_PATTERN") ? "PLAIN" : (glassPattern?.code ?? "PLAIN")) as GlassPattern,
     handle: (handleValue?.code ?? "INOX") as HandleKind,
@@ -437,9 +490,28 @@ function buildPreview(
     hinge: (off("HINGE") ? "STD" : (hingeValue?.code ?? "STD")) as HingeKind,
     sidelight: (off("SIDELIGHT") ? "NONE" : (sidelightValue?.code ?? "NONE")) as SidelightKind,
     side: (opening?.code?.startsWith("LEFT") ? "LEFT" : "RIGHT") as "LEFT" | "RIGHT",
+    opening: (opening?.code?.endsWith("OUTWARD") ? "OUTWARD" : "INWARD") as OpeningKind,
+    frame: (off("FRAME") ? "HIDDEN" : (frame?.code ?? "STD")) as FrameKind,
+    lock: (off("LOCK") ? "3P" : (lock?.code ?? "3P")) as LockKind,
+    hideLock: off("LOCK"),
+    cylinder: (off("CYLINDER") ? "STD" : (cylinder?.code ?? "STD")) as CylinderKind,
+    hideCylinder: off("CYLINDER"),
+    threshold: (off("THRESHOLD")
+      ? "DROP"
+      : threshold?.code === "AUTO"
+        ? "DROP"
+        : (threshold?.code ?? "STD")) as ThresholdKind,
+    showThreshold: !off("THRESHOLD"),
+    showOpeningGuide: !off("OPENING_DIRECTION"),
     smartLock: !off("SMART_LOCK") && Boolean(smartLock && smartLock.code !== "NONE"),
     viewer: !off("ACCESSORY") && accessories.some((a) => a.startsWith("ac-viewer")),
     houseNumber: !off("ACCESSORY") && accessories.includes("ac-number"),
+    closer: !off("ACCESSORY") && accessories.includes("ac-closer"),
+    chain: !off("ACCESSORY") && accessories.includes("ac-chain"),
+    letterbox: !off("ACCESSORY") && accessories.includes("ac-letterbox"),
+    kickplate: !off("ACCESSORY") && accessories.includes("ac-kickplate"),
+    bell: !off("ACCESSORY") && accessories.includes("ac-bell"),
+    camera: !off("ACCESSORY") && accessories.includes("ac-camera"),
     widthMm: selection.width,
     heightMm: selection.height,
   };
@@ -464,6 +536,7 @@ function buildVisualLayers(
   ];
 
   const order: OptionGroupKey[] = [
+    "OPENING_DIRECTION",
     "PANEL_STYLE",
     "OUTSIDE_COLOR",
     "INSIDE_COLOR",

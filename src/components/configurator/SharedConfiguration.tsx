@@ -2,23 +2,23 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { FileQuestion, Link2, ShieldCheck } from "lucide-react";
 
 import type { Dictionary } from "@/i18n";
 import type { ConfigurationSelection, Locale, OptionGroupKey } from "@/types";
 import { routes } from "@/lib/routes";
-import { formatPrice, uid } from "@/lib/utils";
+import { cn, formatPrice, uid } from "@/lib/utils";
 import { Badge, Card, DataRow, EmptyState, Section } from "@/components/ui/primitives";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { toast } from "@/components/ui/overlays";
-import { DoorVisual, type GlassKind, type HandleKind } from "@/components/product/DoorVisual";
+import { DoorVisual, type DoorFace } from "@/components/product/DoorVisual";
 import { getProduct } from "@/mock/products";
 import { findOptionValue } from "@/mock/options";
 import { optionLabel } from "@/mock/options.i18n";
 import { parseSharedDesign } from "@/features/configurator/shared";
 import { calculatePrice } from "@/features/pricing/engine";
-import { snapshotKeys } from "@/components/configurator/Configurator";
+import { buildPreview, snapshotKeys } from "@/components/configurator/Configurator";
 import { materialName, productShort, styleName } from "@/lib/i18n-format";
 import { useCart } from "@/store/cart";
 
@@ -50,6 +50,7 @@ export function SharedConfiguration({
   const params = useSearchParams();
   const r = routes(locale);
   const add = useCart((s) => s.add);
+  const [previewFace, setPreviewFace] = useState<DoorFace>("OUTSIDE");
 
   // Köhnə paylaşma linkləri seçimləri sorğu parametrində daşıyırdı;
   // yeni linklər yalnız kod daşıyır və serverdən oxunur.
@@ -87,7 +88,7 @@ export function SharedConfiguration({
   const price = saved
     ? { ...calculatePrice(product, selection, { locale, dict }), total: saved.total }
     : calculatePrice(product, selection, { locale, dict });
-  const preview = buildPreview(selection, product);
+  const preview = buildPreview(selection, product, new Set(), previewFace);
   const lines = summaryLines(selection, locale, dict);
 
   function copyLink() {
@@ -130,6 +131,22 @@ export function SharedConfiguration({
             <p className="absolute bottom-3 left-3 rounded-[2px] bg-paper/85 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.1em] text-graphite backdrop-blur">
               {selection.width} × {selection.height} mm
             </p>
+            <div className="absolute right-3 top-3 flex border border-line bg-paper/90 p-0.5 backdrop-blur">
+              {(["OUTSIDE", "INSIDE"] as const).map((face) => (
+                <button
+                  key={face}
+                  type="button"
+                  onClick={() => setPreviewFace(face)}
+                  aria-pressed={previewFace === face}
+                  className={cn(
+                    "min-h-9 px-3 text-[11px] font-semibold uppercase tracking-[0.1em] transition-colors",
+                    previewFace === face ? "bg-ink text-paper" : "text-stone hover:text-ink",
+                  )}
+                >
+                  {face === "OUTSIDE" ? dict.configurator.outside : dict.configurator.inside}
+                </button>
+              ))}
+            </div>
           </div>
 
           <p className="mt-3 flex items-center gap-1.5 text-[12px] text-stone">
@@ -201,30 +218,6 @@ export function SharedConfiguration({
 }
 
 /* ------------------------------------------------------------------ */
-
-function buildPreview(selection: ConfigurationSelection, product: NonNullable<ReturnType<typeof getProduct>>) {
-  const outside = findOptionValue(selection.choices.OUTSIDE_COLOR as string);
-  const glassValue = findOptionValue(selection.choices.GLASS as string);
-  const handleValue = findOptionValue(selection.choices.HANDLE as string);
-  const smartLock = findOptionValue(selection.choices.SMART_LOCK as string);
-  const opening = findOptionValue(selection.choices.OPENING_DIRECTION as string);
-  const accessories = Array.isArray(selection.choices.ACCESSORY)
-    ? (selection.choices.ACCESSORY as string[])
-    : [];
-
-  return {
-    panelHex: outside?.hex ?? product.panelHexes[0],
-    style: product.style,
-    glass: (glassValue?.code ?? "NONE") as GlassKind,
-    handle: (handleValue?.code ?? "INOX") as HandleKind,
-    side: (opening?.code?.startsWith("LEFT") ? "LEFT" : "RIGHT") as "LEFT" | "RIGHT",
-    smartLock: Boolean(smartLock && smartLock.code !== "NONE"),
-    viewer: accessories.includes("ac-viewer"),
-    houseNumber: accessories.includes("ac-number"),
-    widthMm: selection.width,
-    heightMm: selection.height,
-  };
-}
 
 function summaryLines(
   selection: ConfigurationSelection,
