@@ -1,12 +1,14 @@
 import type { ConfigurationSelection, Product } from "@/types";
 import { pruneIncompatible } from "./compatibility";
+import { withinSizeLimits } from "./limits";
 import { resolveProductOption } from "./product-options";
 
 export function parseSharedDesign(raw: string | undefined, product: Product): ConfigurationSelection | undefined {
   if (!raw || raw.length > 8000) return;
   try {
     const input = JSON.parse(raw);
-    if (!Number.isFinite(input.width) || !Number.isFinite(input.height) || input.width < 400 || input.width > 3000 || input.height < 1200 || input.height > 3000 || !input.choices || typeof input.choices !== "object") return;
+    if (!withinSizeLimits(input.width, input.height)) return;
+    if (!input.choices || typeof input.choices !== "object") return;
     const choices: ConfigurationSelection["choices"] = {};
     for (const group of product.optionGroups) {
       const value = input.choices[group];

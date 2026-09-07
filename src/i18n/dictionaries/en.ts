@@ -770,6 +770,10 @@ export const en: Dictionary = {
     yourDoor: "Your door",
     outside: "Exterior",
     inside: "Interior",
+    rotate360: "360° view",
+    rotateHint: "Drag the door, use the arrow keys or the slider to rotate it.",
+    angle: "Angle",
+    resetView: "Reset view",
     steps: {
       SIZE: "Size",
       OPENING_DIRECTION: "Opening direction",

@@ -1,6 +1,20 @@
 import { z } from "zod";
 
+import { SIZE_LIMITS } from "@/features/configurator/limits";
+
 /** Giriş validasiyası — bütün API route-ları bu sxemlərdən keçir. */
+
+/** Ölçü sahələri client ilə eyni hüdudlardan qurulur. */
+const widthField = z
+  .number()
+  .int()
+  .min(SIZE_LIMITS.minWidth, "En çox kiçikdir")
+  .max(SIZE_LIMITS.maxWidth, "En çox böyükdür");
+const heightField = z
+  .number()
+  .int()
+  .min(SIZE_LIMITS.minHeight, "Hündürlük çox kiçikdir")
+  .max(SIZE_LIMITS.maxHeight, "Hündürlük çox böyükdür");
 
 const phone = z
   .string()
@@ -14,8 +28,8 @@ export const choicesSchema = z.record(
 
 export const priceSchema = z.object({
   productSlug: z.string().min(1, "Məhsul seçilməlidir"),
-  width: z.number().int().min(400, "En çox kiçikdir").max(3000, "En çox böyükdür"),
-  height: z.number().int().min(1200, "Hündürlük çox kiçikdir").max(3500, "Hündürlük çox böyükdür"),
+  width: widthField,
+  height: heightField,
   choices: choicesSchema.default({}),
 });
 
@@ -24,8 +38,8 @@ export const configurationSchema = priceSchema;
 export const orderItemSchema = z.object({
   productSlug: z.string().min(1),
   quantity: z.number().int().min(1, "Say ən azı 1").max(50, "Say çox böyükdür").default(1),
-  width: z.number().int().min(400, "En çox kiçikdir").max(3000, "En çox böyükdür"),
-  height: z.number().int().min(1200, "Hündürlük çox kiçikdir").max(3500, "Hündürlük çox böyükdür"),
+  width: widthField,
+  height: heightField,
   choices: choicesSchema.default({}),
 });
 

@@ -12,7 +12,9 @@ import { cn, formatPrice, uid } from "@/lib/utils";
 import { Badge, Card, DataRow, EmptyState, Section } from "@/components/ui/primitives";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { toast } from "@/components/ui/overlays";
-import { DoorVisual, type DoorFace } from "@/components/product/DoorVisual";
+import type { DoorFace } from "@/components/product/DoorVisual";
+import { DoorTurntable, faceForAngle } from "@/components/product/DoorTurntable";
+import { configuredConstruction } from "@/features/configurator/construction";
 import { optionLabel } from "@/mock/options.i18n";
 import { parseSharedDesign } from "@/features/configurator/shared";
 import { calculatePrice } from "@/features/pricing/engine";
@@ -51,7 +53,10 @@ export function SharedConfiguration({
   const params = useSearchParams();
   const r = routes(locale);
   const add = useCart((s) => s.add);
-  const [previewFace, setPreviewFace] = useState<DoorFace>("OUTSIDE");
+  // Konfiquratorla eyni 360° baxış — paylaşılan link fərqli görünməsin.
+  const [previewAngle, setPreviewAngle] = useState(0);
+  const previewFace = faceForAngle(previewAngle);
+  const showFace = (face: DoorFace) => setPreviewAngle(face === "INSIDE" ? 180 : 0);
 
   // Köhnə paylaşma linkləri seçimləri sorğu parametrində daşıyırdı;
   // yeni linklər yalnız kod daşıyır. Hər iki halda məhsulu server verir.
@@ -126,7 +131,14 @@ export function SharedConfiguration({
         <div>
           <div className="relative border border-line bg-bone">
             <div className="mx-auto aspect-3/4 max-w-sm">
-              <DoorVisual {...preview} label={dict.actions.doorPreview} />
+              <DoorTurntable
+                visual={preview}
+                stack={configuredConstruction(product, selection)}
+                angle={previewAngle}
+                onAngleChange={setPreviewAngle}
+                label={dict.actions.doorPreview}
+                hint={dict.configurator.rotateHint}
+              />
             </div>
             <p className="absolute bottom-3 left-3 rounded-[2px] bg-paper/85 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.1em] text-graphite backdrop-blur">
               {selection.width} × {selection.height} mm
@@ -136,11 +148,13 @@ export function SharedConfiguration({
                 <button
                   key={face}
                   type="button"
-                  onClick={() => setPreviewFace(face)}
-                  aria-pressed={previewFace === face}
+                  onClick={() => showFace(face)}
+                  aria-pressed={previewFace === face && (previewAngle === 0 || previewAngle === 180)}
                   className={cn(
                     "min-h-9 px-3 text-[11px] font-semibold uppercase tracking-[0.1em] transition-colors",
-                    previewFace === face ? "bg-ink text-paper" : "text-stone hover:text-ink",
+                    previewFace === face && (previewAngle === 0 || previewAngle === 180)
+                      ? "bg-ink text-paper"
+                      : "text-stone hover:text-ink",
                   )}
                 >
                   {face === "OUTSIDE" ? dict.configurator.outside : dict.configurator.inside}

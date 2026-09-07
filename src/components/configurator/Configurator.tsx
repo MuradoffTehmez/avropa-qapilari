@@ -4,7 +4,7 @@ import { useWorkflow } from "@/store/workflow";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, Check, Layers, Link2, RotateCcw, Save, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Layers, Link2, RotateCcw, RotateCw, Save, X } from "lucide-react";
 
 import type { Dictionary } from "@/i18n";
 import type {
@@ -24,7 +24,6 @@ import { Badge, Notice } from "@/components/ui/primitives";
 import { Stepper } from "@/components/ui/disclosure";
 import { toast } from "@/components/ui/overlays";
 import {
-  DoorVisual,
   type CylinderKind,
   type DoorFace,
   type FrameKind,
@@ -39,12 +38,15 @@ import {
   type ThresholdKind,
 } from "@/components/product/DoorVisual";
 import { DoorLayers, type VisualLayer } from "@/components/configurator/DoorLayers";
+import { DoorTurntable, faceForAngle } from "@/components/product/DoorTurntable";
+import { configuredConstruction } from "@/features/configurator/construction";
 import { optionLabel, optionText } from "@/mock/options.i18n";
 import { calculatePrice, sizeRangeLabel } from "@/features/pricing/engine";
 import { toBreakdown } from "@/features/pricing/labels";
 import { useServerPrice } from "@/components/configurator/useServerPrice";
 import { checkCompatibility, pruneIncompatible } from "@/features/configurator/compatibility";
 import { defaultChoices } from "@/features/configurator/defaults";
+import { SIZE_LIMITS } from "@/features/configurator/limits";
 import { productOptionsForGroup, resolveProductOption } from "@/features/configurator/product-options";
 import { useCart } from "@/store/cart";
 import { useSession } from "@/store/session";
@@ -80,7 +82,10 @@ export function Configurator({
   const [hiddenLayers, setHiddenLayers] = useState<Set<string>>(new Set());
   const [layersOpen, setLayersOpen] = useState(false);
   const [customSize, setCustomSize] = useState(false);
-  const [previewFace, setPreviewFace] = useState<DoorFace>("OUTSIDE");
+  // Önizləmə bucağı: 0° çöl tərəf, 180° iç tərəf, aralıqda qapı kəsiyi görünür.
+  const [previewAngle, setPreviewAngle] = useState(0);
+  const previewFace = faceForAngle(previewAngle);
+  const showFace = (face: DoorFace) => setPreviewAngle(face === "INSIDE" ? 180 : 0);
 
   // Başlanğıc seçim də uyğunluq qaydalarından keçirilir: bəzi qruplarda
   // (məsələn şüşə naxışı) bütün dəyərlər ilkin şərt tələb edir, ona görə
@@ -110,8 +115,8 @@ export function Configurator({
   const isSummary = stepIndex >= steps.length;
 
   function setChoice(group: OptionGroupKey, valueId: string, multi: boolean) {
-    if (group === "INSIDE_COLOR") setPreviewFace("INSIDE");
-    if (group === "OUTSIDE_COLOR") setPreviewFace("OUTSIDE");
+    if (group === "INSIDE_COLOR") showFace("INSIDE");
+    if (group === "OUTSIDE_COLOR") showFace("OUTSIDE");
     setSelection((prev) => {
       const next: ConfigurationSelection = { ...prev, choices: { ...prev.choices } };
 
@@ -131,8 +136,8 @@ export function Configurator({
   function setSize(width: number, height: number) {
     setSelection((prev) => ({
       ...prev,
-      width: clamp(width, 400, 3000),
-      height: clamp(height, 1200, 3000),
+      width: clamp(width, SIZE_LIMITS.minWidth, SIZE_LIMITS.maxWidth),
+      height: clamp(height, SIZE_LIMITS.minHeight, SIZE_LIMITS.maxHeight),
     }));
   }
 
@@ -159,14 +164,14 @@ export function Configurator({
     setCustomSize(false);
     setStepIndex(0);
     setHiddenLayers(new Set());
-    setPreviewFace("OUTSIDE");
+    showFace("OUTSIDE");
     toast(dict.configurator.resetDone);
   }
 
   function goToStep(index: number) {
     const target = steps[index];
-    if (target === "INSIDE_COLOR") setPreviewFace("INSIDE");
-    if (target === "OUTSIDE_COLOR") setPreviewFace("OUTSIDE");
+    if (target === "INSIDE_COLOR") showFace("INSIDE");
+    if (target === "OUTSIDE_COLOR") showFace("OUTSIDE");
     setStepIndex(index);
   }
 
@@ -191,6 +196,7 @@ export function Configurator({
   }
 
   const previewProps = buildPreview(selection, product, hiddenLayers, previewFace);
+  const constructionStack = configuredConstruction(product, selection, hiddenLayers);
   const visualLayers = buildVisualLayers(selection, product, dict, locale);
   const selectedLines = summaryLines(selection, product, locale, dict);
   const previewKey = JSON.stringify([
@@ -198,7 +204,6 @@ export function Configurator({
     selection.height,
     selection.choices,
     [...hiddenLayers].sort(),
-    previewFace,
   ]);
 
   return (
@@ -208,7 +213,14 @@ export function Configurator({
         <div className="relative flex h-52 shrink-0 items-center justify-center px-4 py-4 sm:h-72 lg:h-auto lg:flex-1 lg:px-10">
           <div className="h-full max-h-[70vh] w-auto">
             <div key={previewKey} className="motion-preview h-full" style={{ aspectRatio: "3 / 4" }}>
-              <DoorVisual {...previewProps} label={dict.actions.doorPreview} />
+              <DoorTurntable
+                visual={previewProps}
+                stack={constructionStack}
+                angle={previewAngle}
+                onAngleChange={setPreviewAngle}
+                label={dict.actions.doorPreview}
+                hint={dict.configurator.rotateHint}
+              />
             </div>
           </div>
 
@@ -222,21 +234,48 @@ export function Configurator({
             </p>
           </div>
 
-          <div className="absolute bottom-3 left-3 flex border border-line bg-paper p-0.5 sm:bottom-4 sm:left-4 lg:bottom-4 lg:left-1/2 lg:-translate-x-1/2">
-            {(["OUTSIDE", "INSIDE"] as DoorFace[]).map((face) => (
+          <div className="absolute inset-x-3 bottom-3 flex flex-wrap items-center justify-center gap-2 sm:inset-x-4 sm:bottom-4 lg:inset-x-auto lg:bottom-4 lg:left-1/2 lg:-translate-x-1/2">
+            <div className="flex border border-line bg-paper p-0.5">
+              {(["OUTSIDE", "INSIDE"] as DoorFace[]).map((face) => (
+                <button
+                  key={face}
+                  type="button"
+                  onClick={() => showFace(face)}
+                  aria-pressed={previewFace === face && (previewAngle === 0 || previewAngle === 180)}
+                  className={cn(
+                    "min-h-8 px-3 text-[11px] font-medium transition-colors",
+                    previewFace === face && (previewAngle === 0 || previewAngle === 180)
+                      ? "bg-ink text-paper"
+                      : "text-stone hover:text-ink",
+                  )}
+                >
+                  {face === "OUTSIDE" ? dict.configurator.outside : dict.configurator.inside}
+                </button>
+              ))}
+            </div>
+
+            {/* 360° döndərmə */}
+            <div className="flex min-h-8 flex-1 items-center gap-2 border border-line bg-paper px-2 lg:flex-none">
+              <RotateCw size={13} className="shrink-0 text-stone" aria-hidden />
+              <input
+                type="range"
+                min={0}
+                max={359}
+                step={1}
+                value={Math.round(previewAngle)}
+                onChange={(event) => setPreviewAngle(Number(event.target.value))}
+                aria-label={`${dict.configurator.rotate360} — ${dict.configurator.angle}`}
+                className="h-1 w-full min-w-16 flex-1 accent-gold-500 lg:w-24 lg:flex-none"
+              />
               <button
-                key={face}
                 type="button"
-                onClick={() => setPreviewFace(face)}
-                aria-pressed={previewFace === face}
-                className={cn(
-                  "min-h-8 px-3 text-[11px] font-medium transition-colors",
-                  previewFace === face ? "bg-ink text-paper" : "text-stone hover:text-ink",
-                )}
+                onClick={() => setPreviewAngle(0)}
+                aria-label={dict.configurator.resetView}
+                className="w-9 shrink-0 text-right text-[11px] tabular-nums text-stone transition-colors hover:text-ink"
               >
-                {face === "OUTSIDE" ? dict.configurator.outside : dict.configurator.inside}
+                {Math.round(previewAngle)}°
               </button>
-            ))}
+            </div>
           </div>
 
           {/* Qat paneli açarı */}
@@ -624,6 +663,34 @@ function SizeStep({
   dict: Dictionary;
   requiresQuote: boolean;
 }) {
+  // Sahə yazılarkən sıxılmır: "9" yazan kimi 400-ə çevrilməsin deyə
+  // xam mətn saxlanılır, hüdudlar yalnız blur-da tətbiq olunur.
+  const [draft, setDraft] = useState({
+    width: String(selection.width),
+    height: String(selection.height),
+    fromWidth: selection.width,
+    fromHeight: selection.height,
+  });
+
+  // Ölçü kənardan dəyişəndə (preset, sıfırlama) sahələr yenilənir.
+  if (draft.fromWidth !== selection.width || draft.fromHeight !== selection.height) {
+    setDraft({
+      width: String(selection.width),
+      height: String(selection.height),
+      fromWidth: selection.width,
+      fromHeight: selection.height,
+    });
+  }
+
+  function commit(next: { width?: string; height?: string }) {
+    const width = Number(next.width ?? draft.width);
+    const height = Number(next.height ?? draft.height);
+    setSize(
+      Number.isFinite(width) && width > 0 ? width : selection.width,
+      Number.isFinite(height) && height > 0 ? height : selection.height,
+    );
+  }
+
   return (
     <div>
       <StepHeading title={dict.configurator.steps.SIZE} hint={dict.configurator.hints.SIZE} />
@@ -658,16 +725,22 @@ function SizeStep({
               <Input
                 type="number"
                 inputMode="numeric"
-                value={selection.width}
-                onChange={(e) => setSize(Number(e.target.value) || 0, selection.height)}
+                min={SIZE_LIMITS.minWidth}
+                max={SIZE_LIMITS.maxWidth}
+                value={draft.width}
+                onChange={(e) => setDraft({ ...draft, width: e.target.value })}
+                onBlur={(e) => commit({ width: e.target.value })}
               />
             </Field>
             <Field label={dict.configurator.heightMm}>
               <Input
                 type="number"
                 inputMode="numeric"
-                value={selection.height}
-                onChange={(e) => setSize(selection.width, Number(e.target.value) || 0)}
+                min={SIZE_LIMITS.minHeight}
+                max={SIZE_LIMITS.maxHeight}
+                value={draft.height}
+                onChange={(e) => setDraft({ ...draft, height: e.target.value })}
+                onBlur={(e) => commit({ height: e.target.value })}
               />
             </Field>
           </div>

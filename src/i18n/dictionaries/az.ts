@@ -769,6 +769,10 @@ export const az = {
     yourDoor: "Sizin qapınız",
     outside: "Çöl tərəf",
     inside: "İç tərəf",
+    rotate360: "360° baxış",
+    rotateHint: "Qapını sürüşdürərək, ox düymələri və ya sürgü ilə döndərin.",
+    angle: "Bucaq",
+    resetView: "Görünüşü sıfırla",
     steps: {
       SIZE: "Ölçü",
       OPENING_DIRECTION: "Açılma istiqaməti",

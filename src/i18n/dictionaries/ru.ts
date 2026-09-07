@@ -771,6 +771,10 @@ export const ru: Dictionary = {
     yourDoor: "Ваша дверь",
     outside: "Наружная сторона",
     inside: "Внутренняя сторона",
+    rotate360: "Обзор 360°",
+    rotateHint: "Перетащите дверь, используйте стрелки или ползунок для поворота.",
+    angle: "Угол",
+    resetView: "Сбросить вид",
     steps: {
       SIZE: "Размер",
       OPENING_DIRECTION: "Направление открывания",
