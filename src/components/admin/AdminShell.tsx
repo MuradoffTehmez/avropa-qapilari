@@ -30,7 +30,7 @@ import { cn } from "@/lib/utils";
 import { brand } from "@/config/brand";
 import { LogoMark } from "@/components/layout/Logo";
 import { useDialogFocus, useLockBodyScroll } from "@/lib/hooks";
-import { useSession } from "@/store/session";
+import { useStaffSession } from "@/store/session";
 
 /** admin sidebar strukturu. */
 export function AdminShell({
@@ -48,8 +48,8 @@ export function AdminShell({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const mobilePanelRef = useRef<HTMLDivElement>(null);
-  const user = useSession((s) => s.user);
-  const signOut = useSession((s) => s.signOut);
+  const user = useStaffSession((s) => s.user);
+  const signOut = useStaffSession((s) => s.signOut);
   useLockBodyScroll(open);
   useDialogFocus(mobilePanelRef, open);
 

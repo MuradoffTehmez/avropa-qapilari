@@ -1,5 +1,4 @@
 "use client";
-import { LocalManager } from "@/components/admin/LocalManager";
 import { ActivityFeed } from "@/components/account/ActivityFeed";
 import { notFound } from "next/navigation";
 
@@ -10,6 +9,8 @@ import { formatDate, formatDateTime, formatNumber, formatPrice } from "@/lib/uti
 import { Badge, Card, DataRow, Notice, Rating } from "@/components/ui/primitives";
 
 import { AdminPageHeader, DataTable } from "@/components/admin/DataTable";
+import { AdminDeleteAction, AdminEntityAction } from "@/components/admin/AdminEntityAction";
+import type { CrudField } from "@/components/admin/AdminCrud";
 import {
   ContentTable,
   DiscountsTable,
@@ -21,6 +22,7 @@ import {
   OrderStatusControl,
   PaymentStatusControl,
   RepairStatusControl,
+  RequestStatusControl,
   RoleControl,
   TechnicianControl,
 } from "@/components/admin/AdminControls";
@@ -76,7 +78,77 @@ export function AdminSection({
   const label = ui.labels;
   if (!sections.includes(section as Section)) notFound();
 
-  const addButton = (label: string) => <LocalManager section={section} label={label} />;
+  const productFields: CrudField[] = [
+    { name: "name", label: ui.fields.name, required: true },
+    { name: "slug", label: ui.fields.slug, required: true },
+    { name: "sku", label: ui.fields.sku, required: true },
+    { name: "categorySlug", label: ui.fields.categorySlug, required: true },
+    { name: "brandSlug", label: ui.fields.brandSlug, required: true },
+    { name: "material", label: ui.fields.material, required: true },
+    { name: "securityClass", label: ui.fields.securityClass, required: true },
+    { name: "basePrice", label: ui.fields.basePrice, type: "number", required: true },
+    { name: "inStock", label: ui.fields.inStock, type: "checkbox" },
+  ];
+  const categoryFields: CrudField[] = [
+    { name: "name", label: ui.fields.name, required: true },
+    { name: "slug", label: ui.fields.slug, required: true },
+  ];
+  const brandFields: CrudField[] = [
+    { name: "name", label: ui.fields.name, required: true },
+    { name: "slug", label: ui.fields.slug, required: true },
+    { name: "country", label: ui.fields.country, required: true },
+    { name: "founded", label: ui.fields.founded, type: "number", required: true },
+  ];
+  const optionFields: CrudField[] = [
+    { name: "id", label: ui.fields.optionName, required: true },
+    { name: "groupKey", label: ui.fields.group, required: true },
+    { name: "code", label: ui.fields.code, required: true },
+    { name: "label", label: ui.fields.label, required: true },
+    { name: "priceDelta", label: ui.fields.priceDelta, type: "number" },
+  ];
+  const appointmentFields: CrudField[] = [
+    { name: "reference", label: ui.fields.reference, required: true },
+    { name: "type", label: ui.fields.type, required: true },
+    { name: "date", label: ui.fields.date, type: "date", required: true },
+    { name: "startTime", label: ui.fields.startTime, required: true },
+    { name: "endTime", label: ui.fields.endTime, required: true },
+    { name: "address", label: ui.fields.address, required: true },
+    { name: "technicianId", label: ui.fields.technician, type: "select", options: [
+      { value: "", label: ui.unassigned },
+      ...(data.technicians ?? []).map((technician) => ({ value: technician.id, label: technician.name })),
+    ] },
+    { name: "status", label: ui.fields.status, required: true },
+  ];
+  const technicianFields: CrudField[] = [
+    { name: "name", label: ui.fields.name, required: true },
+    { name: "phone", label: ui.fields.phone },
+    { name: "email", label: ui.fields.email, required: true, createOnly: true },
+    { name: "password", label: ui.fields.password, required: true, createOnly: true },
+    { name: "specialization", label: ui.fields.specialization },
+    { name: "serviceAreas", label: ui.fields.serviceArea },
+    { name: "status", label: ui.fields.status, type: "select", options: [
+      { value: "AVAILABLE", label: ui.technicianAvailable },
+      { value: "BUSY", label: ui.technicianOnJob },
+      { value: "OFF", label: ui.technicianOffDuty },
+    ] },
+  ];
+  const userFields: CrudField[] = [
+    { name: "name", label: ui.fields.name, required: true },
+    { name: "email", label: ui.fields.email, required: true },
+    { name: "phone", label: ui.fields.phone },
+    { name: "password", label: ui.fields.password, required: true, createOnly: true },
+    { name: "role", label: label.function, type: "select", createOnly: true, options: Object.entries(ui.roleNames).map(([value, name]) => ({ value, label: name })) },
+  ];
+  const warrantyFields: CrudField[] = [
+    { name: "number", label: label.number, required: true },
+    { name: "serialNumber", label: ui.fields.serialNumber, required: true },
+    { name: "productName", label: ui.fields.productName, required: true },
+    { name: "orderNumber", label: ui.fields.orderNumber },
+    { name: "installationDate", label: ui.fields.installationDate, type: "date", required: true },
+    { name: "startDate", label: ui.fields.startDate, type: "date", required: true },
+    { name: "endDate", label: ui.fields.endDate, type: "date", required: true },
+    { name: "status", label: ui.fields.status, required: true },
+  ];
 
   /* ---------------------------------------------------------- PRODUCTS */
   if (section === "products") {
@@ -87,7 +159,7 @@ export function AdminSection({
         <AdminPageHeader
           title={dict.admin.products}
           description={`${products.length} ${ui.modelUnit}`}
-          action={addButton(ui.newProduct)}
+          action={<AdminEntityAction entity="products" fields={productFields} createLabel={ui.newProduct} />}
         />
         <DataTable
           title={dict.admin.products}
@@ -101,7 +173,7 @@ export function AdminSection({
               render: (p) => (
                 <div className="flex items-center gap-3">
                   <span className="aspect-3/4 w-9 shrink-0 overflow-hidden border border-line bg-bone">
-                    <ProductMedia product={getProduct(p.slug)!} sizes="36px" />
+                    {getProduct(p.slug) ? <ProductMedia product={getProduct(p.slug)!} sizes="36px" /> : null}
                   </span>
                   <span>
                     <span className="block font-medium text-ink">{p.name}</span>
@@ -144,6 +216,11 @@ export function AdminSection({
                 </Badge>
               ),
             },
+            {
+              key: "actions",
+              header: ui.operation,
+              render: (p) => <AdminEntityAction entity="products" id={p.id} fields={productFields} values={p} />,
+            },
           ]}
         />
       </>
@@ -154,7 +231,7 @@ export function AdminSection({
   if (section === "categories") {
     return (
       <><ActivityFeed section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.categories} action={addButton(ui.newCategory)} />
+        <AdminPageHeader title={dict.admin.categories} action={<AdminEntityAction entity="categories" fields={categoryFields} createLabel={ui.newCategory} />} />
         <DataTable
           title={dict.admin.categories}
           minWidth={640}
@@ -162,8 +239,9 @@ export function AdminSection({
           rows={data.categories ?? []}
           columns={[
             { key: "name", header: label.name, render: (c) => <span className="font-medium text-ink">{categoryNameBySlug(c.slug, dict, c.name)}</span> },
-            { key: "slug", header: "Slug", render: (c) => <code className="text-[12px] text-stone">{c.slug}</code> },
+            { key: "slug", header: ui.fields.slug, render: (c) => <code className="text-[12px] text-stone">{c.slug}</code> },
             { key: "count", header: label.product, align: "right", render: (c) => c.productCount },
+            { key: "actions", header: ui.operation, render: (c) => <AdminEntityAction entity="categories" id={c.id} fields={categoryFields} values={c} /> },
           ]}
         />
       </>
@@ -174,7 +252,7 @@ export function AdminSection({
   if (section === "brands") {
     return (
       <><ActivityFeed section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.brands} action={addButton(ui.newBrand)} />
+        <AdminPageHeader title={dict.admin.brands} action={<AdminEntityAction entity="brands" fields={brandFields} createLabel={ui.newBrand} />} />
         <DataTable
           title={dict.admin.brands}
           minWidth={640}
@@ -185,6 +263,7 @@ export function AdminSection({
             { key: "country", header: dict.adminUi.fields.country, render: (b) => countryNameByCode(b.country, dict) },
             { key: "founded", header: label.founded, align: "right", render: (b) => b.founded },
             { key: "count", header: label.model, align: "right", render: (b) => b.productCount },
+            { key: "actions", header: ui.operation, render: (b) => <AdminEntityAction entity="brands" id={b.id} fields={brandFields} values={b} /> },
           ]}
         />
       </>
@@ -199,7 +278,7 @@ export function AdminSection({
         <AdminPageHeader
           title={dict.admin.configurator}
           description={ui.optionsDescription}
-          action={addButton(ui.newOption)}
+          action={<AdminEntityAction entity="options" fields={optionFields} createLabel={ui.newOption} />}
         />
         <div className="space-y-4">
           {groups.map((g) => (
@@ -248,6 +327,11 @@ export function AdminSection({
                     ) : (
                       <span className="text-mist">—</span>
                     ),
+                },
+                {
+                  key: "actions",
+                  header: ui.operation,
+                  render: (v) => <AdminEntityAction entity="options" id={v.id} fields={optionFields} values={{ ...v, groupKey: g.groupKey }} />,
                 },
               ]}
             />
@@ -298,6 +382,7 @@ export function AdminSection({
               align: "right",
               render: (o) => <span className="font-medium tabular-nums text-ink">{formatPrice(o.total)}</span>,
             },
+            { key: "actions", header: ui.operation, render: (o) => <AdminDeleteAction entity="orders" id={o.id} /> },
           ]}
         />
       </>
@@ -319,7 +404,8 @@ export function AdminSection({
             { key: "date", header: label.date, render: (q) => formatDate(q.createdAt) },
             { key: "customer", header: label.customer, render: (q) => q.customerName },
             { key: "subject", header: label.subject, render: (q) => <span className="text-ink">{q.subject}</span> },
-            { key: "status", header: label.status, render: (q) => <Badge tone="gold">{q.status === "SENT" ? dict.accountUi.quoteSent : q.status}</Badge> },
+            { key: "status", header: label.status, render: (q) => <RequestStatusControl kind="quote" number={q.number} status={q.status} /> },
+            { key: "actions", header: ui.operation, render: (q) => <AdminDeleteAction entity="quotes" id={q.id} /> },
           ]}
         />
       </>
@@ -359,6 +445,7 @@ export function AdminSection({
               header: label.status,
               render: (rp) => <RepairStatusControl number={rp.number} status={rp.status} />,
             },
+            { key: "actions", header: ui.operation, render: (rp) => <AdminDeleteAction entity="repairs" id={rp.id} /> },
           ]}
         />
       </>
@@ -393,7 +480,8 @@ export function AdminSection({
                 />
               ),
             },
-            { key: "status", header: label.status, render: (m) => <Badge tone="gold">{m.status === "SCHEDULED" ? dict.accountUi.statuses.scheduled : m.status}</Badge> },
+            { key: "status", header: label.status, render: (m) => <RequestStatusControl kind="measurement" number={m.number} status={m.status} /> },
+            { key: "actions", header: ui.operation, render: (m) => <AdminDeleteAction entity="measurements" id={m.id} /> },
           ]}
         />
       </>
@@ -407,6 +495,7 @@ export function AdminSection({
         <AdminPageHeader
           title={dict.admin.appointments}
           description={ui.appointmentDescription}
+          action={<AdminEntityAction entity="appointments" fields={appointmentFields} createLabel={ui.newRecord} />}
         />
         <DataTable
           title={dict.admin.appointments}
@@ -421,6 +510,7 @@ export function AdminSection({
             { key: "address", header: dict.common.address, render: (a) => <span className="text-stone">{a.address}</span> },
             { key: "ref", header: label.reference, render: (a) => <code className="text-[12px] text-graphite">{a.reference}</code> },
             { key: "status", header: label.status, render: (a) => <Badge tone="gold">{a.status === "CONFIRMED" ? dict.accountUi.statuses.confirmed : dict.accountUi.statuses.scheduled}</Badge> },
+            { key: "actions", header: ui.operation, render: (a) => <AdminEntityAction entity="appointments" id={a.id} fields={appointmentFields} values={a} /> },
           ]}
         />
       </>
@@ -431,7 +521,7 @@ export function AdminSection({
   if (section === "technicians") {
     return (
       <><ActivityFeed section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.technicians} action={addButton(ui.newTechnician)} />
+        <AdminPageHeader title={dict.admin.technicians} action={<AdminEntityAction entity="technicians" fields={technicianFields} createLabel={ui.newTechnician} />} />
         <DataTable
           title={dict.admin.technicians}
           minWidth={860}
@@ -448,11 +538,12 @@ export function AdminSection({
               key: "status",
               header: label.status,
               render: (t) => (
-                <Badge tone={t.status === "AVAILABLE" ? "success" : t.status === "ON_JOB" ? "gold" : "neutral"}>
-                  {t.status === "AVAILABLE" ? ui.technicianAvailable : t.status === "ON_JOB" ? ui.technicianOnJob : ui.technicianOffDuty}
+                <Badge tone={t.status === "AVAILABLE" ? "success" : t.status === "BUSY" ? "gold" : "neutral"}>
+                  {t.status === "AVAILABLE" ? ui.technicianAvailable : t.status === "BUSY" ? ui.technicianOnJob : ui.technicianOffDuty}
                 </Badge>
               ),
             },
+            { key: "actions", header: ui.operation, render: (t) => <AdminEntityAction entity="technicians" id={t.id} fields={technicianFields} values={{ ...t, specialization: t.specialization.join(", "), serviceAreas: t.serviceAreas.join(", ") }} /> },
           ]}
         />
       </>
@@ -551,7 +642,7 @@ export function AdminSection({
 
     return (
       <><ActivityFeed section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.customers} description={`${customers.length} ${ui.customerUnit}`} />
+        <AdminPageHeader title={dict.admin.customers} description={`${customers.length} ${ui.customerUnit}`} action={<AdminEntityAction entity="users" fields={userFields} createLabel={ui.newRecord} />} />
         <DataTable
           title={dict.admin.customers}
           minWidth={800}
@@ -569,6 +660,7 @@ export function AdminSection({
               render: (c) => <span className="font-medium tabular-nums text-ink">{formatPrice(c.total)}</span>,
             },
             { key: "since", header: label.registration, render: (c) => formatDate(c.since) },
+            { key: "actions", header: ui.operation, render: (c) => <AdminEntityAction entity="users" id={c.id} fields={userFields} values={c} /> },
           ]}
         />
       </>
@@ -620,6 +712,7 @@ export function AdminSection({
                   <Badge tone="neutral">{ui.toOrder}</Badge>
                 ),
             },
+            { key: "actions", header: ui.operation, render: (s) => <AdminEntityAction entity="products" id={s.product.id} fields={productFields} values={s.product} /> },
           ]}
         />
       </>
@@ -630,7 +723,7 @@ export function AdminSection({
   if (section === "warranty") {
     return (
       <><ActivityFeed section={section} locale={locale} manage />
-        <AdminPageHeader title={dict.admin.warranty} description={ui.warrantyDescription} />
+        <AdminPageHeader title={dict.admin.warranty} description={ui.warrantyDescription} action={<AdminEntityAction entity="warranties" fields={warrantyFields} createLabel={ui.newRecord} />} />
         <DataTable
           title={dict.admin.warranty}
           minWidth={860}
@@ -648,6 +741,7 @@ export function AdminSection({
               header: label.status,
               render: (w) => <Badge tone={w.status === "ACTIVE" ? "success" : "neutral"}>{w.status === "ACTIVE" ? dict.warranty.active : dict.warranty.expired}</Badge>,
             },
+            { key: "actions", header: ui.operation, render: (w) => <AdminEntityAction entity="warranties" id={w.id} fields={warrantyFields} values={w} /> },
           ]}
         />
       </>

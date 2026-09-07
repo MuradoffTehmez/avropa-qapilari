@@ -30,6 +30,7 @@ export function RegisterForm({ locale, dict }: { locale: Locale; dict: Dictionar
     repeat: "",
   });
   const [terms, setTerms] = useState(false);
+  const [marketingConsent, setMarketingConsent] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [door, setDoor] = useState<DoorState>("locked");
 
@@ -43,6 +44,7 @@ export function RegisterForm({ locale, dict }: { locale: Locale; dict: Dictionar
     const problems: Record<string, string> = {};
     if (!form.name.trim()) problems.name = dict.errors.required;
     if (!EMAIL.test(form.email)) problems.email = dict.auth.errorEmail;
+    if (form.phone.replace(/\D/g, "").length < 9) problems.phone = dict.errors.invalidPhone;
     if (form.password.length < 8) problems.password = dict.auth.errorPassword;
     if (form.repeat !== form.password) problems.repeat = dict.auth.errorPasswordMatch;
     if (!terms) problems.terms = dict.auth.errorTerms;
@@ -63,8 +65,10 @@ export function RegisterForm({ locale, dict }: { locale: Locale; dict: Dictionar
           json: {
             name: form.name.trim(),
             email: form.email,
-            phone: form.phone || undefined,
+            phone: form.phone,
             password: form.password,
+            language: locale,
+            marketingConsent,
           },
         },
       );
@@ -112,7 +116,7 @@ export function RegisterForm({ locale, dict }: { locale: Locale; dict: Dictionar
           />
         </Field>
 
-        <Field label={dict.auth.phone}>
+        <Field label={dict.auth.phone} required error={errors.phone}>
           <Input
             type="tel"
             autoComplete="tel"
@@ -162,6 +166,12 @@ export function RegisterForm({ locale, dict }: { locale: Locale; dict: Dictionar
           />
           {errors.terms && <p className="mt-1.5 text-xs text-danger">{errors.terms}</p>}
         </div>
+
+        <Checkbox
+          checked={marketingConsent}
+          onChange={(e) => setMarketingConsent(e.target.checked)}
+          label={dict.auth.marketingOptional}
+        />
 
         <Button type="submit" size="lg" full disabled={busy}>
           {busy ? dict.auth.unlocking : dict.auth.submitRegister}

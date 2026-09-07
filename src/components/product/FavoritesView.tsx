@@ -11,7 +11,15 @@ import { useFavorites } from "@/store/lists";
 import { useHydrated } from "@/lib/hooks";
 import { products } from "@/mock/products";
 
-export function FavoritesView({ locale, dict }: { locale: Locale; dict: Dictionary }) {
+export function FavoritesView({
+  locale,
+  dict,
+  embedded = false,
+}: {
+  locale: Locale;
+  dict: Dictionary;
+  embedded?: boolean;
+}) {
   const r = routes(locale);
   const hydrated = useHydrated();
   const ids = useFavorites((s) => s.ids);
@@ -19,7 +27,7 @@ export function FavoritesView({ locale, dict }: { locale: Locale; dict: Dictiona
 
   if (!hydrated) {
     return (
-      <div className="container-page grid grid-cols-1 gap-3 py-10 xs:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+      <div className={`${embedded ? "" : "container-page py-10"} grid grid-cols-1 gap-3 xs:grid-cols-2 sm:gap-4 lg:grid-cols-4`}>
         {Array.from({ length: 4 }).map((_, i) => (
           <Skeleton key={i} className="aspect-3/4" />
         ))}
@@ -31,7 +39,7 @@ export function FavoritesView({ locale, dict }: { locale: Locale; dict: Dictiona
 
   if (list.length === 0) {
     return (
-      <div className="container-page py-12">
+      <div className={embedded ? "py-8" : "container-page py-12"}>
         <EmptyState
           icon={<Heart size={34} />}
           title={dict.favorites.empty}
@@ -43,7 +51,7 @@ export function FavoritesView({ locale, dict }: { locale: Locale; dict: Dictiona
   }
 
   return (
-    <div className="container-page py-8 lg:py-10">
+    <div className={embedded ? "" : "container-page py-8 lg:py-10"}>
       <div className="mb-5 flex items-center justify-between border-b border-line pb-4">
         <p className="text-[13px] text-stone">
           <span className="font-semibold tabular-nums text-ink">{list.length}</span>{" "}

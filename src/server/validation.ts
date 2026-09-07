@@ -72,13 +72,19 @@ export const quoteSchema = z.object({
 export const registerSchema = z.object({
   name: z.string().trim().min(2, "Ad ən azı 2 simvol olmalıdır"),
   email: z.email("E-poçt düzgün deyil"),
-  phone: z.string().trim().optional(),
+  phone,
   password: z.string().min(8, "Parol ən azı 8 simvol olmalıdır"),
+  language: z.enum(["az", "en", "ru"]).default("az"),
+  marketingConsent: z.boolean().default(false),
 });
 
 export const loginSchema = z.object({
   email: z.email("E-poçt düzgün deyil"),
   password: z.string().min(1, "Parol tələb olunur"),
+});
+
+export const staffLoginSchema = loginSchema.extend({
+  role: z.enum(["ADMIN", "TECHNICIAN"]),
 });
 
 export const profileSchema = z.object({

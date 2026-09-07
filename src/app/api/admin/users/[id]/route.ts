@@ -1,4 +1,4 @@
-import { requireUser } from "@/server/auth";
+import { requireStaff } from "@/server/auth";
 import { adminCustomers } from "@/server/admin";
 import { recordAudit } from "@/server/audit";
 import { db } from "@/server/db";
@@ -16,7 +16,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   return handle(async () => {
-    const actor = await requireUser("ADMIN");
+    const actor = await requireStaff("ADMIN");
     const { id } = await params;
 
     const user = await db.user.findUnique({ where: { id } });
@@ -39,7 +39,20 @@ export async function PATCH(
       }
     }
 
-    await db.user.update({ where: { id }, data: { role } });
+    await db.$transaction(async (tx) => {
+      await tx.user.update({ where: { id }, data: { role } });
+
+      if (role === "TECHNICIAN") {
+        const profile = await tx.technician.findUnique({ where: { userId: user.id } });
+        if (!profile) {
+          await tx.technician.create({
+            data: { name: user.name, phone: user.phone ?? "", userId: user.id },
+          });
+        }
+      } else if (user.role === "TECHNICIAN") {
+        await tx.technician.updateMany({ where: { userId: user.id }, data: { userId: null } });
+      }
+    });
     await recordAudit(actor, "user.manage", user.email, `${user.role} → ${role}`);
 
     return ok(await adminCustomers());

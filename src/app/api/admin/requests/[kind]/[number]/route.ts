@@ -1,4 +1,4 @@
-import { requireUser } from "@/server/auth";
+import { requireStaff } from "@/server/auth";
 import { changeDetail, recordAudit } from "@/server/audit";
 import { db } from "@/server/db";
 import { fail, handle, ok } from "@/server/http";
@@ -22,7 +22,7 @@ export async function PATCH(
   { params }: { params: Promise<{ kind: string; number: string }> },
 ) {
   return handle(async () => {
-    const actor = await requireUser("ADMIN");
+    const actor = await requireStaff("ADMIN");
     const { kind, number } = await params;
     if (!isKind(kind)) return fail("NOT_FOUND", "Belə müraciət növü yoxdur", 404);
 

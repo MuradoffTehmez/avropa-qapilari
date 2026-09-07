@@ -1,4 +1,4 @@
-import { requireUser } from "@/server/auth";
+import { requireStaff } from "@/server/auth";
 import { adminDiscounts } from "@/server/admin";
 import { recordAudit } from "@/server/audit";
 import { db } from "@/server/db";
@@ -8,7 +8,7 @@ import { discountSchema } from "@/server/validation";
 /** GET /api/admin/discounts */
 export async function GET() {
   return handle(async () => {
-    await requireUser("ADMIN");
+    await requireStaff("ADMIN");
     return ok(await adminDiscounts());
   });
 }
@@ -16,7 +16,7 @@ export async function GET() {
 /** POST /api/admin/discounts — yeni endirim kodu. */
 export async function POST(request: Request) {
   return handle(async () => {
-    const actor = await requireUser("ADMIN");
+    const actor = await requireStaff("ADMIN");
     const input = discountSchema.parse(await request.json());
 
     if (input.endsAt < input.startsAt) {

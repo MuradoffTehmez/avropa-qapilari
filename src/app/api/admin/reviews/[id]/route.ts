@@ -1,6 +1,6 @@
 import { revalidatePath } from "next/cache";
 
-import { requireUser } from "@/server/auth";
+import { requireStaff } from "@/server/auth";
 import { adminReviews } from "@/server/admin";
 import { recordAudit } from "@/server/audit";
 import { db } from "@/server/db";
@@ -16,7 +16,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   return handle(async () => {
-    const actor = await requireUser("ADMIN");
+    const actor = await requireStaff("ADMIN");
     const { id } = await params;
 
     const current = await db.review.findUnique({ where: { id } });
@@ -39,7 +39,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   return handle(async () => {
-    const actor = await requireUser("ADMIN");
+    const actor = await requireStaff("ADMIN");
     const { id } = await params;
 
     const current = await db.review.findUnique({ where: { id } });

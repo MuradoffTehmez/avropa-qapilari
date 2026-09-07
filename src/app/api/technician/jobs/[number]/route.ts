@@ -1,4 +1,4 @@
-import { requireUser } from "@/server/auth";
+import { requireStaff } from "@/server/auth";
 import { db } from "@/server/db";
 import { fail, handle, ok } from "@/server/http";
 import { technicianJobSchema } from "@/server/validation";
@@ -14,7 +14,7 @@ export async function PATCH(
   { params }: { params: Promise<{ number: string }> },
 ) {
   return handle(async () => {
-    const user = await requireUser("TECHNICIAN");
+    const user = await requireStaff("TECHNICIAN");
     const { number } = await params;
     const input = technicianJobSchema.parse(await request.json());
 
@@ -24,7 +24,7 @@ export async function PATCH(
     });
     if (!job) return fail("NOT_FOUND", "Müraciət tapılmadı", 404);
 
-    if (user.role !== "ADMIN" && job.technician?.userId !== user.id) {
+    if (job.technician?.userId !== user.id) {
       return fail("FORBIDDEN", "Bu müraciət sizə təyin edilməyib", 403);
     }
 

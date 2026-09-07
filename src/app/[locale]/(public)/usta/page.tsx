@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import type { Locale } from "@/types";
 import { TechnicianPanel } from "@/components/account/TechnicianPanel";
 import { AuthGuard } from "@/components/account/AuthGuard";
-import { currentUser } from "@/server/auth";
+import { currentStaffUser } from "@/server/auth";
 import { technicianWorkspace } from "@/server/technician";
 export async function generateMetadata({
   params,
@@ -29,15 +29,15 @@ export default async function Page({
   const dict = getDictionary(locale);
 
   // Sessiya yoxdursa `AuthGuard` giriş formasına yönləndirir.
-  const user = await currentUser();
+  const user = await currentStaffUser();
   const workspace =
-    user && (user.role === "TECHNICIAN" || user.role === "ADMIN")
+    user?.role === "TECHNICIAN"
       ? await technicianWorkspace(user.id)
       : null;
 
   return (
     <AuthGuard locale={locale} dict={dict} required="TECHNICIAN">
-      <TechnicianPanel workspace={workspace} />
+      <TechnicianPanel workspace={workspace} locale={locale} />
     </AuthGuard>
   );
 }

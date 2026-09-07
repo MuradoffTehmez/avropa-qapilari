@@ -6,7 +6,7 @@ import type { Locale } from "@/types";
 import { formatDate, formatDateLong, formatPrice } from "@/lib/utils";
 import { Card } from "@/components/ui/primitives";
 import { OrderStatusPill, RepairStatusPill } from "@/components/account/StatusPill";
-import { currentUser } from "@/server/auth";
+import { currentStaffUser } from "@/server/auth";
 import {
   adminDashboard,
   adminMeasurements,
@@ -27,7 +27,7 @@ export default async function AdminDashboardPage({
   const dict = getDictionary(locale);
 
   // Səlahiyyət yoxdursa `AdminBoundary` kilid ekranını göstərir.
-  const user = await currentUser();
+  const user = await currentStaffUser();
   if (user?.role !== "ADMIN") return null;
 
   const [stats, orders, repairRequests, measurements, topDoors, topColors, topLocks] =

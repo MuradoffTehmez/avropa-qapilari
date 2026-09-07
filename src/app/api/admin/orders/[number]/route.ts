@@ -1,4 +1,4 @@
-import { requireUser } from "@/server/auth";
+import { requireStaff } from "@/server/auth";
 import { changeDetail, recordAudit } from "@/server/audit";
 import { db } from "@/server/db";
 import { fail, handle, ok } from "@/server/http";
@@ -15,7 +15,7 @@ export async function PATCH(
   { params }: { params: Promise<{ number: string }> },
 ) {
   return handle(async () => {
-    const actor = await requireUser("ADMIN");
+    const actor = await requireStaff("ADMIN");
     const { number } = await params;
     const input = orderStatusSchema.parse(await request.json());
 

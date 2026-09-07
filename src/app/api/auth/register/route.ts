@@ -19,6 +19,8 @@ export async function POST(request: Request) {
         phone: input.phone || null,
         password: await hashPassword(input.password),
         role: "CUSTOMER",
+        language: input.language,
+        marketingConsent: input.marketingConsent,
       },
     });
 

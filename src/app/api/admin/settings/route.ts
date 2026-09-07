@@ -1,4 +1,4 @@
-import { requireUser } from "@/server/auth";
+import { requireStaff } from "@/server/auth";
 import { adminSettings } from "@/server/admin";
 import { recordAudit } from "@/server/audit";
 import { db } from "@/server/db";
@@ -8,7 +8,7 @@ import { settingsSchema } from "@/server/validation";
 /** GET /api/admin/settings */
 export async function GET() {
   return handle(async () => {
-    await requireUser("ADMIN");
+    await requireStaff("ADMIN");
     return ok(await adminSettings());
   });
 }
@@ -19,7 +19,7 @@ export async function GET() {
  */
 export async function PATCH(request: Request) {
   return handle(async () => {
-    const actor = await requireUser("ADMIN");
+    const actor = await requireStaff("ADMIN");
     const { values } = settingsSchema.parse(await request.json());
 
     const existing = await db.setting.findMany({

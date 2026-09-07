@@ -10,7 +10,7 @@ import { routes } from "@/lib/routes";
 import { useHydrated } from "@/lib/hooks";
 import { ButtonLink } from "@/components/ui/Button";
 import { DoorKeyAnimation } from "@/components/account/DoorKeyAnimation";
-import { hasRole, useSession, type Role } from "@/store/session";
+import { hasRole, useSession, useStaffSession, type Role } from "@/store/session";
 
 /**
  * Rol tələb edən bölmələri qoruyur.
@@ -39,8 +39,13 @@ export function AuthGuard({
   const r = routes(locale);
   const pathname = usePathname();
   const hydrated = useHydrated();
-  const user = useSession((s) => s.user);
-  const status = useSession((s) => s.status);
+  const customerUser = useSession((s) => s.user);
+  const customerStatus = useSession((s) => s.status);
+  const staffUser = useStaffSession((s) => s.user);
+  const staffStatus = useStaffSession((s) => s.status);
+  const staff = required !== "CUSTOMER";
+  const user = staff ? staffUser : customerUser;
+  const status = staff ? staffStatus : customerStatus;
 
   // Serverdə və ilk render-də sessiya bilinmir. Sahəni boş saxlayırıq ki,
   // məzmun sıçramasın — amma `main` landmark-ı və status mətni qalır,
@@ -57,9 +62,8 @@ export function AuthGuard({
     );
   }
 
-  if (hasRole(user, required)) return <>{children}</>;
+  if (staff ? user?.role === required : hasRole(user, required)) return <>{children}</>;
 
-  const staff = required !== "CUSTOMER";
   const admin = required === "ADMIN";
   const loginHref = admin ? r.adminLogin : required === "TECHNICIAN" ? r.technicianLogin : r.login;
   const heading = admin

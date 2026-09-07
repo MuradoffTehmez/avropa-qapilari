@@ -43,6 +43,20 @@ export const useSession = create<SessionState>()((set) => ({
   },
 }));
 
+/** Admin və usta panelləri üçün müştəri sessiyasından ayrı UI keşi. */
+export const useStaffSession = create<SessionState>()((set) => ({
+  user: null,
+  status: "loading",
+  setUser: (user) => set({ user, status: user ? "authenticated" : "anonymous" }),
+  signOut: async () => {
+    try {
+      await fetch("/api/auth/staff/logout", { method: "POST" });
+    } finally {
+      set({ user: null, status: "anonymous" });
+    }
+  },
+}));
+
 /** Rolun tələb olunan səviyyəyə çatıb-çatmadığı. */
 export function hasRole(user: SessionUser | null, required: Role): boolean {
   if (!user) return false;

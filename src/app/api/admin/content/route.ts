@@ -1,4 +1,4 @@
-import { requireUser } from "@/server/auth";
+import { requireStaff } from "@/server/auth";
 import { adminContentPages } from "@/server/admin";
 import { recordAudit } from "@/server/audit";
 import { db } from "@/server/db";
@@ -8,7 +8,7 @@ import { contentPageSchema } from "@/server/validation";
 /** GET /api/admin/content */
 export async function GET() {
   return handle(async () => {
-    await requireUser("ADMIN");
+    await requireStaff("ADMIN");
     return ok(await adminContentPages());
   });
 }
@@ -16,7 +16,7 @@ export async function GET() {
 /** POST /api/admin/content — yeni məzmun səhifəsi. */
 export async function POST(request: Request) {
   return handle(async () => {
-    const actor = await requireUser("ADMIN");
+    const actor = await requireStaff("ADMIN");
     const input = contentPageSchema.parse(await request.json());
 
     const exists = await db.contentPage.findUnique({ where: { path: input.path } });

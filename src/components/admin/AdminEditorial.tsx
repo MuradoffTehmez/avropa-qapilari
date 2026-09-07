@@ -9,6 +9,7 @@ import { Field, Input } from "@/components/ui/form";
 import { toast } from "@/components/ui/overlays";
 import { DataTable } from "@/components/admin/DataTable";
 import { AdminCrud } from "@/components/admin/AdminCrud";
+import { AdminDeleteAction } from "@/components/admin/AdminEntityAction";
 import { formatDate, formatPrice } from "@/lib/utils";
 import { ApiRequestError, apiFetch } from "@/lib/api";
 import { useDict } from "@/i18n/provider";
@@ -266,6 +267,7 @@ export function ReviewsTable({ rows }: { rows: AdminReviewRow[] }) {
             </select>
           ),
         },
+        { key: "actions", header: ui.operation, render: (rv) => <AdminDeleteAction entity="reviews" id={rv.id} /> },
       ]}
     />
   );

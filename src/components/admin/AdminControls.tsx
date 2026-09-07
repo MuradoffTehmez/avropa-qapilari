@@ -220,3 +220,34 @@ export function RoleControl({
     />
   );
 }
+
+/** Təklif və ölçü müraciətlərinin statusu. */
+export function RequestStatusControl({
+  kind,
+  number,
+  status,
+}: {
+  kind: "quote" | "measurement";
+  number: string;
+  status: string;
+}) {
+  const dict = useDict();
+  const router = useRouter();
+  const options = Object.entries(dict.repairStatus).map(([value, label]) => ({ value, label }));
+
+  return (
+    <Control
+      value={status}
+      options={options.some((option) => option.value === status) ? options : [{ value: status, label: status }, ...options]}
+      label={`${number} — ${dict.adminUi.labels.status}`}
+      onPick={async (next) => {
+        try {
+          await apiFetch(`/api/admin/requests/${kind}/${number}`, { method: "PATCH", json: { status: next } });
+          router.refresh();
+        } catch (error) {
+          if (error instanceof ApiRequestError) toast(error.error.message);
+        }
+      }}
+    />
+  );
+}

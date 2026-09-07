@@ -8,6 +8,7 @@ import { db } from "@/server/db";
 export { hashPassword, verifyPassword } from "@/server/password";
 
 export const SESSION_COOKIE = "ep_session";
+export const STAFF_SESSION_COOKIE = "ep_staff_session";
 const SESSION_DAYS = 30;
 
 /* ------------------------------- Sessiya ------------------------------- */
@@ -17,7 +18,10 @@ function hashToken(token: string): string {
   return createHash("sha256").update(token).digest("hex");
 }
 
-export async function createSession(userId: string): Promise<void> {
+export async function createSession(
+  userId: string,
+  audience: "customer" | "staff" = "customer",
+): Promise<void> {
   const token = randomBytes(32).toString("hex");
   const expiresAt = new Date(Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000);
 
@@ -26,7 +30,7 @@ export async function createSession(userId: string): Promise<void> {
   });
 
   const store = await cookies();
-  store.set(SESSION_COOKIE, token, {
+  store.set(audience === "staff" ? STAFF_SESSION_COOKIE : SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -36,13 +40,21 @@ export async function createSession(userId: string): Promise<void> {
 }
 
 export async function destroySession(): Promise<void> {
+  await destroySessionFor(SESSION_COOKIE);
+}
+
+export async function destroyStaffSession(): Promise<void> {
+  await destroySessionFor(STAFF_SESSION_COOKIE);
+}
+
+async function destroySessionFor(cookieName: string): Promise<void> {
   const store = await cookies();
-  const token = store.get(SESSION_COOKIE)?.value;
+  const token = store.get(cookieName)?.value;
 
   if (token) {
     await db.session.deleteMany({ where: { tokenHash: hashToken(token) } });
   }
-  store.delete(SESSION_COOKIE);
+  store.delete(cookieName);
 }
 
 export interface SessionUser {
@@ -53,9 +65,9 @@ export interface SessionUser {
 }
 
 /** Cari istifadəçi — sessiya yoxdursa və ya bitibsə `null`. */
-export async function currentUser(): Promise<SessionUser | null> {
+async function userFromCookie(cookieName: string): Promise<SessionUser | null> {
   const store = await cookies();
-  const token = store.get(SESSION_COOKIE)?.value;
+  const token = store.get(cookieName)?.value;
   if (!token) return null;
 
   const session = await db.session.findUnique({
@@ -75,6 +87,18 @@ export async function currentUser(): Promise<SessionUser | null> {
     email: session.user.email,
     role: session.user.role as SessionUser["role"],
   };
+}
+
+/** Əsas saytın müştəri sessiyası. Əməkdaş sessiyasından qəsdən ayrıdır. */
+export async function currentUser(): Promise<SessionUser | null> {
+  const user = await userFromCookie(SESSION_COOKIE);
+  return user?.role === "CUSTOMER" ? user : null;
+}
+
+/** Admin və usta panellərinin ayrıca sessiyası. */
+export async function currentStaffUser(): Promise<SessionUser | null> {
+  const user = await userFromCookie(STAFF_SESSION_COOKIE);
+  return user && user.role !== "CUSTOMER" ? user : null;
 }
 
 /** Rol yoxlaması — ADMIN bütün səlahiyyətləri əhatə edir (PRD §93). */
@@ -98,5 +122,15 @@ export async function requireUser(role?: SessionUser["role"]): Promise<SessionUs
   const user = await currentUser();
   if (!user) throw new AuthError("UNAUTHENTICATED", "Giriş tələb olunur");
   if (role && !hasRole(user, role)) throw new AuthError("FORBIDDEN", "Səlahiyyət yoxdur");
+  return user;
+}
+
+/** Əməkdaş API-ləri üçün ayrıca sessiya və dəqiq rol yoxlaması. */
+export async function requireStaff(
+  role: Extract<SessionUser["role"], "ADMIN" | "TECHNICIAN">,
+): Promise<SessionUser> {
+  const user = await currentStaffUser();
+  if (!user) throw new AuthError("UNAUTHENTICATED", "Əməkdaş girişi tələb olunur");
+  if (user.role !== role) throw new AuthError("FORBIDDEN", "Bu panel üçün səlahiyyət yoxdur");
   return user;
 }

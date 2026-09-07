@@ -26,6 +26,7 @@ export function SignInForm({ locale, dict }: { locale: Locale; dict: Dictionary 
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [door, setDoor] = useState<DoorState>("locked");
+  const [staffRole, setStaffRole] = useState<"ADMIN" | "TECHNICIAN" | null>(null);
 
   const next = params.get("next");
 
@@ -48,6 +49,7 @@ export function SignInForm({ locale, dict }: { locale: Locale; dict: Dictionary 
 
   async function submitLogin() {
     setDoor("unlocking");
+    setStaffRole(null);
     try {
       const user = await apiFetch<{ id: string; name: string; email: string; role: "CUSTOMER" | "TECHNICIAN" | "ADMIN" }>(
         "/api/auth/login",
@@ -60,8 +62,17 @@ export function SignInForm({ locale, dict }: { locale: Locale; dict: Dictionary 
     } catch (error) {
       setDoor("locked");
       if (error instanceof ApiRequestError) {
+        if (error.error.code === "ADMIN_ACCOUNT") setStaffRole("ADMIN");
+        if (error.error.code === "TECHNICIAN_ACCOUNT") setStaffRole("TECHNICIAN");
         setErrors(
-          error.error.details ?? { password: error.error.message },
+          error.error.details ?? {
+            password:
+              error.error.code === "ADMIN_ACCOUNT"
+                ? dict.auth.adminAccountNotice
+                : error.error.code === "TECHNICIAN_ACCOUNT"
+                  ? dict.auth.technicianAccountNotice
+                  : error.error.message,
+          },
         );
       }
     }
@@ -129,6 +140,23 @@ export function SignInForm({ locale, dict }: { locale: Locale; dict: Dictionary 
           {busy ? dict.auth.unlocking : dict.auth.submitSignIn}
         </Button>
 
+        {staffRole && (
+          <Button
+            type="button"
+            variant="secondary"
+            full
+            onClick={() =>
+              window.open(
+                staffRole === "ADMIN" ? r.adminLogin : r.technicianLogin,
+                "_blank",
+                "noopener,noreferrer",
+              )
+            }
+          >
+            {staffRole === "ADMIN" ? dict.auth.goToAdmin : dict.auth.goToJobs}
+          </Button>
+        )}
+
         <p className="pt-1 text-center text-[13px] text-stone">
           {dict.auth.noAccount}{" "}
           <Link href={r.register} className="font-medium text-gold-600 underline-offset-4 hover:underline">
@@ -142,7 +170,12 @@ export function SignInForm({ locale, dict }: { locale: Locale; dict: Dictionary 
         </p>
 
         <p className="flex items-center justify-center gap-1.5 text-[12px] text-mist">
-          <Link href={r.adminLogin} className="underline-offset-4 hover:underline">
+          <Link
+            href={r.adminLogin}
+            target="_blank"
+            rel="noreferrer"
+            className="underline-offset-4 hover:underline"
+          >
             {dict.auth.adminTitle}
           </Link>
           <ArrowRight size={11} />

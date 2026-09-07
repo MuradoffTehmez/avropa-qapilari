@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-import { useSession, type SessionUser } from "@/store/session";
+import { useSession, useStaffSession, type SessionUser } from "@/store/session";
 
 /**
  * Səhifə yüklənəndə serverdəki sessiyanı bir dəfə oxuyur.
@@ -12,6 +12,7 @@ import { useSession, type SessionUser } from "@/store/session";
  */
 export function SessionBootstrap() {
   const setUser = useSession((s) => s.setUser);
+  const setStaffUser = useStaffSession((s) => s.setUser);
 
   useEffect(() => {
     let cancelled = false;
@@ -25,10 +26,19 @@ export function SessionBootstrap() {
         if (!cancelled) setUser(null);
       });
 
+    fetch("/api/auth/staff/me")
+      .then((r) => (r.ok ? r.json() : { data: null }))
+      .then((body: { data: SessionUser | null }) => {
+        if (!cancelled) setStaffUser(body.data ?? null);
+      })
+      .catch(() => {
+        if (!cancelled) setStaffUser(null);
+      });
+
     return () => {
       cancelled = true;
     };
-  }, [setUser]);
+  }, [setStaffUser, setUser]);
 
   return null;
 }

@@ -259,6 +259,7 @@ export interface AdminAppointmentRow {
   endTime: string;
   type: string;
   technician: string | null;
+  technicianId: string | null;
   address: string;
   reference: string;
   status: string;
@@ -277,6 +278,7 @@ export async function adminAppointments(): Promise<AdminAppointmentRow[]> {
     endTime: a.endTime,
     type: a.type,
     technician: a.technician?.name ?? null,
+    technicianId: a.technicianId,
     address: a.address,
     reference: a.reference,
     status: a.status,
@@ -355,6 +357,7 @@ export interface AdminWarrantyRow {
   serialNumber: string;
   productName: string;
   orderNumber: string;
+  installationDate: string;
   startDate: string;
   endDate: string;
   status: string;
@@ -372,6 +375,7 @@ export async function adminWarranties(): Promise<AdminWarrantyRow[]> {
     serialNumber: w.serialNumber,
     productName: w.productName,
     orderNumber: w.order?.number ?? "",
+    installationDate: w.installationDate,
     startDate: w.startDate,
     endDate: w.endDate,
     status: w.status,

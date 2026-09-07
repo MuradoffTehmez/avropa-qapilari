@@ -1,4 +1,4 @@
-import { requireUser } from "@/server/auth";
+import { requireStaff } from "@/server/auth";
 import { adminSeoEntries } from "@/server/admin";
 import { recordAudit } from "@/server/audit";
 import { db } from "@/server/db";
@@ -8,7 +8,7 @@ import { seoEntrySchema } from "@/server/validation";
 /** GET /api/admin/seo */
 export async function GET() {
   return handle(async () => {
-    await requireUser("ADMIN");
+    await requireStaff("ADMIN");
     return ok(await adminSeoEntries());
   });
 }
@@ -16,7 +16,7 @@ export async function GET() {
 /** POST /api/admin/seo — səhifə üçün meta mətnlər. */
 export async function POST(request: Request) {
   return handle(async () => {
-    const actor = await requireUser("ADMIN");
+    const actor = await requireStaff("ADMIN");
     const input = seoEntrySchema.parse(await request.json());
 
     const exists = await db.seoEntry.findUnique({ where: { path: input.path } });

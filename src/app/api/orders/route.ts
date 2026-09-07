@@ -1,4 +1,4 @@
-import { currentUser } from "@/server/auth";
+import { currentStaffUser, currentUser } from "@/server/auth";
 import { db } from "@/server/db";
 import { fail, handle, ok } from "@/server/http";
 import { nextNumber } from "@/server/numbering";
@@ -39,7 +39,9 @@ export async function POST(request: Request) {
     }
 
     const input = orderSchema.parse(await request.json());
-    const user = await currentUser();
+    const customer = await currentUser();
+    const staff = customer ? null : await currentStaffUser();
+    const user = customer ?? (staff?.role === "TECHNICIAN" ? staff : null);
 
     // Hər sətir üçün qiymət serverdə hesablanır.
     const priced: { item: (typeof input.items)[number]; price: PriceResult }[] = [];

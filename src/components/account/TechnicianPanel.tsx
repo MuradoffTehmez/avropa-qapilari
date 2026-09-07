@@ -2,14 +2,17 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { CheckCircle2, Phone, Ruler, Wrench } from "lucide-react";
+import { CalendarClock, CheckCircle2, LogOut, Package, Phone, Ruler, Wrench } from "lucide-react";
 
-import { Button } from "@/components/ui/Button";
+import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card, DataRow, EmptyState } from "@/components/ui/primitives";
 import { Field, Input, Textarea } from "@/components/ui/form";
 import { toast } from "@/components/ui/overlays";
 import { RepairStatusPill } from "@/components/account/StatusPill";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatPrice } from "@/lib/utils";
+import { routes } from "@/lib/routes";
+import type { Locale } from "@/types";
+import { useStaffSession } from "@/store/session";
 import { ApiRequestError, apiFetch } from "@/lib/api";
 import { useDict } from "@/i18n/provider";
 import type { TechnicianWorkspace } from "@/server/technician";
@@ -20,8 +23,17 @@ import type { TechnicianWorkspace } from "@/server/technician";
  * Status və servis qeydi `/api/technician/jobs/:number`-ə yazılır;
  * server orada müraciətin həmin ustaya aid olduğunu yoxlayır.
  */
-export function TechnicianPanel({ workspace }: { workspace: TechnicianWorkspace | null }) {
+export function TechnicianPanel({
+  workspace,
+  locale,
+}: {
+  workspace: TechnicianWorkspace | null;
+  locale: Locale;
+}) {
   const dict = useDict();
+  const r = routes(locale);
+  const router = useRouter();
+  const signOut = useStaffSession((state) => state.signOut);
 
   if (!workspace) {
     return (
@@ -40,9 +52,16 @@ export function TechnicianPanel({ workspace }: { workspace: TechnicianWorkspace 
       <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gold-600">
         {dict.accountUi.technicianWorkspace}
       </p>
-      <h1 className="mt-3 text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
-        {workspace.name}
-      </h1>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">{workspace.name}</h1>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => void signOut().then(() => router.push(r.technicianLogin))}
+        >
+          <LogOut size={15} /> {dict.account.logout}
+        </Button>
+      </div>
       <p className="mt-2 max-w-xl text-[15px] leading-relaxed text-stone">
         {dict.accountUi.technicianIntro}
       </p>
@@ -51,6 +70,41 @@ export function TechnicianPanel({ workspace }: { workspace: TechnicianWorkspace 
       </p>
 
       <section className="mt-8">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight text-ink">
+            <Package size={17} className="text-gold-500" />
+            {dict.accountUi.personalOrders}
+          </h2>
+          <ButtonLink href={r.doors} size="sm">
+            {dict.accountUi.shopForMyself}
+          </ButtonLink>
+        </div>
+
+        {workspace.orders.length === 0 ? (
+          <EmptyState
+            icon={<Package size={30} />}
+            title={dict.account.noOrders}
+            action={<ButtonLink href={r.doors}>{dict.accountUi.shopForMyself}</ButtonLink>}
+          />
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {workspace.orders.map((order) => (
+              <Card key={order.id} className="flex items-center justify-between gap-4 p-4">
+                <div>
+                  <p className="font-mono text-[12px] text-graphite">{order.number}</p>
+                  <p className="mt-1 text-[12px] text-stone">{formatDate(order.createdAt)}</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold tabular-nums text-ink">{formatPrice(order.total)}</p>
+                  <p className="mt-1 text-[11px] text-stone">{order.status}</p>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="mt-10">
         <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold tracking-tight text-ink">
           <Wrench size={17} className="text-gold-500" />
           {dict.account.repairs}
@@ -62,6 +116,31 @@ export function TechnicianPanel({ workspace }: { workspace: TechnicianWorkspace 
           <div className="space-y-4">
             {workspace.jobs.map((job) => (
               <JobCard key={job.number} job={job} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="mt-10">
+        <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold tracking-tight text-ink">
+          <CalendarClock size={17} className="text-gold-500" />
+          {dict.account.appointments}
+        </h2>
+        {workspace.appointments.length === 0 ? (
+          <EmptyState icon={<CalendarClock size={30} />} title={dict.accountUi.noAppointments} />
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {workspace.appointments.map((appointment) => (
+              <Card key={appointment.id} className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="font-mono text-[12px] text-graphite">{appointment.reference}</p>
+                  <p className="text-[12px] text-stone">{appointment.status}</p>
+                </div>
+                <p className="mt-2 text-[14px] font-medium text-ink">
+                  {formatDate(appointment.date)} · {appointment.startTime}–{appointment.endTime}
+                </p>
+                <p className="mt-1 text-[13px] text-stone">{appointment.address}</p>
+              </Card>
             ))}
           </div>
         )}

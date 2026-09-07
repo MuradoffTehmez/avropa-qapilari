@@ -37,17 +37,38 @@ export interface TechnicianWorkspace {
   completedJobs: number;
   jobs: TechnicianJob[];
   visits: TechnicianVisit[];
+  appointments: {
+    id: string;
+    reference: string;
+    type: string;
+    date: string;
+    startTime: string;
+    endTime: string;
+    address: string;
+    status: string;
+  }[];
+  orders: {
+    id: string;
+    number: string;
+    status: string;
+    total: number;
+    createdAt: string;
+  }[];
 }
 
 /** İstifadəçi hesabına bağlı usta profilini və işlərini qaytarır. */
 export async function technicianWorkspace(userId: string): Promise<TechnicianWorkspace | null> {
-  const technician = await db.technician.findUnique({
-    where: { userId },
-    include: {
-      repairs: { orderBy: { createdAt: "desc" } },
-      measurements: { orderBy: { createdAt: "desc" } },
-    },
-  });
+  const [technician, orders] = await Promise.all([
+    db.technician.findUnique({
+      where: { userId },
+      include: {
+        repairs: { orderBy: { createdAt: "desc" } },
+        measurements: { orderBy: { createdAt: "desc" } },
+        appointments: { orderBy: [{ date: "asc" }, { startTime: "asc" }] },
+      },
+    }),
+    db.order.findMany({ where: { userId }, orderBy: { createdAt: "desc" } }),
+  ]);
 
   if (!technician) return null;
 
@@ -75,6 +96,23 @@ export async function technicianWorkspace(userId: string): Promise<TechnicianWor
       address: `${m.city}, ${m.address}`,
       preferredAt: m.preferredAt,
       status: m.status,
+    })),
+    appointments: technician.appointments.map((appointment) => ({
+      id: appointment.id,
+      reference: appointment.reference,
+      type: appointment.type,
+      date: appointment.date,
+      startTime: appointment.startTime,
+      endTime: appointment.endTime,
+      address: appointment.address,
+      status: appointment.status,
+    })),
+    orders: orders.map((order) => ({
+      id: order.id,
+      number: order.number,
+      status: order.status,
+      total: order.total,
+      createdAt: order.createdAt.toISOString(),
     })),
   };
 }

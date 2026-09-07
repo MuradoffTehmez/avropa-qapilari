@@ -1,6 +1,6 @@
 import { AdminSection } from "@/components/admin/AdminSection";
 import { isLocale } from "@/i18n";
-import { currentUser } from "@/server/auth";
+import { currentStaffUser } from "@/server/auth";
 import {
   adminAnalytics,
   adminAppointments,
@@ -50,7 +50,7 @@ async function loadSection(section: string): Promise<AdminData> {
     case "measurements":
       return { measurements: await adminMeasurements(), technicians: await adminTechnicians() };
     case "appointments":
-      return { appointments: await adminAppointments() };
+      return { appointments: await adminAppointments(), technicians: await adminTechnicians() };
     case "technicians":
       return { technicians: await adminTechnicians() };
     case "customers":
@@ -83,7 +83,7 @@ export default async function Page({
   params: Promise<{ locale: string; section: string }>;
 }) {
   const { locale, section } = await params;
-  const user = await currentUser();
+  const user = await currentStaffUser();
   const data = user?.role === "ADMIN" ? await loadSection(section) : {};
 
   return (

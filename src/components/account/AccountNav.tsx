@@ -34,7 +34,7 @@ export function AccountNav({ locale, dict }: { locale: Locale; dict: Dictionary 
     { icon: Wrench, label: dict.account.repairs, href: r.accountSection("repairs") },
     { icon: CalendarClock, label: dict.account.appointments, href: r.accountSection("appointments") },
     { icon: ShieldCheck, label: dict.account.warranties, href: r.accountSection("warranties") },
-    { icon: Heart, label: dict.account.favorites, href: r.favorites },
+    { icon: Heart, label: dict.account.favorites, href: r.accountSection("favorites") },
     { icon: MapPin, label: dict.account.addresses, href: r.accountSection("addresses") },
     { icon: Bell, label: dict.account.notifications, href: r.accountSection("notifications") },
     { icon: User, label: dict.account.profile, href: r.accountSection("profile") },

@@ -25,6 +25,8 @@ export interface CrudField {
   required?: boolean;
   hint?: string;
   options?: { value: string; label: string }[];
+  /** Yalnız yeni qeyd formasında göstərilir. */
+  createOnly?: boolean;
 }
 
 export interface CrudRow {
@@ -102,6 +104,7 @@ export function AdminCrud<T extends CrudRow>({
   }
 
   async function remove(row: T) {
+    if (!window.confirm(dict.adminUi.deleteConfirm)) return;
     try {
       onRows(await apiFetch<T[]>(`${endpoint}/${row.id}`, { method: "DELETE" }));
       router.refresh();

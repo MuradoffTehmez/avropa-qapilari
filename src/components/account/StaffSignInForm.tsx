@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/Button";
 import { Field, Input } from "@/components/ui/form";
 import { AuthHeading, AuthShell } from "@/components/account/AuthShell";
 import type { DoorState } from "@/components/account/DoorKeyAnimation";
-import { useSession, type Role } from "@/store/session";
+import { useStaffSession, type Role } from "@/store/session";
 import { ApiRequestError, apiFetch } from "@/lib/api";
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -35,7 +35,7 @@ export function StaffSignInForm({
   const r = routes(locale);
   const router = useRouter();
   const params = useSearchParams();
-  const setUser = useSession((s) => s.setUser);
+  const setUser = useStaffSession((s) => s.setUser);
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -65,13 +65,13 @@ export function StaffSignInForm({
     setDoor("unlocking");
     try {
       const user = await apiFetch<{ id: string; name: string; email: string; role: Role }>(
-        "/api/auth/login",
-        { method: "POST", json: { email: form.email, password: form.password } },
+        "/api/auth/staff/login",
+        { method: "POST", json: { email: form.email, password: form.password, role } },
       );
 
       // Rol kifayət etmirsə panelə buraxmırıq — server də hər sorğuda
       // ayrıca yoxlayır, bu yalnız erkən geri bildirişdir.
-      if (user.role !== role && user.role !== "ADMIN") {
+      if (user.role !== role) {
         setDoor("locked");
         setErrors({ password: dict.auth.guardAdminText });
         return;

@@ -22,6 +22,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { OrderStatusPill, RepairStatusPill } from "@/components/account/StatusPill";
 import { DoorVisual } from "@/components/product/DoorVisual";
 import { ProductMedia } from "@/components/product/ProductMedia";
+import { FavoritesView } from "@/components/product/FavoritesView";
 import { ProfileForm } from "@/components/account/ProfileForm";
 import { AddressManager } from "@/components/account/AddressManager";
 import { currentUser } from "@/server/auth";
@@ -45,6 +46,7 @@ const sections = [
   "repairs",
   "appointments",
   "warranties",
+  "favorites",
   "addresses",
   "notifications",
   "profile",
@@ -393,6 +395,16 @@ export default async function AccountSectionPage({
       <div className="space-y-4">
         <ActivityFeed section={section} locale={locale} />
         <AddressManager dict={dict} initial={addresses} />
+      </div>
+    );
+  }
+
+  if (section === "favorites") {
+    return (
+      <div className="space-y-4">
+        <ActivityFeed section={section} locale={locale} />
+        <h2 className="text-xl font-semibold tracking-tight text-ink">{dict.account.favorites}</h2>
+        <FavoritesView locale={locale} dict={dict} embedded />
       </div>
     );
   }

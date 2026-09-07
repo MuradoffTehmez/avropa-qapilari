@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import type { Dictionary } from "@/i18n";
 import { Button } from "@/components/ui/Button";
 import { useHydrated, useStoredValue, writeStoredValue } from "@/lib/hooks";
@@ -8,10 +9,11 @@ const KEY = "ep-cookie-consent-v1";
 
 /** kuki razılığı. Analitik/marketinq yalnız razılıqdan sonra. */
 export function CookieBar({ dict }: { dict: Dictionary }) {
+  const pathname = usePathname();
   const hydrated = useHydrated();
   const consent = useStoredValue(KEY);
 
-  if (!hydrated || consent) return null;
+  if (!hydrated || consent || pathname.includes("/admin")) return null;
 
   return (
     <div

@@ -65,8 +65,8 @@ export function routes(locale: Locale) {
 
     doorPassport: (serial: string) => `${base}/service/door/${serial}`,
 
-    admin: `/admin`,
-    adminSection: (section: string) => `/admin/${section}`,
+    admin: `${base}/admin`,
+    adminSection: (section: string) => `${base}/admin/${section}`,
 
     legal: (page: string) => `${base}/legal/${page}`,
   };
