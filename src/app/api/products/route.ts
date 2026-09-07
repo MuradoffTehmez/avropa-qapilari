@@ -1,5 +1,5 @@
-import { db } from "@/server/db";
 import { handle, ok } from "@/server/http";
+import { catalogProducts } from "@/server/catalog";
 
 /** GET /api/products — kataloq siyahısı, sadə filtrlərlə. */
 export async function GET(request: Request) {
@@ -9,37 +9,12 @@ export async function GET(request: Request) {
     const brand = url.searchParams.get("brand");
     const limit = Math.min(Number(url.searchParams.get("limit") ?? 50), 100);
 
-    const products = await db.product.findMany({
-      where: {
-        ...(category ? { category: { slug: category } } : {}),
-        ...(brand ? { brand: { slug: brand } } : {}),
-      },
-      include: { category: true, brand: true },
-      orderBy: { basePrice: "asc" },
-      take: limit,
-    });
+    const products = (await catalogProducts())
+      .filter((product) => !category || product.categorySlug === category)
+      .filter((product) => !brand || product.brandSlug === brand)
+      .sort((a, b) => a.basePrice - b.basePrice)
+      .slice(0, limit);
 
-    return ok(products.map(serialize));
+    return ok(products);
   });
-}
-
-function serialize(p: Awaited<ReturnType<typeof db.product.findMany>>[number] & {
-  category?: { slug: string; name: string };
-  brand?: { slug: string; name: string };
-}) {
-  return {
-    slug: p.slug,
-    sku: p.sku,
-    name: p.name,
-    basePrice: p.basePrice,
-    oldPrice: p.oldPrice,
-    material: p.material,
-    securityClass: p.securityClass,
-    inStock: p.inStock,
-    rating: p.rating,
-    reviewCount: p.reviewCount,
-    categorySlug: p.category?.slug,
-    brandSlug: p.brand?.slug,
-    panelHexes: JSON.parse(p.panelHexes) as string[],
-  };
 }

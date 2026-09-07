@@ -1,6 +1,5 @@
 import { ImageResponse } from "next/og";
-import { getProduct, products } from "@/mock/products";
-import { getBrand } from "@/mock/taxonomy";
+import { catalogBrand, catalogProduct, catalogProducts } from "@/server/catalog";
 import { brand } from "@/config/brand";
 import { formatPrice } from "@/lib/utils";
 import { isLocale } from "@/i18n";
@@ -12,7 +11,8 @@ export const size = ogSize;
 export const contentType = ogContentType;
 export const alt = "EuroPorta";
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const products = await catalogProducts();
   return products.map((p) => ({ slug: p.slug }));
 }
 
@@ -24,7 +24,7 @@ export default async function ProductOgImage({
   const { locale: raw, slug } = await params;
   const locale = (isLocale(raw) ? raw : "az") as Locale;
   const dict = getDictionary(locale);
-  const product = getProduct(slug);
+  const product = await catalogProduct(slug);
 
   const [regular, semibold] = await Promise.all([loadOgFont(400), loadOgFont(700)]);
 
@@ -51,7 +51,7 @@ export default async function ProductOgImage({
     );
   }
 
-  const productBrand = getBrand(product.brandSlug);
+  const productBrand = await catalogBrand(product.brandSlug);
   const panel = product.panelHexes[0];
 
   const specs = [

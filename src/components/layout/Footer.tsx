@@ -2,14 +2,13 @@ import Link from "next/link";
 import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { FacebookIcon, InstagramIcon, TiktokIcon } from "@/components/ui/SocialIcons";
 import type { Dictionary } from "@/i18n";
-import type { Locale } from "@/types";
+import type { Category, Locale } from "@/types";
 import { routes } from "@/lib/routes";
 import { brand, hasContact, hasSocial } from "@/config/brand";
 import { Logo } from "@/components/layout/Logo";
-import { categories } from "@/mock/taxonomy";
 import { categoryName } from "@/lib/i18n-format";
 
-export function Footer({ locale, dict }: { locale: Locale; dict: Dictionary }) {
+export function Footer({ locale, dict, categories }: { locale: Locale; dict: Dictionary; categories: Category[] }) {
   const r = routes(locale);
   const year = new Date().getFullYear();
   const whatsapp = brand.contact.whatsapp.replace(/[^0-9]/g, "");

@@ -34,8 +34,13 @@ import { ProductActions } from "@/components/product/ProductActions";
 import { CertificateBadges } from "@/components/product/CertificateBadges";
 import { StickyBuyBar } from "@/components/product/StickyBuyBar";
 import { ProductCard } from "@/components/product/ProductCard";
-import { getProduct, getRelatedProducts, products } from "@/mock/products";
-import { getBrand, getCategory } from "@/mock/taxonomy";
+import {
+  catalogBrand,
+  catalogCategories,
+  catalogProduct,
+  catalogProducts,
+  relatedCatalogProducts,
+} from "@/server/catalog";
 import { localizedFaq } from "@/mock/content.i18n";
 import { publishedReviews } from "@/server/reviews";
 import { optionGroups } from "@/mock/options";
@@ -44,7 +49,8 @@ import { categoryName, materialName, priceFrom, productDescription, productShort
 import { JsonLd } from "@/components/seo/JsonLd";
 import { breadcrumbSchema, productSchema } from "@/lib/structured-data";
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const products = await catalogProducts();
   return locales.flatMap((locale) => products.map((p) => ({ locale, slug: p.slug })));
 }
 
@@ -55,7 +61,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale: raw, slug } = await params;
   const locale = (isLocale(raw) ? raw : "az") as Locale;
-  const product = getProduct(slug);
+  const product = await catalogProduct(slug);
   if (!product) return {};
 
   const dict = getDictionary(locale);
@@ -87,13 +93,16 @@ export default async function ProductPage({
   const dict = getDictionary(locale);
   const r = routes(locale);
 
-  const product = getProduct(slug);
+  const product = await catalogProduct(slug);
   if (!product) notFound();
 
-  const category = getCategory(product.categorySlug);
-  const productBrand = getBrand(product.brandSlug);
-  const related = getRelatedProducts(product);
-  const allReviews = await publishedReviews(locale);
+  const [categories, productBrand, related, allReviews] = await Promise.all([
+    catalogCategories(),
+    catalogBrand(product.brandSlug),
+    relatedCatalogProducts(product),
+    publishedReviews(locale),
+  ]);
+  const category = categories.find((item) => item.slug === product.categorySlug);
   const productReviews = allReviews.filter((rv) => rv.productName === product.name);
 
   const specGroups = Array.from(new Set(product.specs.map((s) => s.group)));
@@ -103,7 +112,7 @@ export default async function ProductPage({
     <>
       <JsonLd
         data={[
-          productSchema(product, productBrand, allReviews, locale, dict),
+          productSchema(product, productBrand ?? undefined, allReviews, locale, dict),
           breadcrumbSchema([
             { label: dict.nav.home, href: r.home },
             { label: dict.catalog.title, href: r.doors },

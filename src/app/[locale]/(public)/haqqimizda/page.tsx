@@ -7,8 +7,8 @@ import { localeAlternates, routes } from "@/lib/routes";
 import { brandDescription, countryName, specializationName } from "@/lib/i18n-format";
 import { Breadcrumbs, Section, SectionHeading, Stat } from "@/components/ui/primitives";
 import { ButtonLink } from "@/components/ui/Button";
-import { brands } from "@/mock/taxonomy";
 import { technicians } from "@/mock/content";
+import { catalogBrands } from "@/server/catalog";
 
 export async function generateMetadata({
   params,
@@ -35,6 +35,7 @@ export default async function AboutPage({
   const locale = (isLocale(raw) ? raw : "az") as Locale;
   const dict = getDictionary(locale);
   const r = routes(locale);
+  const brands = await catalogBrands();
 
   return (
     <>

@@ -4,11 +4,9 @@ import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 import type { Dictionary } from "@/i18n";
-import type { Locale } from "@/types";
+import type { Brand, Category, Locale, Product } from "@/types";
 import { routes } from "@/lib/routes";
 import { useDialogFocus, useEscapeKey, useLockBodyScroll } from "@/lib/hooks";
-import { products } from "@/mock/products";
-import { brands, categories } from "@/mock/taxonomy";
 import { ProductMedia } from "@/components/product/ProductMedia";
 import { categoryName, priceFrom } from "@/lib/i18n-format";
 
@@ -18,11 +16,17 @@ export function SearchOverlay({
   onClose,
   locale,
   dict,
+  products,
+  categories,
+  brands,
 }: {
   open: boolean;
   onClose: () => void;
   locale: Locale;
   dict: Dictionary;
+  products: Product[];
+  categories: Category[];
+  brands: Brand[];
 }) {
   const [query, setQuery] = useState("");
   const panelRef = useRef<HTMLDivElement>(null);

@@ -20,8 +20,7 @@ import { DoorVisual } from "@/components/product/DoorVisual";
 import { ProductCard } from "@/components/product/ProductCard";
 import { TrustStrip } from "@/components/home/TrustStrip";
 import { ProcessSection } from "@/components/home/ProcessSection";
-import { categories, brands } from "@/mock/taxonomy";
-import { getFeaturedProducts } from "@/mock/products";
+import { catalogBrands, catalogCategories, featuredCatalogProducts } from "@/server/catalog";
 import { localizedFaq, localizedProjects } from "@/mock/content.i18n";
 import { publishedReviews } from "@/server/reviews";
 import { categoryName, countryName } from "@/lib/i18n-format";
@@ -52,9 +51,12 @@ export default async function HomePage({
   const r = routes(locale);
 
   // Yalnız moderasiyadan keçmiş rəylər göstərilir.
-  const reviews = await publishedReviews(locale);
-
-  const featured = getFeaturedProducts(8);
+  const [reviews, featured, categories, brands] = await Promise.all([
+    publishedReviews(locale),
+    featuredCatalogProducts(8),
+    catalogCategories(),
+    catalogBrands(),
+  ]);
   const featuredCategories = categories.filter((c) => c.featured);
   const featuredProjects = localizedProjects(locale).slice(0, 3);
 

@@ -1,5 +1,5 @@
-import { db } from "@/server/db";
 import { fail, handle, ok } from "@/server/http";
+import { catalogProduct } from "@/server/catalog";
 
 /** GET /api/products/:slug — məhsul detalı və konfiqurator qrupları. */
 export async function GET(
@@ -8,18 +8,10 @@ export async function GET(
 ) {
   return handle(async () => {
     const { slug } = await params;
-    const product = await db.product.findUnique({
-      where: { slug },
-      include: { category: true, brand: true },
-    });
+    const product = await catalogProduct(slug);
 
     if (!product) return fail("NOT_FOUND", "Məhsul tapılmadı", 404);
 
-    return ok({
-      ...product,
-      optionGroups: JSON.parse(product.optionGroups) as string[],
-      panelHexes: JSON.parse(product.panelHexes) as string[],
-      deliveryDays: [product.deliveryDaysMin, product.deliveryDaysMax],
-    });
+    return ok(product);
   });
 }

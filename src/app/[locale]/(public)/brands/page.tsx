@@ -6,8 +6,7 @@ import { getDictionary, isLocale } from "@/i18n";
 import type { Locale } from "@/types";
 import { localeAlternates, routes } from "@/lib/routes";
 import { Breadcrumbs, Section } from "@/components/ui/primitives";
-import { brands } from "@/mock/taxonomy";
-import { products } from "@/mock/products";
+import { catalogBrands } from "@/server/catalog";
 import { brandDescription, countryName } from "@/lib/i18n-format";
 
 export async function generateMetadata({
@@ -35,6 +34,7 @@ export default async function BrandsPage({
   const locale = (isLocale(raw) ? raw : "az") as Locale;
   const dict = getDictionary(locale);
   const r = routes(locale);
+  const brands = await catalogBrands();
 
   return (
     <>
@@ -51,7 +51,7 @@ export default async function BrandsPage({
       <Section>
         <div className="container-page grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
           {brands.map((b) => {
-            const count = products.filter((p) => p.brandSlug === b.slug).length;
+            const count = b.productCount;
             return (
               <Link
                 key={b.id}

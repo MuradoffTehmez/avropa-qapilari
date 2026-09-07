@@ -4,9 +4,10 @@ import { notFound } from "next/navigation";
 import { getDictionary, isLocale, locales } from "@/i18n";
 import type { Locale } from "@/types";
 import { Configurator } from "@/components/configurator/Configurator";
-import { getProduct, products } from "@/mock/products";
+import { catalogProduct, catalogProducts } from "@/server/catalog";
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const products = await catalogProducts();
   return locales.flatMap((locale) => products.map((p) => ({ locale, slug: p.slug })));
 }
 
@@ -18,7 +19,7 @@ export async function generateMetadata({
   const { locale: raw, slug } = await params;
   const locale = (isLocale(raw) ? raw : "az") as Locale;
   const dict = getDictionary(locale);
-  const product = getProduct(slug);
+  const product = await catalogProduct(slug);
   if (!product) return {};
 
   return {
@@ -38,7 +39,7 @@ export default async function ConfiguratorProductPage({
   const locale = (isLocale(raw) ? raw : "az") as Locale;
   const dict = getDictionary(locale);
 
-  const product = getProduct(slug);
+  const product = await catalogProduct(slug);
   if (!product) notFound();
 
   const query = await searchParams;

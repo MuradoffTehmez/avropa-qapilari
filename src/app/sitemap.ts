@@ -2,14 +2,17 @@ import type { MetadataRoute } from "next";
 import { brand } from "@/config/brand";
 import { locales } from "@/i18n/config";
 import { swapLocaleInPath } from "@/lib/routes";
-import { products } from "@/mock/products";
-import { brands, categories } from "@/mock/taxonomy";
+import { catalogBrands, catalogCategories, catalogProducts } from "@/server/catalog";
 import { blogPosts } from "@/mock/content";
 
 /** sitemap. */
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = brand.siteUrl;
-  const now = new Date();
+  const [products, brands, categories] = await Promise.all([
+    catalogProducts(),
+    catalogBrands(),
+    catalogCategories(),
+  ]);
 
   const staticPaths = [
     "",
@@ -55,7 +58,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return locales.flatMap((locale) =>
     all.map((path) => ({
       url: localized(path, locale),
-      lastModified: now,
       changeFrequency: path === "" ? ("daily" as const) : ("weekly" as const),
       priority: path === "" ? 1 : path.startsWith("/qapi/") ? 0.8 : 0.6,
       alternates: {

@@ -6,12 +6,12 @@ import type { Locale } from "@/types";
 import { localeAlternates, routes } from "@/lib/routes";
 import { Breadcrumbs, Section, Stat } from "@/components/ui/primitives";
 import { ProductCard } from "@/components/product/ProductCard";
-import { brands, getBrand } from "@/mock/taxonomy";
-import { products } from "@/mock/products";
+import { catalogBrand, catalogBrands, catalogProducts } from "@/server/catalog";
 import { brandDescription, countryName } from "@/lib/i18n-format";
 import { formatPrice } from "@/lib/utils";
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const brands = await catalogBrands();
   return locales.flatMap((locale) => brands.map((b) => ({ locale, slug: b.slug })));
 }
 
@@ -22,7 +22,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale: raw, slug } = await params;
   const locale = (isLocale(raw) ? raw : "az") as Locale;
-  const b = getBrand(slug);
+  const b = await catalogBrand(slug);
   if (!b) return {};
 
   const dict = getDictionary(locale);
@@ -43,7 +43,7 @@ export default async function BrandPage({
   const dict = getDictionary(locale);
   const r = routes(locale);
 
-  const b = getBrand(slug);
+  const [b, products] = await Promise.all([catalogBrand(slug), catalogProducts()]);
   if (!b) notFound();
 
   const list = products.filter((p) => p.brandSlug === b.slug);

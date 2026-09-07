@@ -7,8 +7,7 @@ import type { Locale } from "@/types";
 import { localeAlternates, routes } from "@/lib/routes";
 import { Breadcrumbs, Section, SectionHeading } from "@/components/ui/primitives";
 import { DoorVisual } from "@/components/product/DoorVisual";
-import { products } from "@/mock/products";
-import { categories } from "@/mock/taxonomy";
+import { catalogCategories, catalogProducts } from "@/server/catalog";
 import { categoryName, priceFrom } from "@/lib/i18n-format";
 
 export async function generateMetadata({
@@ -36,6 +35,7 @@ export default async function ConfiguratorIndexPage({
   const locale = (isLocale(raw) ? raw : "az") as Locale;
   const dict = getDictionary(locale);
   const r = routes(locale);
+  const [products, categories] = await Promise.all([catalogProducts(), catalogCategories()]);
 
   return (
     <>

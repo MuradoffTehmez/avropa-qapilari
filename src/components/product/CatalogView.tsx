@@ -3,15 +3,13 @@
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { LayoutGrid, List, SlidersHorizontal, X } from "lucide-react";
 import type { Dictionary } from "@/i18n";
-import type { DoorMaterial, Locale, Product, SecurityClass, SurfaceStyle } from "@/types";
+import type { Brand, Category, DoorMaterial, Locale, Product, SecurityClass, SurfaceStyle } from "@/types";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { Checkbox, Input, Select, Swatch } from "@/components/ui/form";
 import { Drawer } from "@/components/ui/overlays";
 import { EmptyState } from "@/components/ui/primitives";
 import { ProductCard } from "@/components/product/ProductCard";
-import { brands, categories, collections } from "@/mock/taxonomy";
-import { materialLabels, styleLabels } from "@/mock/products";
 import { categoryName, countryName, materialName, styleName } from "@/lib/i18n-format";
 import {
   applyFilters,
@@ -31,11 +29,15 @@ export function CatalogView({
   locale,
   dict,
   lockedCategory,
+  categories,
+  brands,
 }: {
   products: Product[];
   locale: Locale;
   dict: Dictionary;
   lockedCategory?: string;
+  categories: Category[];
+  brands: Brand[];
 }) {
   const query = useSyncExternalStore(subscribeQuery, () => window.location.search, () => "");
   const filters = useMemo(() => readFilters(query), [query]);
@@ -45,6 +47,9 @@ export function CatalogView({
   const [view, setView] = useState<"grid" | "list">("grid");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [visible, setVisible] = useState(PAGE_SIZE);
+  const collections = useMemo(() => [...new Set(products.map((product) => product.collection))], [products]);
+  const materials = useMemo(() => [...new Set(products.map((product) => product.material))], [products]);
+  const styles = useMemo(() => [...new Set(products.map((product) => product.style))], [products]);
 
   const result = useMemo(
     () => sortProducts(applyFilters(products, filters), sort),
@@ -69,6 +74,11 @@ export function CatalogView({
       toggleIn={toggleIn}
       dict={dict}
       lockedCategory={lockedCategory}
+      categories={categories}
+      brands={brands}
+      collections={collections}
+      materials={materials}
+      styles={styles}
     />
   );
 
@@ -165,7 +175,7 @@ export function CatalogView({
         {/* Active chips */}
         {activeCount > 0 && (
           <div className="mb-5 flex flex-wrap gap-2">
-            <ActiveChips filters={filters} patch={patch} dict={dict} />
+            <ActiveChips filters={filters} patch={patch} dict={dict} categories={categories} brands={brands} />
             <button
               type="button"
               onClick={() => setFilters(emptyFilters)}
@@ -270,12 +280,22 @@ function FilterPanel({
   toggleIn,
   dict,
   lockedCategory,
+  categories,
+  brands,
+  collections,
+  materials,
+  styles,
 }: {
   filters: CatalogFilters;
   patch: (next: Partial<CatalogFilters>) => void;
   toggleIn: <T>(list: T[], value: T) => T[];
   dict: Dictionary;
   lockedCategory?: string;
+  categories: Category[];
+  brands: Brand[];
+  collections: string[];
+  materials: DoorMaterial[];
+  styles: SurfaceStyle[];
 }) {
   return (
     <div>
@@ -347,7 +367,7 @@ function FilterPanel({
 
       <FilterGroup title={dict.catalog.groupTechnical}>
         <p className="text-[11px] uppercase tracking-wide text-stone">{dict.catalog.material}</p>
-        {(Object.keys(materialLabels) as DoorMaterial[]).map((m) => (
+        {materials.map((m) => (
           <Checkbox
             key={m}
             label={materialName(m, dict)}
@@ -424,7 +444,7 @@ function FilterPanel({
         </div>
 
         <p className="mt-3 text-[11px] uppercase tracking-wide text-stone">{dict.catalog.style}</p>
-        {(Object.keys(styleLabels) as SurfaceStyle[]).map((s) => (
+        {styles.map((s) => (
           <Checkbox
             key={s}
             label={styleName(s, dict)}
@@ -514,10 +534,14 @@ function ActiveChips({
   filters,
   patch,
   dict,
+  categories,
+  brands,
 }: {
   filters: CatalogFilters;
   patch: (next: Partial<CatalogFilters>) => void;
   dict: Dictionary;
+  categories: Category[];
+  brands: Brand[];
 }) {
   const chips: { label: string; clear: () => void }[] = [];
 

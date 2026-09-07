@@ -5,11 +5,11 @@ import type { Locale } from "@/types";
 import { localeAlternates, routes } from "@/lib/routes";
 import { Breadcrumbs } from "@/components/ui/primitives";
 import { CatalogView } from "@/components/product/CatalogView";
-import { products } from "@/mock/products";
-import { categories, getCategory } from "@/mock/taxonomy";
+import { catalogBrands, catalogCategories, catalogCategory, catalogProducts } from "@/server/catalog";
 import { categoryDescription, categoryName } from "@/lib/i18n-format";
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const categories = await catalogCategories();
   return locales.flatMap((locale) =>
     categories.map((c) => ({ locale, category: c.slug })),
   );
@@ -22,7 +22,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale: raw, category } = await params;
   const locale = (isLocale(raw) ? raw : "az") as Locale;
-  const cat = getCategory(category);
+  const cat = await catalogCategory(category);
   if (!cat) return {};
 
   const dict = getDictionary(locale);
@@ -43,7 +43,12 @@ export default async function CategoryPage({
   const dict = getDictionary(locale);
   const r = routes(locale);
 
-  const cat = getCategory(category);
+  const [cat, products, categories, brands] = await Promise.all([
+    catalogCategory(category),
+    catalogProducts(),
+    catalogCategories(),
+    catalogBrands(),
+  ]);
   if (!cat) notFound();
 
   const list = products.filter((p) => p.categorySlug === cat.slug);
@@ -69,7 +74,7 @@ export default async function CategoryPage({
       </div>
 
       <div className="pt-8">
-        <CatalogView products={list} locale={locale} dict={dict} lockedCategory={cat.slug} />
+        <CatalogView products={list} categories={categories} brands={brands} locale={locale} dict={dict} lockedCategory={cat.slug} />
       </div>
     </>
   );

@@ -5,6 +5,7 @@ import { Footer } from "@/components/layout/Footer";
 import { AccountNav } from "@/components/account/AccountNav";
 import { AccountHeader } from "@/components/account/AccountHeader";
 import { AuthGuard } from "@/components/account/AuthGuard";
+import { catalogBrands, catalogCategories, catalogProducts } from "@/server/catalog";
 
 export default async function AccountLayout({
   children,
@@ -16,10 +17,15 @@ export default async function AccountLayout({
   const { locale } = await params;
   const typed = (isLocale(locale) ? locale : "az") as Locale;
   const dict = getDictionary(typed);
+  const [products, categories, brands] = await Promise.all([
+    catalogProducts(),
+    catalogCategories(),
+    catalogBrands(),
+  ]);
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <Header locale={typed} dict={dict} />
+      <Header locale={typed} dict={dict} products={products} categories={categories} brands={brands} />
 
       <main id="main" className="flex-1">
         <AuthGuard locale={typed} dict={dict}>
@@ -32,7 +38,7 @@ export default async function AccountLayout({
         </AuthGuard>
       </main>
 
-      <Footer locale={typed} dict={dict} />
+      <Footer locale={typed} dict={dict} categories={categories} />
     </div>
   );
 }

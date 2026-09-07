@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 import type { Dictionary } from "@/i18n";
-import type { Locale } from "@/types";
+import type { Brand, Category, Locale, Product } from "@/types";
 import { routes } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { brand, hasContact } from "@/config/brand";
@@ -27,10 +27,21 @@ import { useCart, cartCount } from "@/store/cart";
 import { useCompare, useFavorites } from "@/store/lists";
 import { useDialogFocus, useEscapeKey, useHydrated, useLockBodyScroll, useScrolledPast } from "@/lib/hooks";
 import { useSession } from "@/store/session";
-import { categories } from "@/mock/taxonomy";
 import { categoryName } from "@/lib/i18n-format";
 
-export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
+export function Header({
+  locale,
+  dict,
+  products,
+  categories,
+  brands,
+}: {
+  locale: Locale;
+  dict: Dictionary;
+  products: Product[];
+  categories: Category[];
+  brands: Brand[];
+}) {
   const r = routes(locale);
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -311,6 +322,9 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
         }}
         locale={locale}
         dict={dict}
+        products={products}
+        categories={categories}
+        brands={brands}
       />
     </>
   );
