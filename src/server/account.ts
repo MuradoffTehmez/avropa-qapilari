@@ -184,7 +184,7 @@ export async function userRepairs(userId: string): Promise<RepairRequest[]> {
 
 export async function userMeasurements(userId: string): Promise<MeasurementRequest[]> {
   const rows = await db.measurementRequest.findMany({
-    where: { userId },
+    where: { userId, archivedAt: null },
     include: { technician: true },
     orderBy: { createdAt: "desc" },
   });
@@ -204,7 +204,7 @@ export async function userMeasurements(userId: string): Promise<MeasurementReque
 
 export async function userQuotes(userId: string): Promise<Quote[]> {
   const rows = await db.quoteRequest.findMany({
-    where: { userId },
+    where: { userId, archivedAt: null },
     orderBy: { createdAt: "desc" },
   });
 
@@ -245,7 +245,7 @@ export type AppointmentRow = Appointment & { technicianName: string | null };
 
 export async function userAppointments(userId: string): Promise<AppointmentRow[]> {
   const rows = await db.appointment.findMany({
-    where: { userId },
+    where: { userId, archivedAt: null },
     include: { technician: true },
     orderBy: { date: "asc" },
   });
@@ -303,7 +303,7 @@ export async function accountSummary(userId: string) {
     db.order.findMany({ where: { userId, archivedAt: null }, select: { status: true } }),
     db.repairRequest.findMany({ where: { userId, archivedAt: null }, select: { status: true } }),
     db.warranty.count({ where: { userId, status: "ACTIVE", archivedAt: null } }),
-    db.appointment.count({ where: { userId, status: { in: ["SCHEDULED", "CONFIRMED"] } } }),
+    db.appointment.count({ where: { userId, status: { in: ["SCHEDULED", "CONFIRMED"] }, archivedAt: null } }),
   ]);
 
   return {

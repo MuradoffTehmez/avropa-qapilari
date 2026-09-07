@@ -135,11 +135,24 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ e
     const { entity, id } = await params;
     return idempotentResponse(request, `admin.${entity}.delete:${id}`, actor.id, async () => {
 
-    if (entity === "users" && id === actor.id) return fail("SELF_DELETE", "Öz hesabınızı silə bilməzsiniz", 422);
+    if (entity === "users" && id === actor.id) return fail("SELF_DELETE", "Öz hesabınızı deaktiv edə bilməzsiniz", 422);
+
+    // Biznes və audit qeydləri fiziki silinmir — arxivlənir (PRD §160).
+    const archivedAt = new Date();
 
     switch (entity) {
-      case "categories": await db.category.delete({ where: { id } }); break;
-      case "brands": await db.brand.delete({ where: { id } }); break;
+      case "categories": {
+        const used = await db.product.count({ where: { categoryId: id } });
+        if (used > 0) return fail("CATEGORY_IN_USE", "Kateqoriyaya bağlı məhsul var", 409);
+        await db.category.delete({ where: { id } });
+        break;
+      }
+      case "brands": {
+        const used = await db.product.count({ where: { brandId: id } });
+        if (used > 0) return fail("BRAND_IN_USE", "Brendə bağlı məhsul var", 409);
+        await db.brand.delete({ where: { id } });
+        break;
+      }
       case "products": await db.product.update({ where: { id }, data: { archivedAt: new Date() } }); break;
       case "options": {
         const [productLinks, rules] = await Promise.all([
@@ -156,27 +169,45 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ e
         await db.optionValue.delete({ where: { id } });
         break;
       }
-      case "appointments": await db.appointment.delete({ where: { id } }); break;
+      case "appointments": await db.appointment.update({ where: { id }, data: { archivedAt } }); break;
       case "technicians": {
         const technician = await db.technician.findUnique({ where: { id } });
         if (!technician) return fail("NOT_FOUND", "Usta tapılmadı", 404);
+        // Usta arxivlənir: görülmüş işlərin icraçısı qeydlərdə qalır,
+        // panelə girişi isə hesab deaktiv edilərək bağlanır.
         await db.$transaction(async (tx) => {
-          await tx.technician.delete({ where: { id } });
-          if (technician.userId) await tx.user.delete({ where: { id: technician.userId } });
+          await tx.technician.update({ where: { id }, data: { archivedAt, status: "OFF" } });
+          if (technician.userId) {
+            await tx.user.update({ where: { id: technician.userId }, data: { deactivatedAt: archivedAt } });
+            await tx.session.deleteMany({ where: { userId: technician.userId } });
+          }
         });
         break;
       }
-      case "users": await db.user.delete({ where: { id } }); break;
-      case "warranties": await db.warranty.update({ where: { id }, data: { archivedAt: new Date() } }); break;
-      case "orders": await db.order.update({ where: { id }, data: { archivedAt: new Date() } }); break;
-      case "quotes": await db.quoteRequest.delete({ where: { id } }); break;
-      case "repairs": await db.repairRequest.update({ where: { id }, data: { archivedAt: new Date() } }); break;
-      case "measurements": await db.measurementRequest.delete({ where: { id } }); break;
-      case "reviews": await db.review.delete({ where: { id } }); break;
+      case "users": {
+        const user = await db.user.findUnique({ where: { id } });
+        if (!user) return fail("NOT_FOUND", "İstifadəçi tapılmadı", 404);
+        await db.$transaction(async (tx) => {
+          await tx.user.update({ where: { id }, data: { deactivatedAt: archivedAt } });
+          await tx.session.deleteMany({ where: { userId: id } });
+        });
+        break;
+      }
+      case "warranties": await db.warranty.update({ where: { id }, data: { archivedAt } }); break;
+      case "orders": await db.order.update({ where: { id }, data: { archivedAt } }); break;
+      case "quotes": await db.quoteRequest.update({ where: { id }, data: { archivedAt } }); break;
+      case "repairs": await db.repairRequest.update({ where: { id }, data: { archivedAt } }); break;
+      case "measurements": await db.measurementRequest.update({ where: { id }, data: { archivedAt } }); break;
+      case "reviews": await db.review.update({ where: { id }, data: { archivedAt } }); break;
       default: return fail("NOT_FOUND", "Belə idarəetmə bölməsi yoxdur", 404);
     }
 
-    const action = ["products", "orders", "repairs", "warranties"].includes(entity) ? "archive" : "delete";
+    // Yalnız taksonomiya fiziki silinir; qalanı arxiv və ya deaktivdir.
+    const action = entity === "users" || entity === "technicians"
+      ? "deactivate"
+      : ["categories", "brands", "options"].includes(entity)
+        ? "delete"
+        : "archive";
     await recordAudit(actor, `${entity}.${action}`, id);
     revalidatePath("/", "layout");
       return ok({ ok: true });

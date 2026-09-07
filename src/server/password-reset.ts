@@ -26,9 +26,9 @@ export interface ResetRequest {
 export async function requestPasswordReset(email: string): Promise<ResetRequest> {
   const user = await db.user.findUnique({ where: { email } });
 
-  // Hesab yoxdursa da eyni cavab verilir: əks halda forma hansı
-  // e-poçtların qeydiyyatda olduğunu açıqlayardı.
-  if (!user) return { accepted: true };
+  // Hesab yoxdursa və ya deaktivdirsə də eyni cavab verilir: əks halda
+  // forma hansı e-poçtların qeydiyyatda olduğunu açıqlayardı.
+  if (!user || user.deactivatedAt) return { accepted: true };
 
   // Köhnə istifadə olunmamış tokenlər ləğv edilir.
   await db.passwordResetToken.deleteMany({ where: { userId: user.id, usedAt: null } });

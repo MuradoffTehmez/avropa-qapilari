@@ -80,6 +80,11 @@ async function userFromCookie(cookieName: string): Promise<SessionUser | null> {
     await db.session.delete({ where: { id: session.id } }).catch(() => {});
     return null;
   }
+  // Hesab deaktiv edilibsə açıq sessiyalar dərhal bağlanır.
+  if (session.user.deactivatedAt) {
+    await db.session.deleteMany({ where: { userId: session.userId } }).catch(() => {});
+    return null;
+  }
 
   return {
     id: session.user.id,

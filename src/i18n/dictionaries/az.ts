@@ -1487,6 +1487,10 @@ export const az = {
     archive: "Arxivlə",
     archived: "Qeyd arxivləndi",
     archiveConfirm: "Bu qeydi arxivləmək istədiyinizə əminsiniz? Tarixçə saxlanılacaq.",
+    deactivate: "Deaktiv et",
+    deactivated: "Hesab deaktiv edildi",
+    deactivateConfirm:
+      "Bu hesabı deaktiv etmək istədiyinizə əminsiniz? Giriş bağlanacaq, sifariş və iş tarixçəsi qalacaq.",
     noMatchingRecord: "Axtarışa uyğun qeyd yoxdur.",
     saved: "Yadda saxlanıldı",
     newProduct: "Yeni məhsul",

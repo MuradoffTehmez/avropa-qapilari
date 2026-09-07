@@ -59,12 +59,15 @@ export interface TechnicianWorkspace {
 /** İstifadəçi hesabına bağlı usta profilini və işlərini qaytarır. */
 export async function technicianWorkspace(userId: string): Promise<TechnicianWorkspace | null> {
   const [technician, orders] = await Promise.all([
-    db.technician.findUnique({
-      where: { userId },
+    db.technician.findFirst({
+      where: { userId, archivedAt: null },
       include: {
         repairs: { where: { archivedAt: null }, orderBy: { createdAt: "desc" } },
-        measurements: { orderBy: { createdAt: "desc" } },
-        appointments: { orderBy: [{ date: "asc" }, { startTime: "asc" }] },
+        measurements: { where: { archivedAt: null }, orderBy: { createdAt: "desc" } },
+        appointments: {
+          where: { archivedAt: null },
+          orderBy: [{ date: "asc" }, { startTime: "asc" }],
+        },
       },
     }),
     db.order.findMany({ where: { userId, archivedAt: null }, orderBy: { createdAt: "desc" } }),

@@ -27,6 +27,9 @@ model User {
   role      String   @default("CUSTOMER") // CUSTOMER | TECHNICIAN | ADMIN
   language  String   @default("az")
   marketingConsent Boolean @default(true)
+  // Hesab silinmir, deaktiv edilir: sifariş tarixçəsi və audit izi qalır,
+  // sessiya və giriş bağlanır (PRD §160).
+  deactivatedAt DateTime?
   createdAt DateTime @default(now())
 
   sessions       Session[]
@@ -41,6 +44,7 @@ model User {
   resetTokens    PasswordResetToken[]
 
   @@index([role])
+  @@index([deactivatedAt])
 }
 
 model Session {
@@ -344,6 +348,7 @@ model MeasurementRequest {
   note         String?
   status       String   @default("NEW")
   technicianId String?
+  archivedAt   DateTime?
   createdAt    DateTime @default(now())
 
   user       User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -351,6 +356,7 @@ model MeasurementRequest {
 
   @@index([status])
   @@index([technicianId])
+  @@index([archivedAt])
 }
 
 model QuoteRequest {
@@ -365,11 +371,13 @@ model QuoteRequest {
   height    Int?
   message   String
   status    String   @default("NEW")
+  archivedAt DateTime?
   createdAt DateTime @default(now())
 
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([status])
+  @@index([archivedAt])
 }
 
 /* ------------------------------- Nömrələr ------------------------------ */
@@ -432,10 +440,14 @@ model Technician {
   status         String  @default("AVAILABLE") // AVAILABLE | BUSY | OFF
   // Panelə giriş üçün istifadəçi hesabı (rol: TECHNICIAN)
   userId         String? @unique
+  // Usta silinmir — arxivlənir, çünki görülmüş işlərin icraçısı itməməlidir.
+  archivedAt     DateTime?
 
   repairs      RepairRequest[]
   measurements MeasurementRequest[]
   appointments Appointment[]
+
+  @@index([archivedAt])
 }
 
 /* ------------------------------- Görüş --------------------------------- */
@@ -452,6 +464,7 @@ model Appointment {
   status       String   @default("SCHEDULED") // SCHEDULED | CONFIRMED | DONE | CANCELLED
   userId       String?
   technicianId String?
+  archivedAt   DateTime?
   createdAt    DateTime @default(now())
 
   user       User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -460,6 +473,7 @@ model Appointment {
   @@index([userId])
   @@index([technicianId])
   @@index([date])
+  @@index([archivedAt])
 }
 
 /* ------------------------------ Zəmanət -------------------------------- */
@@ -566,12 +580,14 @@ model Review {
   // PENDING | APPROVED | REJECTED — yalnız APPROVED saytda görünür
   status    String   @default("PENDING")
   verified  Boolean  @default(false)
+  archivedAt DateTime?
   createdAt DateTime @default(now())
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId])
   @@index([status])
+  @@index([archivedAt])
 }
 
 /* ------------------------------ Audit log ------------------------------ */

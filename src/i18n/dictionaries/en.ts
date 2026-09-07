@@ -1492,6 +1492,10 @@ export const en: Dictionary = {
     archive: "Archive",
     archived: "Record archived",
     archiveConfirm: "Are you sure you want to archive this record? Its history will be preserved.",
+    deactivate: "Deactivate",
+    deactivated: "Account deactivated",
+    deactivateConfirm:
+      "Deactivate this account? Sign-in will be blocked, order and job history will be kept.",
     noMatchingRecord: "No matching record found.",
     saved: "Saved",
     newProduct: "New product",

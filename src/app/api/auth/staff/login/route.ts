@@ -14,6 +14,9 @@ export async function POST(request: Request) {
     if (!user || !valid) {
       return fail("INVALID_CREDENTIALS", "E-poçt və ya parol yanlışdır", 401);
     }
+    if (user.deactivatedAt) {
+      return fail("ACCOUNT_DISABLED", "Hesab deaktiv edilib", 403);
+    }
     if (user.role !== input.role) {
       return fail("WRONG_STAFF_PANEL", "Bu hesab seçilmiş əməkdaş panelinə aid deyil", 403);
     }

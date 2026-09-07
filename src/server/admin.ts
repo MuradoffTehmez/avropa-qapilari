@@ -285,7 +285,10 @@ export interface AdminQuoteRow {
 }
 
 export async function adminQuotes(): Promise<AdminQuoteRow[]> {
-  const rows = await db.quoteRequest.findMany({ orderBy: { createdAt: "desc" } });
+  const rows = await db.quoteRequest.findMany({
+    where: { archivedAt: null },
+    orderBy: { createdAt: "desc" },
+  });
 
   return rows.map((q) => ({
     id: q.id,
@@ -343,6 +346,7 @@ export interface AdminMeasurementRow {
 
 export async function adminMeasurements(): Promise<AdminMeasurementRow[]> {
   const rows = await db.measurementRequest.findMany({
+    where: { archivedAt: null },
     include: { technician: true },
     orderBy: { createdAt: "desc" },
   });
@@ -375,6 +379,7 @@ export interface AdminAppointmentRow {
 
 export async function adminAppointments(): Promise<AdminAppointmentRow[]> {
   const rows = await db.appointment.findMany({
+    where: { archivedAt: null },
     include: { technician: true },
     orderBy: { date: "asc" },
   });
@@ -407,6 +412,7 @@ export interface AdminTechnicianRow {
 
 export async function adminTechnicians(): Promise<AdminTechnicianRow[]> {
   const rows = await db.technician.findMany({
+    where: { archivedAt: null },
     include: {
       _count: {
         select: {
@@ -443,6 +449,7 @@ export interface AdminCustomerRow {
 
 export async function adminCustomers(): Promise<AdminCustomerRow[]> {
   const rows = await db.user.findMany({
+    where: { deactivatedAt: null },
     include: { orders: { where: { archivedAt: null }, select: { total: true } } },
     orderBy: { createdAt: "desc" },
   });
@@ -497,10 +504,10 @@ export async function adminStats() {
     await Promise.all([
       db.product.count({ where: { archivedAt: null } }),
       db.order.count({ where: { archivedAt: null } }),
-      db.user.count(),
+      db.user.count({ where: { deactivatedAt: null } }),
       db.repairRequest.count({ where: { status: { notIn: ["COMPLETED", "CANCELLED"] }, archivedAt: null } }),
-      db.measurementRequest.count({ where: { status: { notIn: ["COMPLETED", "CANCELLED"] } } }),
-      db.quoteRequest.count({ where: { status: { notIn: ["ACCEPTED", "REJECTED", "EXPIRED"] } } }),
+      db.measurementRequest.count({ where: { status: { notIn: ["COMPLETED", "CANCELLED"] }, archivedAt: null } }),
+      db.quoteRequest.count({ where: { status: { notIn: ["ACCEPTED", "REJECTED", "EXPIRED"] }, archivedAt: null } }),
       db.order.aggregate({ _sum: { total: true }, where: { archivedAt: null } }),
     ]);
 
@@ -544,7 +551,7 @@ export async function adminDashboard() {
       db.repairRequest.count({
         where: { status: { in: ["TECHNICIAN_ASSIGNED", "SCHEDULED", "IN_PROGRESS"] }, archivedAt: null },
       }),
-      db.appointment.count({ where: { date: today } }),
+      db.appointment.count({ where: { date: today, archivedAt: null } }),
     ]);
 
   const monthRevenue = month._sum.total ?? 0;
@@ -728,6 +735,7 @@ export interface AdminReviewRow {
 
 export async function adminReviews(): Promise<AdminReviewRow[]> {
   const rows = await db.review.findMany({
+    where: { archivedAt: null },
     include: { product: true },
     orderBy: { createdAt: "desc" },
   });
@@ -796,10 +804,10 @@ export async function adminSettings(): Promise<AdminSettingRow[]> {
 export async function adminAnalytics() {
   const [configurations, quotes, orders, repairs, measurements, monthly] = await Promise.all([
     db.configuration.count(),
-    db.quoteRequest.count(),
+    db.quoteRequest.count({ where: { archivedAt: null } }),
     db.order.count({ where: { archivedAt: null } }),
     db.repairRequest.count({ where: { archivedAt: null } }),
-    db.measurementRequest.count(),
+    db.measurementRequest.count({ where: { archivedAt: null } }),
     db.order.findMany({ where: { archivedAt: null }, select: { createdAt: true, total: true }, orderBy: { createdAt: "asc" } }),
   ]);
 

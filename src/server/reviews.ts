@@ -14,7 +14,11 @@ import { reviewTranslation } from "@/mock/content.i18n";
  */
 export async function publishedReviews(locale: Locale, productName?: string): Promise<Review[]> {
   const rows = await db.review.findMany({
-    where: { status: "APPROVED", ...(productName ? { product: { name: productName } } : {}) },
+    where: {
+      status: "APPROVED",
+      archivedAt: null,
+      ...(productName ? { product: { name: productName } } : {}),
+    },
     include: { product: true },
     orderBy: { createdAt: "desc" },
   });

@@ -16,6 +16,10 @@ export async function POST(request: Request) {
       return fail("INVALID_CREDENTIALS", "E-poçt və ya parol yanlışdır", 401);
     }
 
+    if (user.deactivatedAt) {
+      return fail("ACCOUNT_DISABLED", "Hesab deaktiv edilib", 403);
+    }
+
     if (user.role === "ADMIN") {
       return fail("ADMIN_ACCOUNT", "Bu hesab idarəetmə panelinə aiddir", 403);
     }

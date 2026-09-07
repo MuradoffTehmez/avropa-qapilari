@@ -443,7 +443,7 @@ export function AdminSection({
             { key: "customer", header: label.customer, render: (q) => q.customerName },
             { key: "subject", header: label.subject, render: (q) => <span className="text-ink">{q.subject}</span> },
             { key: "status", header: label.status, render: (q) => <RequestStatusControl kind="quote" number={q.number} status={q.status} /> },
-            { key: "actions", header: ui.operation, render: (q) => <AdminDeleteAction entity="quotes" id={q.id} /> },
+            { key: "actions", header: ui.operation, render: (q) => <AdminDeleteAction entity="quotes" id={q.id} archive /> },
           ]}
         />
       </>
@@ -519,7 +519,7 @@ export function AdminSection({
               ),
             },
             { key: "status", header: label.status, render: (m) => <RequestStatusControl kind="measurement" number={m.number} status={m.status} /> },
-            { key: "actions", header: ui.operation, render: (m) => <AdminDeleteAction entity="measurements" id={m.id} /> },
+            { key: "actions", header: ui.operation, render: (m) => <AdminDeleteAction entity="measurements" id={m.id} archive /> },
           ]}
         />
       </>
@@ -548,7 +548,7 @@ export function AdminSection({
             { key: "address", header: dict.common.address, render: (a) => <span className="text-stone">{a.address}</span> },
             { key: "ref", header: label.reference, render: (a) => <code className="text-[12px] text-graphite">{a.reference}</code> },
             { key: "status", header: label.status, render: (a) => <Badge tone="gold">{a.status === "CONFIRMED" ? dict.accountUi.statuses.confirmed : dict.accountUi.statuses.scheduled}</Badge> },
-            { key: "actions", header: ui.operation, render: (a) => <AdminEntityAction entity="appointments" id={a.id} fields={appointmentFields} values={a} /> },
+            { key: "actions", header: ui.operation, render: (a) => <AdminEntityAction entity="appointments" id={a.id} fields={appointmentFields} values={a} archive /> },
           ]}
         />
       </>
@@ -581,7 +581,7 @@ export function AdminSection({
                 </Badge>
               ),
             },
-            { key: "actions", header: ui.operation, render: (t) => <AdminEntityAction entity="technicians" id={t.id} fields={technicianFields} values={{ ...t, specialization: t.specialization.join(", "), serviceAreas: t.serviceAreas.join(", ") }} /> },
+            { key: "actions", header: ui.operation, render: (t) => <AdminEntityAction entity="technicians" id={t.id} fields={technicianFields} values={{ ...t, specialization: t.specialization.join(", "), serviceAreas: t.serviceAreas.join(", ") }} deactivate /> },
           ]}
         />
       </>
@@ -698,7 +698,7 @@ export function AdminSection({
               render: (c) => <span className="font-medium tabular-nums text-ink">{formatPrice(c.total)}</span>,
             },
             { key: "since", header: label.registration, render: (c) => formatDate(c.since) },
-            { key: "actions", header: ui.operation, render: (c) => <AdminEntityAction entity="users" id={c.id} fields={userFields} values={c} /> },
+            { key: "actions", header: ui.operation, render: (c) => <AdminEntityAction entity="users" id={c.id} fields={userFields} values={c} deactivate /> },
           ]}
         />
       </>

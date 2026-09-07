@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
-import { Archive, Pencil, Plus, Trash2 } from "lucide-react";
+import { Archive, Pencil, Plus, Trash2, UserX } from "lucide-react";
 
 import type { CrudField } from "@/components/admin/AdminCrud";
 import { Button } from "@/components/ui/Button";
@@ -23,6 +23,7 @@ export function AdminEntityAction({
   createLabel,
   deleteOnly = false,
   archive = false,
+  deactivate = false,
 }: {
   entity: string;
   id?: string;
@@ -32,6 +33,8 @@ export function AdminEntityAction({
   deleteOnly?: boolean;
   /** Əlaqəli biznes tarixçəsini qorumaq üçün qeydi fiziki silmək əvəzinə arxivlə. */
   archive?: boolean;
+  /** Hesab qeydləri silinmir — girişi bağlanır, tarixçə qalır. */
+  deactivate?: boolean;
 }) {
   const dict = useDict();
   const values = rawValues as Values;
@@ -98,14 +101,21 @@ export function AdminEntityAction({
 
   async function remove() {
     if (!id) return;
-    if (!window.confirm(archive ? dict.adminUi.archiveConfirm : dict.adminUi.deleteConfirm)) return;
+    const confirmText = deactivate
+      ? dict.adminUi.deactivateConfirm
+      : archive
+        ? dict.adminUi.archiveConfirm
+        : dict.adminUi.deleteConfirm;
+    if (!window.confirm(confirmText)) return;
     try {
       await apiFetch(`/api/admin/entities/${entity}/${id}`, {
         method: "DELETE",
         headers: { "Idempotency-Key": deleteKey.current },
       });
       router.refresh();
-      toast(archive ? dict.adminUi.archived : dict.adminUi.deleted);
+      toast(
+        deactivate ? dict.adminUi.deactivated : archive ? dict.adminUi.archived : dict.adminUi.deleted,
+      );
     } catch (error) {
       if (error instanceof ApiRequestError) toast(error.error.message);
     }
@@ -120,8 +130,8 @@ export function AdminEntityAction({
               <Pencil size={15} />
             </button>
           )}
-          <button type="button" onClick={() => void remove()} aria-label={archive ? dict.adminUi.archive : dict.actions.remove} className="flex size-11 items-center justify-center text-stone hover:text-danger sm:size-9">
-            {archive ? <Archive size={15} /> : <Trash2 size={15} />}
+          <button type="button" onClick={() => void remove()} aria-label={deactivate ? dict.adminUi.deactivate : archive ? dict.adminUi.archive : dict.actions.remove} className="flex size-11 items-center justify-center text-stone hover:text-danger sm:size-9">
+            {deactivate ? <UserX size={15} /> : archive ? <Archive size={15} /> : <Trash2 size={15} />}
           </button>
         </span>
       ) : (
