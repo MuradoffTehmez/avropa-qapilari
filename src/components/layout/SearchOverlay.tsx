@@ -51,7 +51,7 @@ export function SearchOverlay({
       categories: categories.filter((c) => c.name.toLowerCase().includes(q)).slice(0, 4),
       brands: brands.filter((b) => b.name.toLowerCase().includes(q)).slice(0, 4),
     };
-  }, [query]);
+  }, [brands, categories, products, query]);
 
   if (!open) return null;
 
