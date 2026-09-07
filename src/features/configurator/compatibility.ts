@@ -21,6 +21,7 @@ function selectedIds(selection: ConfigurationSelection): string[] {
 export function checkCompatibility(
   value: OptionValue,
   selection: ConfigurationSelection,
+  resolve: (id: string) => OptionValue | undefined,
   labelOf: (id: string) => string,
   dict: Dictionary,
 ): CompatibilityResult {
@@ -44,6 +45,13 @@ export function checkCompatibility(
   for (const id of chosen) {
     // Əks istiqamət: artıq seçilmiş dəyər bunu excludes edirmi?
     if (id === value.id) continue;
+    const selected = resolve(id);
+    if (selected?.excludes?.includes(value.id)) {
+      return {
+        allowed: false,
+        reason: dict.configurator.notCompatibleWith.replace("{option}", labelOf(id)),
+      };
+    }
   }
 
   return { allowed: true };
@@ -77,8 +85,10 @@ export function pruneIncompatible(
 
       const kept = ids.filter((id) => {
         const value = resolve(id);
-        if (!value?.requires?.length) return true;
-        return value.requires.some((req) => chosen.includes(req));
+        if (!value) return false;
+        if (value.requires?.length && !value.requires.some((req) => chosen.includes(req))) return false;
+        if (value.excludes?.some((excluded) => chosen.includes(excluded))) return false;
+        return true;
       });
 
       if (kept.length !== ids.length) {

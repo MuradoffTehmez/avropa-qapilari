@@ -1,5 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import { db } from "@/server/db";
+import { optionGroups } from "@/mock/options";
+import type { OptionGroupKey } from "@/types";
 
 /**
  * SERVER-SIDE QİYMƏT HESABLANMASI — PRD §130.
@@ -74,15 +76,35 @@ const GROUP_ORDER = [
 export class PricingError extends Error {
   constructor(
     message: string,
-    readonly code: "PRODUCT_NOT_FOUND" | "INVALID_OPTION" | "INCOMPATIBLE",
+    readonly code:
+      | "PRODUCT_NOT_FOUND"
+      | "INVALID_OPTION"
+      | "INCOMPATIBLE"
+      | "OPTION_NOT_AVAILABLE"
+      | "INVALID_OPTION_GROUP"
+      | "OPTION_GROUP_NOT_AVAILABLE"
+      | "INVALID_OPTION_CARDINALITY"
+      | "DUPLICATE_OPTION"
+      | "REQUIRED_OPTION_MISSING",
   ) {
     super(message);
   }
 }
 
 export async function calculatePrice(input: PriceInput): Promise<PriceResult> {
-  const product = await db.product.findUnique({ where: { slug: input.productSlug } });
+  const product = await db.product.findUnique({
+    where: { slug: input.productSlug },
+    include: {
+      productOptions: {
+        where: { enabled: true },
+        select: { optionValueId: true },
+      },
+    },
+  });
   if (!product) throw new PricingError("Məhsul tapılmadı", "PRODUCT_NOT_FOUND");
+
+  const configuredGroups = parseConfiguredGroups(product.optionGroups);
+  assertSelectionShape(input.choices, configuredGroups);
 
   // Seçilmiş id-ləri düzləşdirib bazadan oxuyuruq — client-in göndərdiyi
   // `priceDelta` və ya `label` dəyərləri nəzərə alınmır.
@@ -99,6 +121,24 @@ export async function calculatePrice(input: PriceInput): Promise<PriceResult> {
     const known = new Set(values.map((v) => v.id));
     const unknown = selectedIds.filter((id) => !known.has(id));
     throw new PricingError(`Naməlum seçim: ${unknown.join(", ")}`, "INVALID_OPTION");
+  }
+
+
+  const allowedOptionIds = new Set(product.productOptions.map((entry) => entry.optionValueId));
+  const disallowed = values.filter((value) => !allowedOptionIds.has(value.id));
+  if (disallowed.length > 0) {
+    throw new PricingError(
+      `Məhsula aid olmayan seçim: ${disallowed.map((value) => value.id).join(", ")}`,
+      "OPTION_NOT_AVAILABLE",
+    );
+  }
+
+  for (const [groupKey, raw] of Object.entries(input.choices)) {
+    const ids = Array.isArray(raw) ? raw : [raw];
+    const wrongGroup = ids.find((id) => values.find((value) => value.id === id)?.groupKey !== groupKey);
+    if (wrongGroup) {
+      throw new PricingError(`Seçim yanlış qrupda göndərilib: ${wrongGroup}`, "INVALID_OPTION_GROUP");
+    }
   }
 
   assertCompatible(values);
@@ -150,6 +190,55 @@ export async function calculatePrice(input: PriceInput): Promise<PriceResult> {
     total: Math.max(0, subtotal - discount),
     requiresQuote,
   };
+}
+
+function parseConfiguredGroups(raw: string): OptionGroupKey[] {
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((key): key is OptionGroupKey =>
+      typeof key === "string" && key in optionGroups,
+    );
+  } catch {
+    return [];
+  }
+}
+
+function assertSelectionShape(
+  choices: PriceInput["choices"],
+  configuredGroups: OptionGroupKey[],
+) {
+  const allowedGroups: Set<OptionGroupKey> = new Set(
+    configuredGroups.filter((key) => key !== "SIZE"),
+  );
+  const sentIds = new Set<string>();
+
+  for (const [rawGroup, raw] of Object.entries(choices)) {
+    if (!allowedGroups.has(rawGroup as OptionGroupKey)) {
+      throw new PricingError(`Məhsula aid olmayan seçim qrupu: ${rawGroup}`, "OPTION_GROUP_NOT_AVAILABLE");
+    }
+
+    const group = optionGroups[rawGroup as OptionGroupKey];
+    if (Array.isArray(raw) !== group.multi) {
+      throw new PricingError(`Seçim qrupunun formatı yanlışdır: ${rawGroup}`, "INVALID_OPTION_CARDINALITY");
+    }
+
+    for (const id of Array.isArray(raw) ? raw : [raw]) {
+      if (sentIds.has(id)) {
+        throw new PricingError(`Seçim təkrarlanıb: ${id}`, "DUPLICATE_OPTION");
+      }
+      sentIds.add(id);
+    }
+  }
+
+  for (const groupKey of allowedGroups) {
+    const group = optionGroups[groupKey];
+    if (!group.required) continue;
+    const raw = choices[groupKey];
+    if (typeof raw !== "string" || raw.length === 0) {
+      throw new PricingError(`Məcburi seçim yoxdur: ${groupKey}`, "REQUIRED_OPTION_MISSING");
+    }
+  }
 }
 
 /** `requires` / `excludes` qaydalarını serverdə də yoxlayır (PRD §97). */

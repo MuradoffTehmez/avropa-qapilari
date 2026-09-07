@@ -638,7 +638,7 @@ function OptionStep({
 
   const withCompat = def.values.map((v) => ({
     value: v,
-    compat: checkCompatibility(v, selection, labelOf, dict),
+    compat: checkCompatibility(v, selection, findOptionValue, labelOf, dict),
   }));
 
   return (

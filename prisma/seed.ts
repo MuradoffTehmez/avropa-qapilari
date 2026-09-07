@@ -40,6 +40,7 @@ async function main() {
   await db.session.deleteMany();
   await db.technician.deleteMany();
   await db.user.deleteMany();
+  await db.productOption.deleteMany();
   await db.optionValue.deleteMany();
   await db.product.deleteMany();
   await db.category.deleteMany();
@@ -112,6 +113,19 @@ async function main() {
         excludes: v.excludes ? JSON.stringify(v.excludes) : null,
       },
     });
+  }
+
+  for (const product of products) {
+    const allowedGroups = new Set(product.optionGroups);
+    const allowedValues = allOptionValues.filter((value) => allowedGroups.has(value.groupKey));
+    if (allowedValues.length > 0) {
+      await db.productOption.createMany({
+        data: allowedValues.map((value) => ({
+          productId: product.id,
+          optionValueId: value.id,
+        })),
+      });
+    }
   }
 
   await seedAccounts();

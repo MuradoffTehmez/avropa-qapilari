@@ -116,6 +116,7 @@ model Product {
   orderItems     OrderItem[]
   configurations Configuration[]
   reviews        Review[]
+  productOptions ProductOption[]
 
   @@index([categoryId])
   @@index([brandId])
@@ -135,8 +136,23 @@ model OptionValue {
   // Uyğunluq qaydaları, JSON massiv (PRD §97)
   requires    String?
   excludes    String?
+  products    ProductOption[]
 
   @@index([groupKey])
+}
+
+model ProductOption {
+  id            String  @id @default(cuid())
+  productId     String
+  optionValueId String
+  enabled       Boolean @default(true)
+
+  product     Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  optionValue OptionValue @relation(fields: [optionValueId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, optionValueId])
+  @@index([productId, enabled])
+  @@index([optionValueId])
 }
 
 model Configuration {
