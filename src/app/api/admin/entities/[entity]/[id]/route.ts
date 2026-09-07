@@ -5,6 +5,7 @@ import { requireStaff } from "@/server/auth";
 import { recordAudit } from "@/server/audit";
 import { db } from "@/server/db";
 import { fail, handle, ok } from "@/server/http";
+import { idempotentResponse } from "@/server/idempotency";
 
 const productOptionOrder = ["OPENING_DIRECTION", "PANEL_STYLE", "OUTSIDE_COLOR", "INSIDE_COLOR", "FRAME", "SIDELIGHT", "GLASS", "GLASS_PATTERN", "HANDLE", "HINGE", "LOCK", "CYLINDER", "SMART_LOCK", "THRESHOLD", "INSULATION", "ACCESSORY", "INSTALLATION", "DELIVERY"];
 
@@ -41,7 +42,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ en
   return handle(async () => {
     const actor = await requireStaff("ADMIN");
     const { entity, id } = await params;
-    const raw: unknown = await request.json();
+    return idempotentResponse(request, `admin.${entity}.update:${id}`, actor.id, async () => {
+      const raw: unknown = await request.json();
 
     switch (entity) {
       case "categories": await db.category.update({ where: { id }, data: categorySchema.parse(raw) }); break;
@@ -122,14 +124,16 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ en
 
     await recordAudit(actor, `${entity}.update`, id);
     revalidatePath("/", "layout");
-    return ok({ ok: true });
+      return ok({ ok: true });
+    });
   });
 }
 
-export async function DELETE(_request: Request, { params }: { params: Promise<{ entity: string; id: string }> }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ entity: string; id: string }> }) {
   return handle(async () => {
     const actor = await requireStaff("ADMIN");
     const { entity, id } = await params;
+    return idempotentResponse(request, `admin.${entity}.delete:${id}`, actor.id, async () => {
 
     if (entity === "users" && id === actor.id) return fail("SELF_DELETE", "Öz hesabınızı silə bilməzsiniz", 422);
 
@@ -175,7 +179,8 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     const action = ["products", "orders", "repairs", "warranties"].includes(entity) ? "archive" : "delete";
     await recordAudit(actor, `${entity}.${action}`, id);
     revalidatePath("/", "layout");
-    return ok({ ok: true });
+      return ok({ ok: true });
+    });
   });
 }
 

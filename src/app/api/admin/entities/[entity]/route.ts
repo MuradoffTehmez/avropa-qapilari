@@ -5,6 +5,7 @@ import { hashPassword, requireStaff } from "@/server/auth";
 import { recordAudit } from "@/server/audit";
 import { db } from "@/server/db";
 import { fail, handle, ok } from "@/server/http";
+import { idempotentResponse } from "@/server/idempotency";
 
 const productOptionOrder = ["OPENING_DIRECTION", "PANEL_STYLE", "OUTSIDE_COLOR", "INSIDE_COLOR", "FRAME", "SIDELIGHT", "GLASS", "GLASS_PATTERN", "HANDLE", "HINGE", "LOCK", "CYLINDER", "SMART_LOCK", "THRESHOLD", "INSULATION", "ACCESSORY", "INSTALLATION", "DELIVERY"];
 
@@ -46,7 +47,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ ent
   return handle(async () => {
     const actor = await requireStaff("ADMIN");
     const { entity } = await params;
-    const raw: unknown = await request.json();
+    return idempotentResponse(request, `admin.${entity}.create`, actor.id, async () => {
+      const raw: unknown = await request.json();
 
     let target = "";
     switch (entity) {
@@ -144,7 +146,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ ent
 
     await recordAudit(actor, `${entity}.create`, target);
     revalidatePath("/", "layout");
-    return ok({ ok: true }, { status: 201 });
+      return ok({ ok: true }, { status: 201 });
+    });
   });
 }
 

@@ -4,6 +4,7 @@ import { recordAudit } from "@/server/audit";
 import { db } from "@/server/db";
 import { fail, handle, ok } from "@/server/http";
 import { seoEntrySchema } from "@/server/validation";
+import { idempotentResponse } from "@/server/idempotency";
 
 /** GET /api/admin/seo */
 export async function GET() {
@@ -17,7 +18,8 @@ export async function GET() {
 export async function POST(request: Request) {
   return handle(async () => {
     const actor = await requireStaff("ADMIN");
-    const input = seoEntrySchema.parse(await request.json());
+    return idempotentResponse(request, "admin.seo.create", actor.id, async () => {
+      const input = seoEntrySchema.parse(await request.json());
 
     const exists = await db.seoEntry.findUnique({ where: { path: input.path } });
     if (exists) {
@@ -29,6 +31,7 @@ export async function POST(request: Request) {
     await db.seoEntry.create({ data: { ...input, canonical: input.canonical || null } });
     await recordAudit(actor, "seo.create", input.path, input.title);
 
-    return ok(await adminSeoEntries(), { status: 201 });
+      return ok(await adminSeoEntries(), { status: 201 });
+    });
   });
 }

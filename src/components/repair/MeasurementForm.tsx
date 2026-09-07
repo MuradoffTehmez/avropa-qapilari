@@ -1,7 +1,7 @@
 "use client";
 
 import { useWorkflow } from "@/store/workflow";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { CheckCircle2, Ruler } from "lucide-react";
 import type { Dictionary } from "@/i18n";
 import type { Locale, PropertyType } from "@/types";
@@ -36,6 +36,7 @@ export function MeasurementForm({ locale, dict }: { locale: Locale; dict: Dictio
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
+  const idempotencyKey = useRef(crypto.randomUUID());
 
   function set<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -61,6 +62,7 @@ export function MeasurementForm({ locale, dict }: { locale: Locale; dict: Dictio
     try {
       const { number } = await apiFetch<{ number: string }>("/api/measurement", {
         method: "POST",
+        headers: { "Idempotency-Key": idempotencyKey.current },
         json: {
           propertyType: form.propertyType,
           doorCount: Number(form.doorCount) || 1,

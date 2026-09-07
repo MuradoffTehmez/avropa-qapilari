@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
@@ -59,8 +59,10 @@ export function AdminCrud<T extends CrudRow>({
   const [values, setValues] = useState<Record<string, string | string[] | boolean>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
+  const idempotencyKey = useRef(crypto.randomUUID());
 
   function begin(row?: T) {
+    idempotencyKey.current = crypto.randomUUID();
     const next: Record<string, string | string[] | boolean> = {};
     for (const field of fields) {
       const raw = row ? (row as unknown as Record<string, unknown>)[field.name] : undefined;
@@ -92,6 +94,7 @@ export function AdminCrud<T extends CrudRow>({
     try {
       const next = await apiFetch<T[]>(editing ? `${endpoint}/${editing.id}` : endpoint, {
         method: editing ? "PATCH" : "POST",
+        headers: { "Idempotency-Key": idempotencyKey.current },
         json: payload(),
       });
       onRows(next);

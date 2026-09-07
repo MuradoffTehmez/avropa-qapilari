@@ -4,6 +4,7 @@ import { fail, handle, ok } from "@/server/http";
 import { nextNumber } from "@/server/numbering";
 import { calculatePrice, PricingError } from "@/server/pricing";
 import { configurationSchema } from "@/server/validation";
+import { idempotentResponse } from "@/server/idempotency";
 
 /**
  * POST /api/configurations — konfiqurasiyanı saxlayır.
@@ -15,8 +16,9 @@ import { configurationSchema } from "@/server/validation";
  */
 export async function POST(request: Request) {
   return handle(async () => {
-    const input = configurationSchema.parse(await request.json());
     const user = await currentUser();
+    return idempotentResponse(request, "configuration.create", user?.id ?? "anonymous", async () => {
+      const input = configurationSchema.parse(await request.json());
 
     let total: number;
     try {
@@ -48,10 +50,11 @@ export async function POST(request: Request) {
       });
     });
 
-    return ok(
-      { code: configuration.code, total: configuration.total },
-      { status: 201 },
-    );
+      return ok(
+        { code: configuration.code, total: configuration.total },
+        { status: 201 },
+      );
+    });
   });
 }
 

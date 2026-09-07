@@ -4,6 +4,7 @@ import { recordAudit } from "@/server/audit";
 import { db } from "@/server/db";
 import { fail, handle, ok } from "@/server/http";
 import { contentPageSchema } from "@/server/validation";
+import { idempotentResponse } from "@/server/idempotency";
 
 /** GET /api/admin/content */
 export async function GET() {
@@ -17,7 +18,8 @@ export async function GET() {
 export async function POST(request: Request) {
   return handle(async () => {
     const actor = await requireStaff("ADMIN");
-    const input = contentPageSchema.parse(await request.json());
+    return idempotentResponse(request, "admin.content.create", actor.id, async () => {
+      const input = contentPageSchema.parse(await request.json());
 
     const exists = await db.contentPage.findUnique({ where: { path: input.path } });
     if (exists) {
@@ -29,6 +31,7 @@ export async function POST(request: Request) {
     await db.contentPage.create({ data: input });
     await recordAudit(actor, "content.create", input.path, input.title);
 
-    return ok(await adminContentPages(), { status: 201 });
+      return ok(await adminContentPages(), { status: 201 });
+    });
   });
 }

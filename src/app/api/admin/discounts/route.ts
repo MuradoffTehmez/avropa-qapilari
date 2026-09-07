@@ -4,6 +4,7 @@ import { recordAudit } from "@/server/audit";
 import { db } from "@/server/db";
 import { fail, handle, ok } from "@/server/http";
 import { discountSchema } from "@/server/validation";
+import { idempotentResponse } from "@/server/idempotency";
 
 /** GET /api/admin/discounts */
 export async function GET() {
@@ -17,7 +18,8 @@ export async function GET() {
 export async function POST(request: Request) {
   return handle(async () => {
     const actor = await requireStaff("ADMIN");
-    const input = discountSchema.parse(await request.json());
+    return idempotentResponse(request, "admin.discount.create", actor.id, async () => {
+      const input = discountSchema.parse(await request.json());
 
     if (input.endsAt < input.startsAt) {
       return fail("INVALID_PERIOD", "Bitmə tarixi başlanğıcdan əvvəl ola bilməz", 422, {
@@ -35,6 +37,7 @@ export async function POST(request: Request) {
     await db.discount.create({ data: input });
     await recordAudit(actor, "discount.create", input.code, `${input.type} ${input.value}`);
 
-    return ok(await adminDiscounts(), { status: 201 });
+      return ok(await adminDiscounts(), { status: 201 });
+    });
   });
 }

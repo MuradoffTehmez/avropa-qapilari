@@ -551,3 +551,18 @@ model Setting {
   value     String
   updatedAt DateTime @updatedAt
 }
+
+/* ------------------------- Təkrar sorğu qoruması ---------------------- */
+
+// Xam Idempotency-Key saxlanılmır; actor + scope + açarın SHA-256 izi id olur.
+model IdempotencyRecord {
+  id           String    @id
+  scope        String
+  requestHash  String
+  status       Int?
+  responseBody String?
+  createdAt    DateTime  @default(now())
+  completedAt  DateTime?
+
+  @@index([createdAt])
+}

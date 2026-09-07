@@ -3,12 +3,14 @@ import { db } from "@/server/db";
 import { handle, ok } from "@/server/http";
 import { nextNumber } from "@/server/numbering";
 import { measurementSchema } from "@/server/validation";
+import { idempotentResponse } from "@/server/idempotency";
 
 /** POST /api/measurement — ölçü ustası sifarişi (PRD §67). */
 export async function POST(request: Request) {
   return handle(async () => {
-    const input = measurementSchema.parse(await request.json());
     const user = await currentUser();
+    return idempotentResponse(request, "measurement.create", user?.id ?? "anonymous", async () => {
+      const input = measurementSchema.parse(await request.json());
 
     const created = await db.$transaction(async (tx) => {
       const number = await nextNumber(tx, "MSR");
@@ -17,6 +19,7 @@ export async function POST(request: Request) {
       });
     });
 
-    return ok({ number: created.number }, { status: 201 });
+      return ok({ number: created.number }, { status: 201 });
+    });
   });
 }

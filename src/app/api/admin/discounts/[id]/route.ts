@@ -4,6 +4,7 @@ import { changeDetail, recordAudit } from "@/server/audit";
 import { db } from "@/server/db";
 import { fail, handle, ok } from "@/server/http";
 import { discountSchema } from "@/server/validation";
+import { idempotentResponse } from "@/server/idempotency";
 
 /** PATCH /api/admin/discounts/:id */
 export async function PATCH(
@@ -13,6 +14,7 @@ export async function PATCH(
   return handle(async () => {
     const actor = await requireStaff("ADMIN");
     const { id } = await params;
+    return idempotentResponse(request, `admin.discount.update:${id}`, actor.id, async () => {
 
     const current = await db.discount.findUnique({ where: { id } });
     if (!current) return fail("NOT_FOUND", "Endirim tapılmadı", 404);
@@ -31,18 +33,20 @@ export async function PATCH(
       }),
     );
 
-    return ok(await adminDiscounts());
+      return ok(await adminDiscounts());
+    });
   });
 }
 
 /** DELETE /api/admin/discounts/:id */
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   return handle(async () => {
     const actor = await requireStaff("ADMIN");
     const { id } = await params;
+    return idempotentResponse(request, `admin.discount.delete:${id}`, actor.id, async () => {
 
     const current = await db.discount.findUnique({ where: { id } });
     if (!current) return fail("NOT_FOUND", "Endirim tapılmadı", 404);
@@ -50,6 +54,7 @@ export async function DELETE(
     await db.discount.delete({ where: { id } });
     await recordAudit(actor, "discount.delete", current.code);
 
-    return ok(await adminDiscounts());
+      return ok(await adminDiscounts());
+    });
   });
 }

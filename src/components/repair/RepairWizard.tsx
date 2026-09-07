@@ -1,7 +1,7 @@
 "use client";
 
 import { useWorkflow } from "@/store/workflow";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -95,6 +95,7 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
   const [errors, setErrors] = useState<Partial<Record<keyof RepairForm, string>>>({});
   const [submitted, setSubmitted] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
+  const idempotencyKey = useRef(crypto.randomUUID());
 
   function set<K extends keyof RepairForm>(key: K, value: RepairForm[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -128,6 +129,7 @@ export function RepairWizard({ locale, dict }: { locale: Locale; dict: Dictionar
     try {
       const { number } = await apiFetch<{ number: string }>("/api/repair", {
         method: "POST",
+        headers: { "Idempotency-Key": idempotencyKey.current },
         json: {
           category: form.category,
           doorType: form.doorType,

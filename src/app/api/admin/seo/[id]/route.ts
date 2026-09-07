@@ -4,6 +4,7 @@ import { changeDetail, recordAudit } from "@/server/audit";
 import { db } from "@/server/db";
 import { fail, handle, ok } from "@/server/http";
 import { seoEntrySchema } from "@/server/validation";
+import { idempotentResponse } from "@/server/idempotency";
 
 /** PATCH /api/admin/seo/:id */
 export async function PATCH(
@@ -13,6 +14,7 @@ export async function PATCH(
   return handle(async () => {
     const actor = await requireStaff("ADMIN");
     const { id } = await params;
+    return idempotentResponse(request, `admin.seo.update:${id}`, actor.id, async () => {
 
     const current = await db.seoEntry.findUnique({ where: { id } });
     if (!current) return fail("NOT_FOUND", "Qeyd tapılmadı", 404);
@@ -30,18 +32,20 @@ export async function PATCH(
       changeDetail({ title: [current.title, input.title] }),
     );
 
-    return ok(await adminSeoEntries());
+      return ok(await adminSeoEntries());
+    });
   });
 }
 
 /** DELETE /api/admin/seo/:id */
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   return handle(async () => {
     const actor = await requireStaff("ADMIN");
     const { id } = await params;
+    return idempotentResponse(request, `admin.seo.delete:${id}`, actor.id, async () => {
 
     const current = await db.seoEntry.findUnique({ where: { id } });
     if (!current) return fail("NOT_FOUND", "Qeyd tapılmadı", 404);
@@ -49,6 +53,7 @@ export async function DELETE(
     await db.seoEntry.delete({ where: { id } });
     await recordAudit(actor, "seo.delete", current.path);
 
-    return ok(await adminSeoEntries());
+      return ok(await adminSeoEntries());
+    });
   });
 }

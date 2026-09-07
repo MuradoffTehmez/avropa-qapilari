@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Archive, Pencil, Plus, Trash2 } from "lucide-react";
 
 import type { CrudField } from "@/components/admin/AdminCrud";
@@ -40,9 +40,12 @@ export function AdminEntityAction({
   const [form, setForm] = useState<FormValues>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
+  const mutationKey = useRef(crypto.randomUUID());
+  const deleteKey = useRef(crypto.randomUUID());
   const visibleFields = id ? fields.filter((field) => !field.createOnly) : fields;
 
   function begin() {
+    mutationKey.current = crypto.randomUUID();
     setForm(
       Object.fromEntries(
         visibleFields.map((field) => {
@@ -78,7 +81,7 @@ export function AdminEntityAction({
       );
       await apiFetch(id ? `/api/admin/entities/${entity}/${id}` : `/api/admin/entities/${entity}`, {
         method: id ? "PATCH" : "POST",
-        headers: { "Idempotency-Key": crypto.randomUUID() },
+        headers: { "Idempotency-Key": mutationKey.current },
         json: payload,
       });
       setOpen(false);
@@ -99,7 +102,7 @@ export function AdminEntityAction({
     try {
       await apiFetch(`/api/admin/entities/${entity}/${id}`, {
         method: "DELETE",
-        headers: { "Idempotency-Key": crypto.randomUUID() },
+        headers: { "Idempotency-Key": deleteKey.current },
       });
       router.refresh();
       toast(archive ? dict.adminUi.archived : dict.adminUi.deleted);

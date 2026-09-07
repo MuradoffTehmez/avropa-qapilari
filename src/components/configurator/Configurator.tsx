@@ -3,7 +3,7 @@
 import { useWorkflow } from "@/store/workflow";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, Layers, Link2, RotateCcw, Save, X } from "lucide-react";
 
 import type { Dictionary } from "@/i18n";
@@ -873,6 +873,7 @@ function SummaryStep({
   const user = useSession((s) => s.user);
   const [configId, setConfigId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const idempotencyKey = useRef(crypto.randomUUID());
 
   /**
    * Konfiqurasiyanı serverdə saxlayır. Nömrəni və yekun məbləği server
@@ -884,6 +885,7 @@ function SummaryStep({
     try {
       const saved = await apiFetch<{ code: string; total: number }>("/api/configurations", {
         method: "POST",
+        headers: { "Idempotency-Key": idempotencyKey.current },
         json: {
           productSlug: product.slug,
           width: selection.width,
