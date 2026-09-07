@@ -90,6 +90,7 @@ model Product {
   soundInsulationDb Int
   warrantyYears    Int
   style            String
+  status           String  @default("PUBLISHED") // DRAFT | PUBLISHED
   inStock          Boolean @default(true)
   isNew            Boolean @default(false)
   isBestseller     Boolean @default(false)
@@ -124,6 +125,7 @@ model Product {
   @@index([categoryId])
   @@index([brandId])
   @@index([basePrice])
+  @@index([status])
   @@index([archivedAt])
 }
 

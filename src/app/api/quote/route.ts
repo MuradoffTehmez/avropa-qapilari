@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     const user = await currentUser();
 
     const product = input.productSlug
-      ? await db.product.findFirst({ where: { slug: input.productSlug, archivedAt: null } })
+      ? await db.product.findFirst({ where: { slug: input.productSlug, archivedAt: null, status: "PUBLISHED" } })
       : null;
 
     const created = await db.$transaction(async (tx) => {

@@ -93,7 +93,7 @@ export class PricingError extends Error {
 
 export async function calculatePrice(input: PriceInput): Promise<PriceResult> {
   const product = await db.product.findFirst({
-    where: { slug: input.productSlug, archivedAt: null },
+    where: { slug: input.productSlug, archivedAt: null, status: "PUBLISHED" },
     include: {
       productOptions: {
         where: { enabled: true },

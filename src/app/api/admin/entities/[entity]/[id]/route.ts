@@ -6,9 +6,27 @@ import { recordAudit } from "@/server/audit";
 import { db } from "@/server/db";
 import { fail, handle, ok } from "@/server/http";
 
+const productOptionOrder = ["OPENING_DIRECTION", "PANEL_STYLE", "OUTSIDE_COLOR", "INSIDE_COLOR", "FRAME", "SIDELIGHT", "GLASS", "GLASS_PATTERN", "HANDLE", "HINGE", "LOCK", "CYLINDER", "SMART_LOCK", "THRESHOLD", "INSULATION", "ACCESSORY", "INSTALLATION", "DELIVERY"];
+
 const categorySchema = z.object({ slug: z.string().trim().min(2), name: z.string().trim().min(2) });
 const brandSchema = z.object({ slug: z.string().trim().min(2), name: z.string().trim().min(2), country: z.string().trim().min(2), founded: z.number().int().min(1000).max(2200) });
-const productSchema = z.object({ slug: z.string().trim().min(2), sku: z.string().trim().min(2), name: z.string().trim().min(2), categorySlug: z.string().trim().min(2), brandSlug: z.string().trim().min(2), material: z.string().trim().min(2), securityClass: z.string().trim().min(2), basePrice: z.number().int().min(0), inStock: z.boolean() });
+const productSchema = z.object({
+  slug: z.string().trim().min(2), sku: z.string().trim().min(2), name: z.string().trim().min(2),
+  categorySlug: z.string().trim().min(2), brandSlug: z.string().trim().min(2), collection: z.string().trim().min(1),
+  material: z.enum(["STEEL", "SOLID_WOOD", "MDF", "ALUMINIUM", "COMPOSITE", "GLASS"]),
+  securityClass: z.string().trim().min(1), style: z.enum(["MODERN", "CLASSIC", "MINIMAL", "LOFT", "NEOCLASSIC"]),
+  status: z.enum(["DRAFT", "PUBLISHED"]), basePrice: z.number().int().min(0),
+  warrantyYears: z.number().int().min(0).max(30), soundInsulationDb: z.number().int().min(0).max(100),
+  defaultWidth: z.number().int().min(300).max(5000), defaultHeight: z.number().int().min(1000).max(5000),
+  minWidth: z.number().int().min(300).max(5000), maxWidth: z.number().int().min(300).max(5000),
+  minHeight: z.number().int().min(1000).max(5000), maxHeight: z.number().int().min(1000).max(5000),
+  deliveryDaysMin: z.number().int().min(0).max(365), deliveryDaysMax: z.number().int().min(0).max(365),
+  inStock: z.boolean(), isBestseller: z.boolean(), optionValueIds: z.array(z.string().min(1)).min(1),
+}).superRefine((value, context) => {
+  if (value.minWidth > value.defaultWidth || value.defaultWidth > value.maxWidth) context.addIssue({ code: "custom", path: ["defaultWidth"], message: "Standart en minimum və maksimum aralığında olmalıdır" });
+  if (value.minHeight > value.defaultHeight || value.defaultHeight > value.maxHeight) context.addIssue({ code: "custom", path: ["defaultHeight"], message: "Standart hündürlük minimum və maksimum aralığında olmalıdır" });
+  if (value.deliveryDaysMin > value.deliveryDaysMax) context.addIssue({ code: "custom", path: ["deliveryDaysMax"], message: "Maksimum müddət minimumdan az ola bilməz" });
+});
 const optionSchema = z.object({ groupKey: z.string().trim().min(2), code: z.string().trim().min(1), label: z.string().trim().min(1), priceDelta: z.number().int(), hex: z.string().trim().optional() });
 const appointmentSchema = z.object({ reference: z.string().trim().min(2), type: z.string().trim().min(2), date: z.string().trim().min(10), startTime: z.string().trim().min(4), endTime: z.string().trim().min(4), address: z.string().trim().min(3), technicianId: z.string().optional(), status: z.string().trim().min(2) });
 const technicianSchema = z.object({ name: z.string().trim().min(2), phone: z.string().trim(), specialization: z.string().default(""), serviceAreas: z.string().default(""), status: z.string().trim().min(2) });
@@ -26,9 +44,32 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ en
       case "brands": await db.brand.update({ where: { id }, data: brandSchema.parse(raw) }); break;
       case "products": {
         const input = productSchema.parse(raw);
-        const [category, brand] = await Promise.all([db.category.findUnique({ where: { slug: input.categorySlug } }), db.brand.findUnique({ where: { slug: input.brandSlug } })]);
+        const optionIds = [...new Set(input.optionValueIds)];
+        const [category, brand, options] = await Promise.all([
+          db.category.findUnique({ where: { slug: input.categorySlug } }),
+          db.brand.findUnique({ where: { slug: input.brandSlug } }),
+          db.optionValue.findMany({ where: { id: { in: optionIds } } }),
+        ]);
         if (!category || !brand) return fail("RELATION_NOT_FOUND", "Kateqoriya və ya brend tapılmadı", 422);
-        await db.product.update({ where: { id }, data: { slug: input.slug, sku: input.sku, name: input.name, categoryId: category.id, brandId: brand.id, material: input.material, securityClass: input.securityClass, basePrice: input.basePrice, inStock: input.inStock } });
+        if (options.length !== optionIds.length) return fail("OPTION_NOT_FOUND", "Seçilən option dəyərlərindən biri tapılmadı", 422);
+        const selectedGroups = new Set(options.map((option) => option.groupKey));
+        const optionGroups = ["SIZE", ...productOptionOrder.filter((group) => selectedGroups.has(group))];
+        const panelHexes = options.filter((option) => option.groupKey === "OUTSIDE_COLOR" && option.hex).map((option) => option.hex!);
+        await db.$transaction(async (tx) => {
+          await tx.product.update({ where: { id }, data: {
+            slug: input.slug, sku: input.sku, name: input.name, collection: input.collection,
+            basePrice: input.basePrice, material: input.material, securityClass: input.securityClass,
+            soundInsulationDb: input.soundInsulationDb, warrantyYears: input.warrantyYears,
+            style: input.style, status: input.status, inStock: input.inStock, isBestseller: input.isBestseller,
+            defaultWidth: input.defaultWidth, defaultHeight: input.defaultHeight,
+            minWidth: input.minWidth, maxWidth: input.maxWidth, minHeight: input.minHeight, maxHeight: input.maxHeight,
+            deliveryDaysMin: input.deliveryDaysMin, deliveryDaysMax: input.deliveryDaysMax,
+            optionGroups: JSON.stringify(optionGroups), panelHexes: JSON.stringify(panelHexes),
+            categoryId: category.id, brandId: brand.id,
+          } });
+          await tx.productOption.deleteMany({ where: { productId: id } });
+          await tx.productOption.createMany({ data: optionIds.map((optionValueId) => ({ productId: id, optionValueId })) });
+        });
         break;
       }
       case "options": { const input = optionSchema.parse(raw); await db.optionValue.update({ where: { id }, data: { ...input, hex: input.hex || null } }); break; }

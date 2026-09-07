@@ -13,6 +13,9 @@ export function defaultChoices(product: Product): ConfigurationSelection["choice
   for (const key of product.optionGroups) {
     if (key === "SIZE") continue;
     const group = optionGroups[key];
+    const values = product.optionValueIds
+      ? group.values.filter((value) => product.optionValueIds!.includes(value.id))
+      : group.values;
 
     if (group.multi) {
       choices[key] = [];
@@ -22,7 +25,7 @@ export function defaultChoices(product: Product): ConfigurationSelection["choice
     // Xarici rəng üçün məhsulun öz palitrasına uyğun dəyəri seçirik
     // Panel naxışı məhsulun öz stilindən başlayır
     if (key === "PANEL_STYLE") {
-      const match = group.values.find((v) => v.code === product.style);
+      const match = values.find((v) => v.code === product.style);
       if (match) {
         choices[key] = match.id;
         continue;
@@ -30,14 +33,14 @@ export function defaultChoices(product: Product): ConfigurationSelection["choice
     }
 
     if (key === "OUTSIDE_COLOR") {
-      const match = group.values.find((v) => v.hex === product.panelHexes[0]);
+      const match = values.find((v) => v.hex === product.panelHexes[0]);
       if (match) {
         choices[key] = match.id;
         continue;
       }
     }
 
-    const first = group.values.find((v) => v.priceDelta === 0 && !v.requires) ?? group.values[0];
+    const first = values.find((v) => v.priceDelta === 0 && !v.requires) ?? values[0];
     if (first) choices[key] = first.id;
   }
 

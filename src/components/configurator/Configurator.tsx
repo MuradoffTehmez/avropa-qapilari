@@ -308,6 +308,7 @@ export function Configurator({
             <OptionStep
               group={currentGroup}
               selection={selection}
+              availableOptionIds={product.optionValueIds}
               onSelect={setChoice}
               dict={dict}
               locale={locale}
@@ -690,12 +691,14 @@ function SizeStep({
 function OptionStep({
   group,
   selection,
+  availableOptionIds,
   onSelect,
   dict,
   locale,
 }: {
   group: OptionGroupKey;
   selection: ConfigurationSelection;
+  availableOptionIds?: string[];
   onSelect: (group: OptionGroupKey, valueId: string, multi: boolean) => void;
   dict: Dictionary;
   locale: Locale;
@@ -709,7 +712,10 @@ function OptionStep({
     return v ? optionLabel(v, locale) : id;
   };
 
-  const withCompat = def.values.map((v) => ({
+  const availableValues = availableOptionIds
+    ? def.values.filter((value) => availableOptionIds.includes(value.id))
+    : def.values;
+  const withCompat = availableValues.map((v) => ({
     value: v,
     compat: checkCompatibility(v, selection, findOptionValue, labelOf, dict),
   }));

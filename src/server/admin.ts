@@ -25,16 +25,35 @@ export interface AdminProductRow {
   categorySlug: string;
   brandSlug: string;
   brandName: string;
+  collection: string;
   material: DoorMaterial;
   securityClass: SecurityClass;
+  style: string;
+  status: string;
   basePrice: number;
   inStock: boolean;
+  isBestseller: boolean;
+  warrantyYears: number;
+  soundInsulationDb: number;
+  defaultWidth: number;
+  defaultHeight: number;
+  minWidth: number;
+  maxWidth: number;
+  minHeight: number;
+  maxHeight: number;
+  deliveryDaysMin: number;
+  deliveryDaysMax: number;
+  optionValueIds: string[];
 }
 
 export async function adminProducts(): Promise<AdminProductRow[]> {
   const rows = await db.product.findMany({
     where: { archivedAt: null },
-    include: { category: true, brand: true },
+    include: {
+      category: true,
+      brand: true,
+      productOptions: { where: { enabled: true }, select: { optionValueId: true } },
+    },
     orderBy: { name: "asc" },
   });
 
@@ -46,10 +65,25 @@ export async function adminProducts(): Promise<AdminProductRow[]> {
     categorySlug: p.category.slug,
     brandSlug: p.brand.slug,
     brandName: p.brand.name,
+    collection: p.collection,
     material: p.material as DoorMaterial,
     securityClass: p.securityClass as SecurityClass,
+    style: p.style,
+    status: p.status,
     basePrice: p.basePrice,
     inStock: p.inStock,
+    isBestseller: p.isBestseller,
+    warrantyYears: p.warrantyYears,
+    soundInsulationDb: p.soundInsulationDb,
+    defaultWidth: p.defaultWidth,
+    defaultHeight: p.defaultHeight,
+    minWidth: p.minWidth,
+    maxWidth: p.maxWidth,
+    minHeight: p.minHeight,
+    maxHeight: p.maxHeight,
+    deliveryDaysMin: p.deliveryDaysMin,
+    deliveryDaysMax: p.deliveryDaysMax,
+    optionValueIds: p.productOptions.map((option) => option.optionValueId),
   }));
 }
 

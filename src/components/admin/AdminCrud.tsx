@@ -16,7 +16,7 @@ import { useDict } from "@/i18n/provider";
  * Sətirlər serverdən gəlir, dəyişiklik dərhal API-ya yazılır — lokal
  * yaddaşda nüsxə saxlanılmır. Səlahiyyət hər sorğuda serverdə yoxlanılır.
  */
-export type CrudFieldType = "text" | "number" | "textarea" | "checkbox" | "select" | "date";
+export type CrudFieldType = "text" | "number" | "textarea" | "checkbox" | "select" | "multiselect" | "date";
 
 export interface CrudField {
   name: string;
@@ -56,16 +56,19 @@ export function AdminCrud<T extends CrudRow>({
 
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<T | null>(null);
-  const [values, setValues] = useState<Record<string, string | boolean>>({});
+  const [values, setValues] = useState<Record<string, string | string[] | boolean>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
 
   function begin(row?: T) {
-    const next: Record<string, string | boolean> = {};
+    const next: Record<string, string | string[] | boolean> = {};
     for (const field of fields) {
       const raw = row ? (row as unknown as Record<string, unknown>)[field.name] : undefined;
-      next[field.name] =
-        field.type === "checkbox" ? Boolean(raw) : raw === undefined || raw === null ? "" : String(raw);
+      next[field.name] = field.type === "checkbox"
+        ? Boolean(raw)
+        : field.type === "multiselect"
+          ? Array.isArray(raw) ? raw.filter((value): value is string => typeof value === "string") : []
+          : raw === undefined || raw === null ? "" : String(raw);
     }
     setValues(next);
     setEditing(row ?? null);
@@ -161,6 +164,29 @@ export function AdminCrud<T extends CrudRow>({
                     }
                   />
                 </div>
+              );
+            }
+
+            if (field.type === "multiselect") {
+              const selected = Array.isArray(value) ? value : [];
+              return (
+                <Field key={field.name} label={field.label} required={field.required} hint={field.hint} error={errors[field.name]} className="sm:col-span-2">
+                  <div className="grid max-h-64 gap-2 overflow-y-auto border border-line p-3 sm:grid-cols-2">
+                    {(field.options ?? []).map((option) => (
+                      <Checkbox
+                        key={option.value}
+                        label={option.label}
+                        checked={selected.includes(option.value)}
+                        onChange={(event) => setValues((current) => ({
+                          ...current,
+                          [field.name]: event.target.checked
+                            ? [...selected, option.value]
+                            : selected.filter((item) => item !== option.value),
+                        }))}
+                      />
+                    ))}
+                  </div>
+                </Field>
               );
             }
 

@@ -33,8 +33,19 @@ import {
 async function loadSection(section: string): Promise<AdminData> {
   switch (section) {
     case "products":
+      return {
+        products: await adminProducts(),
+        categories: await adminCategories(),
+        brands: await adminBrands(),
+        optionGroups: await adminOptionGroups(),
+      };
     case "inventory":
-      return { products: await adminProducts() };
+      return {
+        products: await adminProducts(),
+        categories: await adminCategories(),
+        brands: await adminBrands(),
+        optionGroups: await adminOptionGroups(),
+      };
     case "categories":
       return { categories: await adminCategories() };
     case "brands":

@@ -34,6 +34,7 @@ import {
   countryNameByCode,
   materialName,
   specializationName,
+  styleName,
 } from "@/lib/i18n-format";
 import type { AdminData } from "@/server/admin";
 
@@ -78,16 +79,41 @@ export function AdminSection({
   const label = ui.labels;
   if (!sections.includes(section as Section)) notFound();
 
+  const productOptionChoices = (data.optionGroups ?? []).flatMap((group) =>
+    group.values.map((value) => ({
+      value: value.id,
+      label: `${dict.configurator.steps[group.groupKey]} · ${optionLabelById(value.id, locale, value.label)}`,
+    })),
+  );
+
   const productFields: CrudField[] = [
     { name: "name", label: ui.fields.name, required: true },
     { name: "slug", label: ui.fields.slug, required: true },
     { name: "sku", label: ui.fields.sku, required: true },
-    { name: "categorySlug", label: ui.fields.categorySlug, required: true },
-    { name: "brandSlug", label: ui.fields.brandSlug, required: true },
-    { name: "material", label: ui.fields.material, required: true },
+    { name: "categorySlug", label: ui.fields.categorySlug, type: "select", required: true, options: (data.categories ?? []).map((category) => ({ value: category.slug, label: categoryNameBySlug(category.slug, dict, category.name) })) },
+    { name: "brandSlug", label: ui.fields.brandSlug, type: "select", required: true, options: (data.brands ?? []).map((brand) => ({ value: brand.slug, label: brand.name })) },
+    { name: "collection", label: ui.fields.collection, required: true },
+    { name: "material", label: ui.fields.material, type: "select", required: true, options: ["STEEL", "SOLID_WOOD", "MDF", "ALUMINIUM", "COMPOSITE", "GLASS"].map((value) => ({ value, label: materialName(value as Parameters<typeof materialName>[0], dict) })) },
     { name: "securityClass", label: ui.fields.securityClass, required: true },
+    { name: "style", label: ui.fields.style, type: "select", required: true, options: ["MODERN", "CLASSIC", "MINIMAL", "LOFT", "NEOCLASSIC"].map((value) => ({ value, label: styleName(value as Parameters<typeof styleName>[0], dict) })) },
+    { name: "status", label: ui.fields.status, type: "select", required: true, options: [
+      { value: "DRAFT", label: ui.draft },
+      { value: "PUBLISHED", label: ui.published },
+    ] },
     { name: "basePrice", label: ui.fields.basePrice, type: "number", required: true },
+    { name: "warrantyYears", label: ui.fields.warrantyYears, type: "number", required: true },
+    { name: "soundInsulationDb", label: ui.fields.soundInsulationDb, type: "number", required: true },
+    { name: "defaultWidth", label: ui.fields.defaultWidth, type: "number", required: true },
+    { name: "defaultHeight", label: ui.fields.defaultHeight, type: "number", required: true },
+    { name: "minWidth", label: ui.fields.minWidth, type: "number", required: true },
+    { name: "maxWidth", label: ui.fields.maxWidth, type: "number", required: true },
+    { name: "minHeight", label: ui.fields.minHeight, type: "number", required: true },
+    { name: "maxHeight", label: ui.fields.maxHeight, type: "number", required: true },
+    { name: "deliveryDaysMin", label: ui.fields.deliveryDaysMin, type: "number", required: true },
+    { name: "deliveryDaysMax", label: ui.fields.deliveryDaysMax, type: "number", required: true },
     { name: "inStock", label: ui.fields.inStock, type: "checkbox" },
+    { name: "isBestseller", label: ui.fields.featured, type: "checkbox" },
+    { name: "optionValueIds", label: ui.fields.availableOptions, type: "multiselect", required: true, options: productOptionChoices },
   ];
   const categoryFields: CrudField[] = [
     { name: "name", label: ui.fields.name, required: true },
@@ -204,6 +230,15 @@ export function AdminSection({
               align: "right",
               render: (p) => (
                 <span className="font-medium tabular-nums text-ink">{formatPrice(p.basePrice)}</span>
+              ),
+            },
+            {
+              key: "status",
+              header: label.status,
+              render: (p) => (
+                <Badge tone={p.status === "PUBLISHED" ? "success" : "neutral"}>
+                  {p.status === "PUBLISHED" ? ui.published : ui.draft}
+                </Badge>
               ),
             },
             {

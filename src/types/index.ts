@@ -132,6 +132,8 @@ export interface Product {
   specs: ProductSpec[];
   documents: ProductDocument[];
   optionGroups: OptionGroupKey[];
+  /** Bazada bu məhsula bağlanmış konfiqurator dəyərləri. Olmadıqda statik kataloq bütün qrup dəyərlərini istifadə edir. */
+  optionValueIds?: string[];
 }
 
 /* ---------------------------- Configurator ----------------------------- */

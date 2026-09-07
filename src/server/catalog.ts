@@ -14,7 +14,7 @@ import { products as seedProducts } from "@/mock/products";
 import { brands as seedBrands, categories as seedCategories } from "@/mock/taxonomy";
 
 type ProductRow = Prisma.ProductGetPayload<{
-  include: { category: true; brand: true };
+  include: { category: true; brand: true; productOptions: true };
 }>;
 
 const materials = new Set<DoorMaterial>([
@@ -120,13 +120,14 @@ function mapProduct(row: ProductRow): Product {
     specs: fallback?.specs ?? [],
     documents: fallback?.documents ?? [],
     optionGroups: groups.length > 0 ? groups : (fallback?.optionGroups ?? ["SIZE"]),
+    optionValueIds: row.productOptions.filter((option) => option.enabled).map((option) => option.optionValueId),
   };
 }
 
 export async function catalogProducts(): Promise<Product[]> {
   const rows = await db.product.findMany({
-    where: { archivedAt: null },
-    include: { category: true, brand: true },
+    where: { archivedAt: null, status: "PUBLISHED" },
+    include: { category: true, brand: true, productOptions: true },
     orderBy: [{ isBestseller: "desc" }, { rating: "desc" }, { name: "asc" }],
   });
   return rows.map(mapProduct);
@@ -134,8 +135,8 @@ export async function catalogProducts(): Promise<Product[]> {
 
 export async function catalogProduct(slug: string): Promise<Product | null> {
   const row = await db.product.findFirst({
-    where: { slug, archivedAt: null },
-    include: { category: true, brand: true },
+    where: { slug, archivedAt: null, status: "PUBLISHED" },
+    include: { category: true, brand: true, productOptions: true },
   });
   return row ? mapProduct(row) : null;
 }
@@ -146,8 +147,8 @@ export async function featuredCatalogProducts(limit = 8): Promise<Product[]> {
 
 export async function relatedCatalogProducts(product: Product, limit = 4): Promise<Product[]> {
   const rows = await db.product.findMany({
-    where: { category: { slug: product.categorySlug }, id: { not: product.id }, archivedAt: null },
-    include: { category: true, brand: true },
+    where: { category: { slug: product.categorySlug }, id: { not: product.id }, archivedAt: null, status: "PUBLISHED" },
+    include: { category: true, brand: true, productOptions: true },
     orderBy: [{ isBestseller: "desc" }, { rating: "desc" }],
     take: limit,
   });
@@ -156,7 +157,7 @@ export async function relatedCatalogProducts(product: Product, limit = 4): Promi
 
 export async function catalogCategories(): Promise<Category[]> {
   const rows = await db.category.findMany({
-    include: { _count: { select: { products: { where: { archivedAt: null } } } } },
+    include: { _count: { select: { products: { where: { archivedAt: null, status: "PUBLISHED" } } } } },
     orderBy: { name: "asc" },
   });
   return rows.map((row) => {
@@ -180,7 +181,7 @@ export async function catalogCategory(slug: string): Promise<Category | null> {
 
 export async function catalogBrands(): Promise<Brand[]> {
   const rows = await db.brand.findMany({
-    include: { _count: { select: { products: { where: { archivedAt: null } } } } },
+    include: { _count: { select: { products: { where: { archivedAt: null, status: "PUBLISHED" } } } } },
     orderBy: { name: "asc" },
   });
   return rows.map((row) => {

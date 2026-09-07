@@ -11,7 +11,8 @@ import { Modal, toast } from "@/components/ui/overlays";
 import { ApiRequestError, apiFetch } from "@/lib/api";
 import { useDict } from "@/i18n/provider";
 
-type Values = Record<string, string | number | boolean | null | undefined>;
+type Values = Record<string, string | string[] | number | boolean | null | undefined>;
+type FormValues = Record<string, string | string[] | boolean>;
 
 /** Serverdə saxlanan admin sətiri üçün ortaq yaratma/redaktə/silmə düyməsi. */
 export function AdminEntityAction({
@@ -36,7 +37,7 @@ export function AdminEntityAction({
   const values = rawValues as Values;
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<Record<string, string | boolean>>({});
+  const [form, setForm] = useState<FormValues>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const visibleFields = id ? fields.filter((field) => !field.createOnly) : fields;
@@ -50,6 +51,8 @@ export function AdminEntityAction({
             field.name,
             field.type === "checkbox"
               ? Boolean(value)
+              : field.type === "multiselect"
+                ? Array.isArray(value) ? value : []
               : value == null
                 ? field.type === "select"
                   ? field.options?.[0]?.value ?? ""
@@ -132,6 +135,28 @@ export function AdminEntityAction({
                 <div key={field.name} className="sm:col-span-2">
                   <Checkbox label={field.label} checked={Boolean(form[field.name])} onChange={(e) => setForm((v) => ({ ...v, [field.name]: e.target.checked }))} />
                 </div>
+              );
+            }
+            if (field.type === "multiselect") {
+              const selected = Array.isArray(form[field.name]) ? form[field.name] as string[] : [];
+              return (
+                <Field key={field.name} label={field.label} required={field.required} hint={field.hint} error={errors[field.name]} className="sm:col-span-2">
+                  <div className="grid max-h-72 gap-2 overflow-y-auto border border-line p-3 sm:grid-cols-2">
+                    {(field.options ?? []).map((option) => (
+                      <Checkbox
+                        key={option.value}
+                        label={option.label}
+                        checked={selected.includes(option.value)}
+                        onChange={(event) => setForm((current) => ({
+                          ...current,
+                          [field.name]: event.target.checked
+                            ? [...selected, option.value]
+                            : selected.filter((item) => item !== option.value),
+                        }))}
+                      />
+                    ))}
+                  </div>
+                </Field>
               );
             }
             const control = field.type === "textarea" ? (

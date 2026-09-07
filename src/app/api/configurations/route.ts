@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     }
 
     const product = await db.product.findFirst({
-      where: { slug: input.productSlug, archivedAt: null },
+      where: { slug: input.productSlug, archivedAt: null, status: "PUBLISHED" },
     });
     if (!product) return fail("PRODUCT_NOT_FOUND", "Məhsul tapılmadı", 404);
 
