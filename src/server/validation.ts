@@ -43,6 +43,29 @@ export const orderItemSchema = z.object({
   choices: choicesSchema.default({}),
 });
 
+/** Favorit sinxronizasiyası — brauzerdəki siyahı serverə yüklənir. */
+export const favoritesSyncSchema = z.object({
+  productIds: z.array(z.string().min(1)).max(200, "Favorit siyahısı çox uzundur").default([]),
+  /** Girişdən sonra brauzer siyahısını mövcud qeydlərin üstünə əlavə edir. */
+  merge: z.boolean().default(false),
+});
+
+/** Səbət sinxronizasiyası — qiymət serverdə yenidən hesablanır. */
+export const cartSyncSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        productSlug: z.string().min(1),
+        quantity: z.number().int().min(1, "Say ən azı 1").max(50, "Say çox böyükdür").default(1),
+        width: widthField,
+        height: heightField,
+        choices: choicesSchema.default({}),
+      }),
+    )
+    .max(50, "Səbətdə çox sətir var")
+    .default([]),
+});
+
 export const orderSchema = z.object({
   customerName: z.string().trim().min(2, "Ad ən azı 2 simvol olmalıdır"),
   customerPhone: phone,

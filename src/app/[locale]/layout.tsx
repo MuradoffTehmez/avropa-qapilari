@@ -12,6 +12,7 @@ import { ToastHost } from "@/components/ui/overlays";
 import { CookieBar } from "@/components/layout/CookieBar";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { SessionBootstrap } from "@/components/account/SessionBootstrap";
+import { ListSync } from "@/components/account/ListSync";
 
 const inter = Inter({
   subsets: ["latin", "latin-ext", "cyrillic"],
@@ -96,6 +97,7 @@ export default async function LocaleLayout({
         </a>
         <I18nProvider locale={typedLocale} dict={dict}>
           <SessionBootstrap />
+          <ListSync />
           {children}
           <MobileNav locale={typedLocale} dict={dict} />
           <ToastHost />

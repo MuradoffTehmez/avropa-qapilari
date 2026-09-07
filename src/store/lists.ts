@@ -8,6 +8,8 @@ interface FavoritesState {
   ids: string[];
   toggle: (id: string) => void;
   has: (id: string) => boolean;
+  /** Serverdən gələn siyahını qəbul edir (giriş sonrası sinxronizasiya). */
+  replace: (ids: string[]) => void;
   clear: () => void;
 }
 
@@ -20,6 +22,7 @@ export const useFavorites = create<FavoritesState>()(
           ids: s.ids.includes(id) ? s.ids.filter((x) => x !== id) : [...s.ids, id],
         })),
       has: (id) => get().ids.includes(id),
+      replace: (ids) => set({ ids: [...new Set(ids)] }),
       clear: () => set({ ids: [] }),
     }),
     { name: "ep-favorites-v1" },

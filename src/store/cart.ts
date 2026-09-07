@@ -5,14 +5,17 @@ import { persist } from "zustand/middleware";
 import type { CartItem } from "@/types";
 
 /**
- * anonim istifadəçi üçün local persistence.
- * Backend qoşulanda login zamanı server cart ilə merge ediləcək.
+ * Səbət: anonim istifadəçidə brauzerdə saxlanılır, giriş edəndə
+ * `ListSync` onu serverlə birləşdirir və bundan sonra hər dəyişiklik
+ * serverə yazılır (`/api/account/cart`).
  */
 interface CartState {
   items: CartItem[];
   add: (item: CartItem) => void;
   remove: (id: string) => void;
   setQuantity: (id: string, quantity: number) => void;
+  /** Serverdən gələn səbəti qəbul edir — qiymətlər serverdə hesablanıb. */
+  replace: (items: CartItem[]) => void;
   clear: () => void;
 }
 
@@ -43,6 +46,7 @@ export const useCart = create<CartState>()(
             i.id === id ? { ...i, quantity: Math.max(1, Math.min(99, quantity)) } : i,
           ),
         })),
+      replace: (items) => set({ items }),
       clear: () => set({ items: [] }),
     }),
     { name: "ep-cart-v1" },
