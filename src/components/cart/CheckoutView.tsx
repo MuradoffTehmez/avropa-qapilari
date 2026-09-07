@@ -6,7 +6,7 @@ import { useState } from "react";
 import { ArrowLeft, ArrowRight, CheckCircle2, ShoppingBag } from "lucide-react";
 
 import type { Dictionary } from "@/i18n";
-import type { Locale } from "@/types";
+import type { Locale, OptionValue } from "@/types";
 import { routes } from "@/lib/routes";
 import { formatPrice } from "@/lib/utils";
 import { Button, ButtonLink } from "@/components/ui/Button";
@@ -17,7 +17,6 @@ import { cartSubtotal, useCart } from "@/store/cart";
 import { useHydrated } from "@/lib/hooks";
 import { useSession } from "@/store/session";
 import { bakuDistricts, cities } from "@/mock/content";
-import { optionGroups } from "@/mock/options";
 import { optionText } from "@/mock/options.i18n";
 import { ApiRequestError, apiFetch } from "@/lib/api";
 
@@ -68,7 +67,18 @@ const initial: CheckoutState = {
   terms: false,
 };
 
-export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionary }) {
+export function CheckoutView({
+  locale,
+  dict,
+  deliveryOptions,
+  installationOptions,
+}: {
+  locale: Locale;
+  dict: Dictionary;
+  /** Çatdırılma və quraşdırma seçimləri bazadan gəlir. */
+  deliveryOptions: OptionValue[];
+  installationOptions: OptionValue[];
+}) {
   const r = routes(locale);
   const hydrated = useHydrated();
 
@@ -207,9 +217,9 @@ export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionar
 
   const subtotal = cartSubtotal(items) - items.reduce((sum, item) => sum + (item.includedServices ?? 0) * item.quantity, 0);
   const deliveryPrice =
-    optionGroups.DELIVERY.values.find((v) => v.id === form.delivery)?.priceDelta ?? 0;
+    deliveryOptions.find((v) => v.id === form.delivery)?.priceDelta ?? 0;
   const installationPrice =
-    optionGroups.INSTALLATION.values.find((v) => v.id === form.installation)?.priceDelta ?? 0;
+    installationOptions.find((v) => v.id === form.installation)?.priceDelta ?? 0;
   const total = subtotal + deliveryPrice + installationPrice;
 
   function validate(current: StepId): boolean {
@@ -360,7 +370,7 @@ export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionar
           <div className="max-w-xl space-y-4">
             <SectionTitle>{dict.checkout.steps.delivery}</SectionTitle>
             <div className="grid gap-2">
-              {optionGroups.DELIVERY.values.map((v) => (
+              {deliveryOptions.map((v) => (
                 <RadioCard
                   key={v.id}
                   name="delivery"
@@ -378,7 +388,7 @@ export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionar
           <div className="max-w-xl space-y-4">
             <SectionTitle>{dict.checkout.steps.installation}</SectionTitle>
             <div className="grid gap-2">
-              {optionGroups.INSTALLATION.values.map((v) => (
+              {installationOptions.map((v) => (
                 <RadioCard
                   key={v.id}
                   name="installation"
@@ -442,11 +452,11 @@ export function CheckoutView({ locale, dict }: { locale: Locale; dict: Dictionar
               />
               <SummaryRow
                 label={dict.checkout.steps.delivery}
-                value={optionGroups.DELIVERY.values.find((v) => v.id === form.delivery) ? optionText(optionGroups.DELIVERY.values.find((v) => v.id === form.delivery)!, locale).label : "—"}
+                value={deliveryOptions.find((v) => v.id === form.delivery) ? optionText(deliveryOptions.find((v) => v.id === form.delivery)!, locale).label : "—"}
               />
               <SummaryRow
                 label={dict.checkout.steps.installation}
-                value={optionGroups.INSTALLATION.values.find((v) => v.id === form.installation) ? optionText(optionGroups.INSTALLATION.values.find((v) => v.id === form.installation)!, locale).label : "—"}
+                value={installationOptions.find((v) => v.id === form.installation) ? optionText(installationOptions.find((v) => v.id === form.installation)!, locale).label : "—"}
               />
               <SummaryRow
                 label={dict.checkout.steps.payment}

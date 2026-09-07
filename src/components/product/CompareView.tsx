@@ -3,19 +3,27 @@
 import Link from "next/link";
 import { Check, Minus, Scale, X } from "lucide-react";
 import type { Dictionary } from "@/i18n";
-import type { Locale, Product } from "@/types";
+import type { Brand, Locale, Product } from "@/types";
 import { routes } from "@/lib/routes";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { EmptyState, Skeleton } from "@/components/ui/primitives";
 import { ProductMedia } from "@/components/product/ProductMedia";
 import { useCompare } from "@/store/lists";
 import { useHydrated } from "@/lib/hooks";
-import { products } from "@/mock/products";
-import { getBrand } from "@/mock/taxonomy";
 import { materialName, priceFrom, styleName } from "@/lib/i18n-format";
 
 /** maksimum 4 məhsul müqayisəsi. */
-export function CompareView({ locale, dict }: { locale: Locale; dict: Dictionary }) {
+export function CompareView({
+  locale,
+  dict,
+  products,
+  brands,
+}: {
+  locale: Locale;
+  dict: Dictionary;
+  products: Product[];
+  brands: Brand[];
+}) {
   const r = routes(locale);
   const hydrated = useHydrated();
   const ids = useCompare((s) => s.ids);
@@ -47,7 +55,10 @@ export function CompareView({ locale, dict }: { locale: Locale; dict: Dictionary
 
   const rows: { label: string; render: (p: Product) => React.ReactNode }[] = [
     { label: dict.common.price, render: (p) => priceFrom(p.basePrice, locale, dict) },
-    { label: dict.catalog.brand, render: (p) => getBrand(p.brandSlug)?.name ?? "—" },
+    {
+      label: dict.catalog.brand,
+      render: (p) => brands.find((b) => b.slug === p.brandSlug)?.name ?? "—",
+    },
     { label: dict.catalog.material, render: (p) => materialName(p.material, dict) },
     { label: dict.catalog.securityClass, render: (p) => p.securityClass },
     { label: dict.catalog.soundInsulation, render: (p) => `${p.soundInsulationDb} dB` },

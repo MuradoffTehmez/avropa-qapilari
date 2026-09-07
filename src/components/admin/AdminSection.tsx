@@ -27,7 +27,6 @@ import {
   TechnicianControl,
 } from "@/components/admin/AdminControls";
 import { ProductMedia } from "@/components/product/ProductMedia";
-import { getProduct } from "@/mock/products";
 import { optionLabelById } from "@/mock/options.i18n";
 import {
   categoryNameBySlug,
@@ -203,7 +202,7 @@ export function AdminSection({
               render: (p) => (
                 <div className="flex items-center gap-3">
                   <span className="aspect-3/4 w-9 shrink-0 overflow-hidden border border-line bg-bone">
-                    {getProduct(p.slug) ? <ProductMedia product={getProduct(p.slug)!} sizes="36px" /> : null}
+                    <ProductMedia product={p.media} sizes="36px" />
                   </span>
                   <span>
                     <span className="block font-medium text-ink">{p.name}</span>

@@ -25,10 +25,13 @@ export async function generateMetadata({
 
 export default async function SharedConfigurationPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; code: string }>;
+  searchParams: Promise<{ p?: string }>;
 }) {
   const { locale: raw, code } = await params;
+  const query = await searchParams;
   const locale = (isLocale(raw) ? raw : "az") as Locale;
   const dict = getDictionary(locale);
   const r = routes(locale);
@@ -49,7 +52,9 @@ export default async function SharedConfigurationPage({
         total: record.total,
       }
     : null;
-  const product = saved ? await catalogProduct(saved.productSlug) : null;
+  // Kod tapılmasa köhnə `?p=slug` linki üçün məhsul yenə bazadan oxunur.
+  const productSlug = saved?.productSlug ?? query.p;
+  const product = productSlug ? await catalogProduct(productSlug) : null;
 
   return (
     <>

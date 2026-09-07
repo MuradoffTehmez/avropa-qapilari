@@ -1,5 +1,9 @@
-import type { ConfigurationSelection, Product } from "@/types";
-import { optionGroups } from "@/mock/options";
+import type {
+  ConfigurationSelection,
+  OptionGroupKey,
+  OptionGroupMeta,
+  Product,
+} from "@/types";
 import { productOptionsForGroup } from "./product-options";
 
 /**
@@ -7,13 +11,19 @@ import { productOptionsForGroup } from "./product-options";
  *
  * Nəticə `pruneIncompatible` ilə təmizlənməlidir: bəzi qruplarda bütün
  * dəyərlər ilkin şərt tələb edir (məsələn şüşə naxışı şüşə tələb edir).
+ *
+ * `groups` qrup qaydalarıdır — bazadan (`catalogOptionGroups`) gəlir.
  */
-export function defaultChoices(product: Product): ConfigurationSelection["choices"] {
+export function defaultChoices(
+  product: Product,
+  groups: Partial<Record<OptionGroupKey, OptionGroupMeta>>,
+): ConfigurationSelection["choices"] {
   const choices: ConfigurationSelection["choices"] = {};
 
   for (const key of product.optionGroups) {
     if (key === "SIZE") continue;
-    const group = optionGroups[key];
+    const group = groups[key];
+    if (!group) continue;
     const values = productOptionsForGroup(product, key);
 
     if (group.multi) {

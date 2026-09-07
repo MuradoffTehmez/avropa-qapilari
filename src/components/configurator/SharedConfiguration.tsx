@@ -13,7 +13,6 @@ import { Badge, Card, DataRow, EmptyState, Section } from "@/components/ui/primi
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { toast } from "@/components/ui/overlays";
 import { DoorVisual, type DoorFace } from "@/components/product/DoorVisual";
-import { getProduct } from "@/mock/products";
 import { optionLabel } from "@/mock/options.i18n";
 import { parseSharedDesign } from "@/features/configurator/shared";
 import { calculatePrice } from "@/features/pricing/engine";
@@ -55,11 +54,10 @@ export function SharedConfiguration({
   const [previewFace, setPreviewFace] = useState<DoorFace>("OUTSIDE");
 
   // Köhnə paylaşma linkləri seçimləri sorğu parametrində daşıyırdı;
-  // yeni linklər yalnız kod daşıyır və serverdən oxunur.
-  const slug = saved?.productSlug ?? params.get("p") ?? "";
+  // yeni linklər yalnız kod daşıyır. Hər iki halda məhsulu server verir.
   const raw = params.get("d") ?? undefined;
 
-  const product = serverProduct ?? (slug ? getProduct(slug) : undefined);
+  const product = serverProduct ?? undefined;
   const selection = useMemo(
     () =>
       product

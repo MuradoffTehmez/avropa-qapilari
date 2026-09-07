@@ -138,6 +138,23 @@ export interface Product {
   optionValues?: OptionValue[];
 }
 
+/**
+ * Məhsul vizualı üçün lazım olan minimum sahələr. Admin cədvəli tam
+ * `Product` qurmadan da eyni komponenti istifadə edə bilsin deyə ayrılıb.
+ */
+export type MediaProduct = Pick<
+  Product,
+  | "name"
+  | "images"
+  | "panelHexes"
+  | "style"
+  | "hasGlass"
+  | "smartLockReady"
+  | "categorySlug"
+  | "defaultWidth"
+  | "defaultHeight"
+>;
+
 /* ---------------------------- Configurator ----------------------------- */
 
 export type OptionGroupKey =
@@ -180,13 +197,24 @@ export interface OptionValue {
   badge?: string;
 }
 
-export interface OptionGroup {
+/** Konfiqurator addımının metadatası — dəyərlər məhsula görə ayrıca gəlir. */
+export interface OptionGroupMeta {
   key: OptionGroupKey;
   title: string;
   hint: string;
   required: boolean;
   multi: boolean;
+}
+
+export interface OptionGroup extends OptionGroupMeta {
   values: OptionValue[];
+}
+
+/** Konfiquratorda təklif olunan hazır ölçü (mm). */
+export interface SizePreset {
+  label: string;
+  width: number;
+  height: number;
 }
 
 export interface ConfigurationSelection {

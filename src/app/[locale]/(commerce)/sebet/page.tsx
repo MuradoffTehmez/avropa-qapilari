@@ -4,6 +4,7 @@ import type { Locale } from "@/types";
 import { routes } from "@/lib/routes";
 import { Breadcrumbs } from "@/components/ui/primitives";
 import { CartView } from "@/components/cart/CartView";
+import { catalogProducts } from "@/server/catalog";
 
 export async function generateMetadata({
   params,
@@ -29,6 +30,7 @@ export default async function CartPage({
   const locale = (isLocale(raw) ? raw : "az") as Locale;
   const dict = getDictionary(locale);
   const r = routes(locale);
+  const products = await catalogProducts();
 
   return (
     <>
@@ -40,7 +42,7 @@ export default async function CartPage({
           </h1>
         </div>
       </div>
-      <CartView locale={locale} dict={dict} />
+      <CartView locale={locale} dict={dict} products={products} />
     </>
   );
 }

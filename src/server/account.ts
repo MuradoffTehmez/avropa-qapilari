@@ -12,7 +12,26 @@ import type {
   Warranty,
 } from "@/types";
 import { db } from "@/server/db";
-import { findOptionValue } from "@/mock/options";
+/** Sifariş snapshot-ındakı option id-ləri bazadan oxunur. */
+type OptionIndex = Map<string, { hex: string | null }>;
+
+async function loadOptionIndex(
+  choiceSets: Record<string, string | string[]>[],
+): Promise<OptionIndex> {
+  const ids = [
+    ...new Set(
+      choiceSets.flatMap((choices) =>
+        Object.values(choices).flatMap((value) => (Array.isArray(value) ? value : [value])),
+      ),
+    ),
+  ];
+  if (ids.length === 0) return new Map();
+  const rows = await db.optionValue.findMany({
+    where: { id: { in: ids } },
+    select: { id: true, hex: true },
+  });
+  return new Map(rows.map((row) => [row.id, { hex: row.hex }]));
+}
 
 /**
  * Kabinet oxu qatı.
@@ -48,20 +67,24 @@ function buildTimeline(history: { status: string; createdAt: Date }[]): OrderTim
 }
 
 /** Sifariş sətrinin seçimlərini kartda göstərilən formaya çevirir. */
-function snapshotLines(choices: Record<string, string | string[]>) {
+function snapshotLines(choices: Record<string, string | string[]>, options: OptionIndex) {
   const lines: { group: string; value: string }[] = [];
   for (const [group, raw] of Object.entries(choices)) {
     if (!raw) continue;
     for (const id of Array.isArray(raw) ? raw : [raw]) {
-      if (findOptionValue(id)) lines.push({ group, value: id });
+      if (options.has(id)) lines.push({ group, value: id });
     }
   }
   return lines;
 }
 
-function panelHexOf(choices: Record<string, string | string[]>, fallback: string): string {
+function panelHexOf(
+  choices: Record<string, string | string[]>,
+  fallback: string,
+  options: OptionIndex,
+): string {
   const outside = choices.OUTSIDE_COLOR;
-  const value = typeof outside === "string" ? findOptionValue(outside) : undefined;
+  const value = typeof outside === "string" ? options.get(outside) : undefined;
   return value?.hex ?? fallback;
 }
 
@@ -71,6 +94,12 @@ export async function userOrders(userId: string): Promise<Order[]> {
     include: { items: { include: { product: true } }, history: true },
     orderBy: { createdAt: "desc" },
   });
+
+  const options = await loadOptionIndex(
+    rows.flatMap((o) =>
+      o.items.map((i) => JSON.parse(i.snapshot) as Record<string, string | string[]>),
+    ),
+  );
 
   return rows.map((o) => ({
     id: o.id,
@@ -91,10 +120,10 @@ export async function userOrders(userId: string): Promise<Order[]> {
         productSlug: i.product.slug,
         productName: i.product.name,
         sku: i.product.sku,
-        panelHex: panelHexOf(choices, hexes[0]),
+        panelHex: panelHexOf(choices, hexes[0], options),
         quantity: i.quantity,
         unitPrice: i.unitPrice,
-        snapshot: { width: i.width, height: i.height, lines: snapshotLines(choices) },
+        snapshot: { width: i.width, height: i.height, lines: snapshotLines(choices, options) },
       };
     }),
     timeline: buildTimeline(o.history),

@@ -169,13 +169,15 @@ Səhifələr onu `src/server/` oxu modullarından alır:
 
 | Modul | Nə üçün |
 |---|---|
+| `catalog.ts` | public kataloq, məhsul, konfiqurator qrupları və ölçü presetləri |
 | `account.ts` | müştəri kabineti — hər sorğu `userId` ilə məhdudlaşır |
 | `admin.ts` | admin panelinin cədvəlləri və KPI-ları |
 | `technician.ts` | ustaya təyin edilmiş işlər |
 | `pricing.ts` | server qiyməti (PRD §130) |
 
-`src/mock/` **kataloq məzmununun mənbəyidir** — `prisma/seed.ts` bazanı
-oradan doldurur. Hər modeldən bir qeyd saxlanılır: 9 məhsul, 1 sifariş,
+`src/mock/` **yalnız seed mənbəyidir** — `prisma/seed.ts` bazanı oradan
+doldurur; sayt komponentləri ondan məhsul, taksonomiya və ya option oxumur
+(`options.i18n.ts` və `content.i18n.ts` tərcümə qatıdır, data deyil). Hər modeldən bir qeyd saxlanılır: 9 məhsul, 1 sifariş,
 1 təmir, 1 zəmanət və s.
 
 - Sayğacları əl ilə yazma — `taxonomy.ts` onları məhsul siyahısından hesablayır.

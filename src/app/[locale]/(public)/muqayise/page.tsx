@@ -4,6 +4,7 @@ import type { Locale } from "@/types";
 import { routes } from "@/lib/routes";
 import { Breadcrumbs } from "@/components/ui/primitives";
 import { CompareView } from "@/components/product/CompareView";
+import { catalogBrands, catalogProducts } from "@/server/catalog";
 
 export async function generateMetadata({
   params,
@@ -29,6 +30,7 @@ export default async function Page({
   const locale = (isLocale(raw) ? raw : "az") as Locale;
   const dict = getDictionary(locale);
   const r = routes(locale);
+  const [products, brands] = await Promise.all([catalogProducts(), catalogBrands()]);
 
   return (
     <>
@@ -40,7 +42,7 @@ export default async function Page({
           </h1>
         </div>
       </div>
-      <CompareView locale={locale} dict={dict} />
+      <CompareView locale={locale} dict={dict} products={products} brands={brands} />
     </>
   );
 }

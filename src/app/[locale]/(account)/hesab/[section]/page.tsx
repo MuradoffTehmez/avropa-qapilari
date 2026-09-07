@@ -38,7 +38,7 @@ import {
   userWarranties,
 } from "@/server/account";
 import { snapshotLine } from "@/mock/options.i18n";
-import { getProduct } from "@/mock/products";
+import { catalogProducts } from "@/server/catalog";
 
 const sections = [
   "orders",
@@ -75,7 +75,16 @@ export default async function AccountSectionPage({
 
   /* ------------------------------------------------------------ ORDERS */
   if (section === "orders") {
-    const [orders, quotes] = await Promise.all([userOrders(user.id), userQuotes(user.id)]);
+    const [orders, quotes, products] = await Promise.all([
+      userOrders(user.id),
+      userQuotes(user.id),
+      catalogProducts(),
+    ]);
+    // Snapshot sətirləri option id-si daşıyır; adı kataloqdan gəlir.
+    const optionsById = new Map(
+      products.flatMap((p) => (p.optionValues ?? []).map((value) => [value.id, value] as const)),
+    );
+    const resolveOption = (id: string) => optionsById.get(id);
 
     return (
       <div className="space-y-4"><ActivityFeed section={section} locale={locale} />
@@ -108,7 +117,7 @@ export default async function AccountSectionPage({
             <div className="grid gap-6 p-4 lg:grid-cols-[1.4fr_1fr]">
               <div className="space-y-3">
                 {o.items.map((item) => {
-                  const product = getProduct(item.productSlug);
+                  const product = products.find((p) => p.slug === item.productSlug);
                   return <div key={item.id} className="flex gap-3">
                     <Link
                       href={r.product(item.productSlug)}
@@ -123,7 +132,7 @@ export default async function AccountSectionPage({
                       </p>
                       <ul className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[12px] text-graphite">
                         {item.snapshot.lines
-                          .map((l) => snapshotLine(l, locale, dict))
+                          .map((l) => snapshotLine(l, locale, dict, resolveOption))
                           .map((l) => (
                             <li key={l.group}>
                               <span className="text-stone">{l.group}:</span> {l.value}
@@ -400,11 +409,12 @@ export default async function AccountSectionPage({
   }
 
   if (section === "favorites") {
+    const products = await catalogProducts();
     return (
       <div className="space-y-4">
         <ActivityFeed section={section} locale={locale} />
         <h2 className="text-xl font-semibold tracking-tight text-ink">{dict.account.favorites}</h2>
-        <FavoritesView locale={locale} dict={dict} embedded />
+        <FavoritesView locale={locale} dict={dict} products={products} embedded />
       </div>
     );
   }

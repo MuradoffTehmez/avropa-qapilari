@@ -4,7 +4,12 @@ import { notFound } from "next/navigation";
 import { getDictionary, isLocale, locales } from "@/i18n";
 import type { Locale } from "@/types";
 import { Configurator } from "@/components/configurator/Configurator";
-import { catalogProduct, catalogProducts } from "@/server/catalog";
+import {
+  catalogOptionGroups,
+  catalogProduct,
+  catalogProducts,
+  catalogSizePresets,
+} from "@/server/catalog";
 
 export async function generateStaticParams() {
   const products = await catalogProducts();
@@ -39,9 +44,22 @@ export default async function ConfiguratorProductPage({
   const locale = (isLocale(raw) ? raw : "az") as Locale;
   const dict = getDictionary(locale);
 
-  const product = await catalogProduct(slug);
+  const [product, groups, sizePresets] = await Promise.all([
+    catalogProduct(slug),
+    catalogOptionGroups(),
+    catalogSizePresets(),
+  ]);
   if (!product) notFound();
 
   const query = await searchParams;
-  return <Configurator initialSelection={parseSharedDesign(query.design, product)} product={product} locale={locale} dict={dict} />;
+  return (
+    <Configurator
+      initialSelection={parseSharedDesign(query.design, product)}
+      product={product}
+      groups={groups}
+      sizePresets={sizePresets}
+      locale={locale}
+      dict={dict}
+    />
+  );
 }

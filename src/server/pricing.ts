@@ -1,7 +1,20 @@
 import type { Prisma } from "@prisma/client";
 import { db } from "@/server/db";
-import { optionGroups } from "@/mock/options";
+import { isOptionGroupKey } from "@/server/catalog";
 import type { OptionGroupKey } from "@/types";
+
+/** Qrup qaydaları bazadan oxunur — admin qrupu dəyişəndə validasiya da dəyişir. */
+type GroupRules = Map<OptionGroupKey, { required: boolean; multi: boolean }>;
+
+async function loadGroupRules(): Promise<GroupRules> {
+  const rows = await db.optionGroup.findMany();
+  const rules: GroupRules = new Map();
+  for (const row of rows) {
+    if (!isOptionGroupKey(row.key)) continue;
+    rules.set(row.key, { required: row.required, multi: row.multi });
+  }
+  return rules;
+}
 
 /**
  * SERVER-SIDE QİYMƏT HESABLANMASI — PRD §130.
@@ -103,8 +116,9 @@ export async function calculatePrice(input: PriceInput): Promise<PriceResult> {
   });
   if (!product) throw new PricingError("Məhsul tapılmadı", "PRODUCT_NOT_FOUND");
 
-  const configuredGroups = parseConfiguredGroups(product.optionGroups);
-  assertSelectionShape(input.choices, configuredGroups);
+  const groupRules = await loadGroupRules();
+  const configuredGroups = parseConfiguredGroups(product.optionGroups, groupRules);
+  assertSelectionShape(input.choices, configuredGroups, groupRules);
 
   // Seçilmiş id-ləri düzləşdirib bazadan oxuyuruq — client-in göndərdiyi
   // `priceDelta` və ya `label` dəyərləri nəzərə alınmır.
@@ -192,12 +206,12 @@ export async function calculatePrice(input: PriceInput): Promise<PriceResult> {
   };
 }
 
-function parseConfiguredGroups(raw: string): OptionGroupKey[] {
+function parseConfiguredGroups(raw: string, rules: GroupRules): OptionGroupKey[] {
   try {
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter((key): key is OptionGroupKey =>
-      typeof key === "string" && key in optionGroups,
+    return parsed.filter(
+      (key): key is OptionGroupKey => typeof key === "string" && isOptionGroupKey(key) && rules.has(key),
     );
   } catch {
     return [];
@@ -207,6 +221,7 @@ function parseConfiguredGroups(raw: string): OptionGroupKey[] {
 function assertSelectionShape(
   choices: PriceInput["choices"],
   configuredGroups: OptionGroupKey[],
+  rules: GroupRules,
 ) {
   const allowedGroups: Set<OptionGroupKey> = new Set(
     configuredGroups.filter((key) => key !== "SIZE"),
@@ -218,7 +233,10 @@ function assertSelectionShape(
       throw new PricingError(`Məhsula aid olmayan seçim qrupu: ${rawGroup}`, "OPTION_GROUP_NOT_AVAILABLE");
     }
 
-    const group = optionGroups[rawGroup as OptionGroupKey];
+    const group = rules.get(rawGroup as OptionGroupKey);
+    if (!group) {
+      throw new PricingError(`Naməlum seçim qrupu: ${rawGroup}`, "OPTION_GROUP_NOT_AVAILABLE");
+    }
     if (Array.isArray(raw) !== group.multi) {
       throw new PricingError(`Seçim qrupunun formatı yanlışdır: ${rawGroup}`, "INVALID_OPTION_CARDINALITY");
     }
@@ -232,8 +250,8 @@ function assertSelectionShape(
   }
 
   for (const groupKey of allowedGroups) {
-    const group = optionGroups[groupKey];
-    if (!group.required) continue;
+    const group = rules.get(groupKey);
+    if (!group?.required) continue;
     const raw = choices[groupKey];
     if (typeof raw !== "string" || raw.length === 0) {
       throw new PricingError(`Məcburi seçim yoxdur: ${groupKey}`, "REQUIRED_OPTION_MISSING");

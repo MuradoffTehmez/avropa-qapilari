@@ -4,6 +4,7 @@ import type { Locale } from "@/types";
 import { localeAlternates, routes } from "@/lib/routes";
 import { Breadcrumbs } from "@/components/ui/primitives";
 import { QuoteForm } from "@/components/repair/QuoteForm";
+import { catalogProducts } from "@/server/catalog";
 
 export async function generateMetadata({
   params,
@@ -30,6 +31,7 @@ export default async function Page({
   const locale = (isLocale(raw) ? raw : "az") as Locale;
   const dict = getDictionary(locale);
   const r = routes(locale);
+  const products = await catalogProducts();
 
   return (
     <>
@@ -42,7 +44,7 @@ export default async function Page({
           <p className="mt-2 max-w-xl text-[15px] text-stone">{dict.quote.subtitle}</p>
         </div>
       </div>
-      <QuoteForm locale={locale} dict={dict} />
+      <QuoteForm locale={locale} dict={dict} products={products} />
     </>
   );
 }

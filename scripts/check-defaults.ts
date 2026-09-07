@@ -3,25 +3,25 @@
  * keçirir. Uyğunsuz default seçim varsa burada aşkarlanır — istifadəçi
  * konfiquratoru açan kimi 422 almasın.
  */
-import { findOptionValue } from "../src/mock/options";
 import { defaultChoices } from "../src/features/configurator/defaults";
 import { pruneIncompatible } from "../src/features/configurator/compatibility";
+import { resolveProductOption } from "../src/features/configurator/product-options";
 import { calculatePrice, PricingError } from "../src/server/pricing";
 import { db } from "../src/server/db";
-import { catalogProducts } from "../src/server/catalog";
+import { catalogOptionGroups, catalogProducts } from "../src/server/catalog";
 
 async function main() {
   let failed = 0;
-  const products = await catalogProducts();
+  const [products, groups] = await Promise.all([catalogProducts(), catalogOptionGroups()]);
 
   for (const product of products) {
     const selection = pruneIncompatible(
       {
         width: product.defaultWidth,
         height: product.defaultHeight,
-        choices: defaultChoices(product),
+        choices: defaultChoices(product, groups),
       },
-      findOptionValue,
+      (id) => resolveProductOption(product, id),
     );
 
     try {
@@ -61,9 +61,9 @@ async function main() {
       {
         width: first.defaultWidth,
         height: first.defaultHeight,
-        choices: defaultChoices(first),
+        choices: defaultChoices(first, groups),
       },
-      findOptionValue,
+      (id) => resolveProductOption(first, id),
     );
     if (first.optionGroups.includes("HANDLE")) {
       try {

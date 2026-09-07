@@ -1,6 +1,5 @@
 import type { CartSnapshotLine, Locale, OptionGroupKey, OptionValue } from "@/types";
 import type { Dictionary } from "@/i18n";
-import { findOptionValue } from "@/mock/options";
 
 /**
  * Option dəyərlərinin EN/RU tərcümələri.
@@ -364,11 +363,15 @@ export function optionLabelById(id: string, locale: Locale, fallback: string): s
  * `group` option qrupunun açarı, `value` isə option id-sidir — belə saxlanır ki,
  * müştəri sifarişi başqa dildə açanda da öz konfiqurasiyasını oxuya bilsin.
  * Açar tanınmırsa mətn olduğu kimi qalır (əvvəl yadda saxlanmış səbətlər üçün).
+ *
+ * `resolve` option id-sini bazadan gələn dəyərlərdə axtarır — adminin
+ * yaratdığı seçimlər də adı ilə görünsün deyə.
  */
 export function snapshotLine(
   line: CartSnapshotLine,
   locale: Locale,
   dict: Dictionary,
+  resolve: (id: string) => OptionValue | undefined,
 ): CartSnapshotLine {
   const steps = dict.configurator.steps;
   const group =
@@ -378,6 +381,6 @@ export function snapshotLine(
         ? dict.configurator.baseLayer
         : line.group;
 
-  const option = findOptionValue(line.value);
+  const option = resolve(line.value);
   return { group, value: option ? optionLabel(option, locale) : line.value };
 }

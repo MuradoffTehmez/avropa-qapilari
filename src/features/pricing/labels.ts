@@ -1,7 +1,9 @@
 import type { Dictionary } from "@/i18n";
-import type { Locale, OptionGroupKey, PriceBreakdown, PriceLine } from "@/types";
-import { findOptionValue } from "@/mock/options";
+import type { Locale, OptionGroupKey, OptionValue, PriceBreakdown, PriceLine } from "@/types";
 import { optionLabel } from "@/mock/options.i18n";
+
+/** Option id-sini məhsulun bazadan gələn dəyərlərində tapan funksiya. */
+export type OptionResolver = (id: string) => OptionValue | undefined;
 
 /**
  * Server qiymət sətirlərinin lokalizasiyası.
@@ -26,9 +28,14 @@ export interface ServerPrice {
   requiresQuote: boolean;
 }
 
-function lineLabel(line: ServerPriceLine, locale: Locale, dict: Dictionary): string {
+function lineLabel(
+  line: ServerPriceLine,
+  locale: Locale,
+  dict: Dictionary,
+  resolve: OptionResolver,
+): string {
   if (line.labelKey === "option" && line.valueId) {
-    const value = findOptionValue(line.valueId);
+    const value = resolve(line.valueId);
     const group = line.groupKey
       ? dict.configurator.steps[line.groupKey as OptionGroupKey]
       : "";
@@ -50,10 +57,11 @@ export function toBreakdown(
   price: ServerPrice,
   locale: Locale,
   dict: Dictionary,
+  resolve: OptionResolver,
 ): PriceBreakdown {
   const lines: PriceLine[] = price.lines.map((l) => ({
     key: l.key,
-    label: lineLabel(l, locale, dict),
+    label: lineLabel(l, locale, dict, resolve),
     amount: l.amount,
   }));
 

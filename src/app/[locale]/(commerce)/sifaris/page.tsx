@@ -4,6 +4,7 @@ import type { Locale } from "@/types";
 import { routes } from "@/lib/routes";
 import { Breadcrumbs } from "@/components/ui/primitives";
 import { CheckoutView } from "@/components/cart/CheckoutView";
+import { catalogOptionValues } from "@/server/catalog";
 
 export async function generateMetadata({
   params,
@@ -29,6 +30,10 @@ export default async function CheckoutPage({
   const locale = (isLocale(raw) ? raw : "az") as Locale;
   const dict = getDictionary(locale);
   const r = routes(locale);
+  const [deliveryOptions, installationOptions] = await Promise.all([
+    catalogOptionValues(["DELIVERY"]),
+    catalogOptionValues(["INSTALLATION"]),
+  ]);
 
   return (
     <>
@@ -46,7 +51,12 @@ export default async function CheckoutPage({
           </h1>
         </div>
       </div>
-      <CheckoutView locale={locale} dict={dict} />
+      <CheckoutView
+        locale={locale}
+        dict={dict}
+        deliveryOptions={deliveryOptions}
+        installationOptions={installationOptions}
+      />
     </>
   );
 }

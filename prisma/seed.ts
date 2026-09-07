@@ -7,7 +7,12 @@
 import { PrismaClient } from "@prisma/client";
 import { products } from "../src/mock/products";
 import { brands, categories } from "../src/mock/taxonomy";
-import { allOptionValues, findOptionValue } from "../src/mock/options";
+import {
+  allOptionValues,
+  findOptionValue,
+  optionGroups as optionGroupMeta,
+  standardSizes,
+} from "../src/mock/options";
 import { reviews, technicians } from "../src/mock/content";
 import { az } from "../src/i18n/dictionaries/az";
 import { brand } from "../src/config/brand";
@@ -42,6 +47,8 @@ async function main() {
   await db.user.deleteMany();
   await db.productOption.deleteMany();
   await db.optionValue.deleteMany();
+  await db.optionGroup.deleteMany();
+  await db.sizePreset.deleteMany();
   await db.product.deleteMany();
   await db.category.deleteMany();
   await db.brand.deleteMany();
@@ -49,12 +56,29 @@ async function main() {
 
   for (const b of brands) {
     await db.brand.create({
-      data: { id: b.id, slug: b.slug, name: b.name, country: b.country, founded: b.founded },
+      data: {
+        id: b.id,
+        slug: b.slug,
+        name: b.name,
+        country: b.country,
+        founded: b.founded,
+        description: b.description,
+      },
     });
   }
 
   for (const c of categories) {
-    await db.category.create({ data: { id: c.id, slug: c.slug, name: c.name } });
+    await db.category.create({
+      data: {
+        id: c.id,
+        slug: c.slug,
+        name: c.name,
+        shortName: c.shortName,
+        description: c.description,
+        featured: c.featured,
+        accent: c.accent,
+      },
+    });
   }
 
   for (const p of products) {
@@ -69,18 +93,26 @@ async function main() {
         sku: p.sku,
         name: p.name,
         collection: p.collection,
+        shortDescription: p.shortDescription,
+        description: p.description,
         basePrice: p.basePrice,
         oldPrice: p.oldPrice ?? null,
         material: p.material,
         securityClass: p.securityClass,
         fireRating: p.fireRating ?? null,
         soundInsulationDb: p.soundInsulationDb,
+        thermalW: p.thermalW,
         warrantyYears: p.warrantyYears,
         style: p.style,
         inStock: p.inStock,
         isNew: p.isNew ?? false,
         isBestseller: p.isBestseller ?? false,
         onSale: p.onSale ?? false,
+        hasGlass: p.hasGlass,
+        smartLockReady: p.smartLockReady,
+        customSizeAvailable: p.customSizeAvailable,
+        installationAvailable: p.installationAvailable,
+        madeToOrder: p.madeToOrder,
         rating: p.rating,
         reviewCount: p.reviewCount,
         defaultWidth: p.defaultWidth,
@@ -93,9 +125,31 @@ async function main() {
         deliveryDaysMax: p.deliveryDays[1],
         optionGroups: JSON.stringify(p.optionGroups),
         panelHexes: JSON.stringify(p.panelHexes),
+        images: JSON.stringify(p.images),
+        specs: JSON.stringify(p.specs),
+        documents: JSON.stringify(p.documents),
         categoryId: category.id,
         brandId: brand.id,
       },
+    });
+  }
+
+  for (const [key, group] of Object.entries(optionGroupMeta)) {
+    await db.optionGroup.create({
+      data: {
+        key,
+        title: group.title,
+        hint: group.hint ?? null,
+        required: group.required,
+        multi: group.multi,
+        sortOrder: Object.keys(optionGroupMeta).indexOf(key),
+      },
+    });
+  }
+
+  for (const [index, size] of standardSizes.entries()) {
+    await db.sizePreset.create({
+      data: { label: size.label, width: size.width, height: size.height, sortOrder: index },
     });
   }
 
@@ -109,6 +163,9 @@ async function main() {
         description: v.description ?? null,
         priceDelta: v.priceDelta,
         hex: v.hex ?? null,
+        swatch: v.swatch ?? null,
+        badge: v.badge ?? null,
+        requiresGroup: v.requiresGroup ?? null,
         requires: v.requires ? JSON.stringify(v.requires) : null,
         excludes: v.excludes ? JSON.stringify(v.excludes) : null,
       },
@@ -135,6 +192,8 @@ async function main() {
     brands: await db.brand.count(),
     categories: await db.category.count(),
     products: await db.product.count(),
+    optionGroups: await db.optionGroup.count(),
+    sizePresets: await db.sizePreset.count(),
     optionValues: await db.optionValue.count(),
     users: await db.user.count(),
     orders: await db.order.count(),
@@ -210,7 +269,7 @@ async function seedAccounts() {
     {
       width: product.defaultWidth,
       height: product.defaultHeight,
-      choices: defaultChoices(product),
+      choices: defaultChoices(product, optionGroupMeta),
     },
     findOptionValue,
   );
@@ -278,7 +337,7 @@ async function seedAccounts() {
           {
             width: products[1].defaultWidth,
             height: products[1].defaultHeight,
-            choices: defaultChoices(products[1]),
+            choices: defaultChoices(products[1], optionGroupMeta),
           },
           findOptionValue,
         ).choices,

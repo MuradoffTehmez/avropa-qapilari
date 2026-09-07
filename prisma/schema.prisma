@@ -66,6 +66,7 @@ model Brand {
   name     String
   country  String
   founded  Int
+  description String @default("")
   products Product[]
 }
 
@@ -73,6 +74,11 @@ model Category {
   id       String    @id @default(cuid())
   slug     String    @unique
   name     String
+  shortName   String  @default("")
+  description String  @default("")
+  featured    Boolean @default(false)
+  // Kateqoriya kartının aksent rəngi — token və ya hex
+  accent      String  @default("var(--color-graphite)")
   products Product[]
 }
 
@@ -82,12 +88,15 @@ model Product {
   sku              String  @unique
   name             String
   collection       String
+  shortDescription String  @default("")
+  description      String  @default("")
   basePrice        Int
   oldPrice         Int?
   material         String
   securityClass    String
   fireRating       String?
   soundInsulationDb Int
+  thermalW         Float   @default(0)
   warrantyYears    Int
   style            String
   status           String  @default("PUBLISHED") // DRAFT | PUBLISHED
@@ -95,6 +104,11 @@ model Product {
   isNew            Boolean @default(false)
   isBestseller     Boolean @default(false)
   onSale           Boolean @default(false)
+  hasGlass              Boolean @default(false)
+  smartLockReady        Boolean @default(false)
+  customSizeAvailable   Boolean @default(true)
+  installationAvailable Boolean @default(false)
+  madeToOrder           Boolean @default(false)
   rating           Float   @default(0)
   reviewCount      Int     @default(0)
   defaultWidth     Int
@@ -108,6 +122,11 @@ model Product {
   // Konfiquratorda göstərilən option qrupları, JSON massiv
   optionGroups     String
   panelHexes       String
+  // Şəkil, texniki xüsusiyyət və sənəd siyahıları JSON massivdir —
+  // `panelHexes` və `optionGroups` ilə eyni üsul.
+  images           String  @default("[]")
+  specs            String  @default("[]")
+  documents        String  @default("[]")
   // Admin arxivləməsi kataloq və konfiquratordan gizlədir, əlaqəli
   // sifariş və konfiqurasiya tarixçəsini isə saxlayır (PRD §95, §160).
   archivedAt       DateTime?
@@ -131,6 +150,29 @@ model Product {
 
 /* ------------------------------ Konfiqurator --------------------------- */
 
+// Qrup metadatası: konfiquratorun addım başlığı, məcburilik və çoxseçim
+// qaydası. `OptionValue.groupKey` bu açara işarə edir; FK qoyulmur, çünki
+// `Product.optionGroups` da JSON açar siyahısıdır.
+model OptionGroup {
+  key       String  @id
+  title     String
+  hint      String?
+  required  Boolean @default(false)
+  multi     Boolean @default(false)
+  sortOrder Int     @default(0)
+}
+
+// Konfiquratorda təklif olunan hazır ölçülər (mm).
+model SizePreset {
+  id        String @id @default(cuid())
+  label     String
+  width     Int
+  height    Int
+  sortOrder Int    @default(0)
+
+  @@unique([width, height])
+}
+
 model OptionValue {
   id          String  @id
   groupKey    String
@@ -139,6 +181,11 @@ model OptionValue {
   description String?
   priceDelta  Int     @default(0)
   hex         String?
+  // Tekstura üçün CSS gradient — düz rəng olmayan dekorlar
+  swatch      String?
+  badge       String?
+  // Dəyər yalnız bu qrupda seçim varsa göstərilir
+  requiresGroup String?
   // Uyğunluq qaydaları, JSON massiv (PRD §97)
   requires    String?
   excludes    String?

@@ -11,8 +11,10 @@ import type {
   ConfigurationSelection,
   Locale,
   OptionGroupKey,
+  OptionGroupMeta,
   OptionValue,
   Product,
+  SizePreset,
 } from "@/types";
 import { routes } from "@/lib/routes";
 import { clamp, cn, formatPrice, uid } from "@/lib/utils";
@@ -37,7 +39,6 @@ import {
   type ThresholdKind,
 } from "@/components/product/DoorVisual";
 import { DoorLayers, type VisualLayer } from "@/components/configurator/DoorLayers";
-import { findOptionValue, optionGroups, standardSizes } from "@/mock/options";
 import { optionLabel, optionText } from "@/mock/options.i18n";
 import { calculatePrice, sizeRangeLabel } from "@/features/pricing/engine";
 import { toBreakdown } from "@/features/pricing/labels";
@@ -51,12 +52,18 @@ import { ApiRequestError, apiFetch } from "@/lib/api";
 
 export function Configurator({
   product,
+  groups,
+  sizePresets,
   locale,
   dict,
   initialSelection,
 }: {
   initialSelection?: ConfigurationSelection;
   product: Product;
+  /** Qrup qaydaları bazadan gəlir (`catalogOptionGroups`). */
+  groups: Partial<Record<OptionGroupKey, OptionGroupMeta>>;
+  /** Hazır ölçü presetləri bazadan gəlir (`catalogSizePresets`). */
+  sizePresets: SizePreset[];
   locale: Locale;
   dict: Dictionary;
 }) {
@@ -83,7 +90,7 @@ export function Configurator({
       initialSelection ?? {
         width: product.defaultWidth,
         height: product.defaultHeight,
-        choices: defaultChoices(product),
+        choices: defaultChoices(product, groups),
       },
       findValue,
     ),
@@ -96,8 +103,8 @@ export function Configurator({
   );
   const server = useServerPrice(product.slug, selection);
   const price = useMemo(
-    () => (server.price ? toBreakdown(server.price, locale, dict) : estimate),
-    [server.price, estimate, locale, dict],
+    () => (server.price ? toBreakdown(server.price, locale, dict, findValue) : estimate),
+    [server.price, estimate, locale, dict, findValue],
   );
   const currentGroup = steps[stepIndex];
   const isSummary = stepIndex >= steps.length;
@@ -144,7 +151,7 @@ export function Configurator({
         {
           width: product.defaultWidth,
           height: product.defaultHeight,
-          choices: defaultChoices(product),
+          choices: defaultChoices(product, groups),
         },
         findValue,
       ),
@@ -299,6 +306,7 @@ export function Configurator({
           ) : currentGroup === "SIZE" ? (
             <SizeStep
               product={product}
+              sizePresets={sizePresets}
               selection={selection}
               setSize={setSize}
               customSize={customSize}
@@ -309,6 +317,7 @@ export function Configurator({
           ) : (
             <OptionStep
               group={currentGroup}
+              multi={groups[currentGroup]?.multi ?? false}
               selection={selection}
               product={product}
               onSelect={setChoice}
@@ -408,12 +417,12 @@ export function Configurator({
 /* ------------------------------------------------------------------ */
 
 /** Səbətə yazılan snapshot: qrup açarı + option id (dil-müstəqil). */
-export function snapshotKeys(selection: ConfigurationSelection, product?: Product) {
+export function snapshotKeys(selection: ConfigurationSelection, product: Product) {
   const lines: { group: string; value: string }[] = [];
   for (const [key, raw] of Object.entries(selection.choices)) {
     if (!raw) continue;
     const ids = (Array.isArray(raw) ? raw : [raw]).filter((id) =>
-      product ? resolveProductOption(product, id) : findOptionValue(id),
+      resolveProductOption(product, id),
     );
     if (ids.length === 0) continue;
     for (const id of ids) lines.push({ group: key, value: id });
@@ -566,9 +575,9 @@ function buildVisualLayers(
     if (!raw) continue;
 
     const ids = Array.isArray(raw) ? raw : [raw];
-    const values = ids.map((id) => resolveProductOption(product, id)).filter(Boolean) as NonNullable<
-      ReturnType<typeof findOptionValue>
-    >[];
+    const values = ids
+      .map((id) => resolveProductOption(product, id))
+      .filter((value): value is OptionValue => value !== undefined);
     if (values.length === 0) continue;
     if (values.length === 1 && values[0].code === "NONE") continue;
 
@@ -589,6 +598,7 @@ function buildVisualLayers(
 
 function SizeStep({
   product,
+  sizePresets,
   selection,
   setSize,
   customSize,
@@ -597,6 +607,7 @@ function SizeStep({
   requiresQuote,
 }: {
   product: Product;
+  sizePresets: SizePreset[];
   selection: ConfigurationSelection;
   setSize: (w: number, h: number) => void;
   customSize: boolean;
@@ -660,8 +671,14 @@ function SizeStep({
         </div>
       ) : (
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {standardSizes
-            .filter((s) => s.width >= product.minWidth && s.width <= product.maxWidth)
+          {sizePresets
+            .filter(
+              (s) =>
+                s.width >= product.minWidth &&
+                s.width <= product.maxWidth &&
+                s.height >= product.minHeight &&
+                s.height <= product.maxHeight,
+            )
             .map((s) => {
               const active = selection.width === s.width && selection.height === s.height;
               return (
@@ -695,6 +712,7 @@ function SizeStep({
 
 function OptionStep({
   group,
+  multi,
   selection,
   product,
   onSelect,
@@ -702,13 +720,13 @@ function OptionStep({
   locale,
 }: {
   group: OptionGroupKey;
+  multi: boolean;
   selection: ConfigurationSelection;
   product: Product;
   onSelect: (group: OptionGroupKey, valueId: string, multi: boolean) => void;
   dict: Dictionary;
   locale: Locale;
 }) {
-  const def = optionGroups[group];
   const isColor = group === "OUTSIDE_COLOR" || group === "INSIDE_COLOR";
   const current = selection.choices[group];
 
@@ -728,7 +746,7 @@ function OptionStep({
       <StepHeading
         title={dict.configurator.steps[group]}
         hint={dict.configurator.hints[group]}
-        multi={def.multi}
+        multi={multi}
         multipleChoiceLabel={dict.configurator.multipleChoice}
       />
 
@@ -742,13 +760,13 @@ function OptionStep({
       ) : (
         <div className="grid gap-2 sm:grid-cols-2">
           {withCompat.map(({ value, compat }) => {
-            const selected = def.multi
+            const selected = multi
               ? Array.isArray(current) && current.includes(value.id)
               : current === value.id;
 
             const text = optionText(value, locale);
 
-            return def.multi ? (
+            return multi ? (
               <button
                 key={value.id}
                 type="button"

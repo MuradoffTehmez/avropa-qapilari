@@ -1,11 +1,14 @@
 import type {
   DoorMaterial,
+  MediaProduct,
   OptionGroupKey,
   OrderStatus,
+  ProductImage,
   PropertyType,
   RepairCategoryKey,
   RepairStatus,
   SecurityClass,
+  SurfaceStyle,
 } from "@/types";
 import { db } from "@/server/db";
 
@@ -44,6 +47,47 @@ export interface AdminProductRow {
   deliveryDaysMin: number;
   deliveryDaysMax: number;
   optionValueIds: string[];
+  /** Admin cədvəlindəki kiçik vizual üçün — foto yoxdursa SVG qapı. */
+  media: MediaProduct;
+}
+
+function parsePanelHexes(raw: string): string[] {
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    const hexes = Array.isArray(parsed)
+      ? parsed.filter((item): item is string => typeof item === "string")
+      : [];
+    return hexes.length > 0 ? hexes : ["#383e42"];
+  } catch {
+    return ["#383e42"];
+  }
+}
+
+function parseProductImages(raw: string): ProductImage[] {
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.flatMap((item) => {
+      if (
+        typeof item !== "object" ||
+        item === null ||
+        typeof (item as { src?: unknown }).src !== "string" ||
+        typeof (item as { alt?: unknown }).alt !== "string"
+      ) {
+        return [];
+      }
+      const image = item as { src: string; alt: string; primary?: unknown };
+      return [
+        {
+          src: image.src,
+          alt: image.alt,
+          primary: typeof image.primary === "boolean" ? image.primary : undefined,
+        },
+      ];
+    });
+  } catch {
+    return [];
+  }
 }
 
 export async function adminProducts(): Promise<AdminProductRow[]> {
@@ -84,6 +128,17 @@ export async function adminProducts(): Promise<AdminProductRow[]> {
     deliveryDaysMin: p.deliveryDaysMin,
     deliveryDaysMax: p.deliveryDaysMax,
     optionValueIds: p.productOptions.map((option) => option.optionValueId),
+    media: {
+      name: p.name,
+      images: parseProductImages(p.images),
+      panelHexes: parsePanelHexes(p.panelHexes),
+      style: p.style as SurfaceStyle,
+      hasGlass: p.hasGlass,
+      smartLockReady: p.smartLockReady,
+      categorySlug: p.category.slug,
+      defaultWidth: p.defaultWidth,
+      defaultHeight: p.defaultHeight,
+    },
   }));
 }
 

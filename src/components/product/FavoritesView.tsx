@@ -2,22 +2,24 @@
 
 import { Heart } from "lucide-react";
 import type { Dictionary } from "@/i18n";
-import type { Locale } from "@/types";
+import type { Locale, Product } from "@/types";
 import { routes } from "@/lib/routes";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { EmptyState, Skeleton } from "@/components/ui/primitives";
 import { ProductCard } from "@/components/product/ProductCard";
 import { useFavorites } from "@/store/lists";
 import { useHydrated } from "@/lib/hooks";
-import { products } from "@/mock/products";
 
 export function FavoritesView({
   locale,
   dict,
+  products,
   embedded = false,
 }: {
   locale: Locale;
   dict: Dictionary;
+  /** Kataloq bazadan gəlir — səhifə server komponentində oxuyur. */
+  products: Product[];
   embedded?: boolean;
 }) {
   const r = routes(locale);

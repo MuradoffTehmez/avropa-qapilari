@@ -1,5 +1,5 @@
 import Image from "next/image";
-import type { Product } from "@/types";
+import type { MediaProduct } from "@/types";
 import { cn } from "@/lib/utils";
 import { DoorVisual, type GlassKind } from "@/components/product/DoorVisual";
 
@@ -16,7 +16,7 @@ export function ProductMedia({
   className,
   ambient = true,
 }: {
-  product: Product;
+  product: MediaProduct;
   /** Hansı şəkil / rəng variantı */
   index?: number;
   sizes?: string;
@@ -55,6 +55,6 @@ export function ProductMedia({
 }
 
 /** Məhsulun neçə vizual variantı var — foto və ya rəng sayı. */
-export function mediaCount(product: Product): number {
+export function mediaCount(product: MediaProduct): number {
   return product.images.length > 0 ? product.images.length : product.panelHexes.length;
 }

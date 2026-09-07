@@ -4,17 +4,24 @@ import { useWorkflow } from "@/store/workflow";
 import { useRef, useState } from "react";
 import { CheckCircle2, FileText } from "lucide-react";
 import type { Dictionary } from "@/i18n";
-import type { Locale } from "@/types";
+import type { Locale, Product } from "@/types";
 import { routes } from "@/lib/routes";
 
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/primitives";
 import { Field, Input, Select, Textarea } from "@/components/ui/form";
-import { products } from "@/mock/products";
 import { ApiRequestError, apiFetch } from "@/lib/api";
 
 /** Quote Request. */
-export function QuoteForm({ locale, dict }: { locale: Locale; dict: Dictionary }) {
+export function QuoteForm({
+  locale,
+  dict,
+  products,
+}: {
+  locale: Locale;
+  dict: Dictionary;
+  products: Product[];
+}) {
   const r = routes(locale);
   const [form, setForm] = useState({
     name: "",

@@ -6,17 +6,29 @@ import type {
   Category,
   DoorMaterial,
   OptionGroupKey,
+  OptionGroupMeta,
   OptionValue,
   Product,
+  ProductDocument,
+  ProductImage,
+  ProductSpec,
   SecurityClass,
+  SizePreset,
   SurfaceStyle,
 } from "@/types";
-import { products as seedProducts } from "@/mock/products";
-import { brands as seedBrands, categories as seedCategories } from "@/mock/taxonomy";
 
 type ProductRow = Prisma.ProductGetPayload<{
   include: { category: true; brand: true; productOptions: { include: { optionValue: true } } };
 }>;
+
+const productInclude = {
+  category: true,
+  brand: true,
+  productOptions: { include: { optionValue: true } },
+} satisfies Prisma.ProductInclude;
+
+/** Kataloq və konfiqurator yalnız dərc olunmuş, arxivlənməmiş məhsulları görür. */
+const visible = { archivedAt: null, status: "PUBLISHED" } satisfies Prisma.ProductWhereInput;
 
 const materials = new Set<DoorMaterial>([
   "STEEL",
@@ -49,39 +61,108 @@ const optionGroupKeys = new Set<OptionGroupKey>([
   "INSTALLATION",
   "DELIVERY",
 ]);
+const documentTypes = new Set<ProductDocument["type"]>([
+  "TECH_SHEET",
+  "CERTIFICATE",
+  "INSTALLATION",
+  "WARRANTY",
+]);
 
-function jsonStrings(value: string): string[] {
+export function isOptionGroupKey(value: string): value is OptionGroupKey {
+  return optionGroupKeys.has(value as OptionGroupKey);
+}
+
+function jsonArray(value: string): unknown[] {
   try {
     const parsed: unknown = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === "string") : [];
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
 }
 
+function jsonStrings(value: string): string[] {
+  return jsonArray(value).filter((item): item is string => typeof item === "string");
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function parseImages(value: string): ProductImage[] {
+  return jsonArray(value).flatMap((item) => {
+    if (!isRecord(item) || typeof item.src !== "string" || typeof item.alt !== "string") return [];
+    return [
+      {
+        src: item.src,
+        alt: item.alt,
+        primary: typeof item.primary === "boolean" ? item.primary : undefined,
+        colorOptionId: typeof item.colorOptionId === "string" ? item.colorOptionId : undefined,
+        width: typeof item.width === "number" ? item.width : undefined,
+        height: typeof item.height === "number" ? item.height : undefined,
+      },
+    ];
+  });
+}
+
+function parseSpecs(value: string): ProductSpec[] {
+  return jsonArray(value).flatMap((item) => {
+    if (
+      !isRecord(item) ||
+      typeof item.group !== "string" ||
+      typeof item.label !== "string" ||
+      typeof item.value !== "string"
+    ) {
+      return [];
+    }
+    return [{ group: item.group, label: item.label, value: item.value }];
+  });
+}
+
+function parseDocuments(value: string): ProductDocument[] {
+  return jsonArray(value).flatMap((item) => {
+    if (
+      !isRecord(item) ||
+      typeof item.id !== "string" ||
+      typeof item.title !== "string" ||
+      typeof item.sizeKb !== "number" ||
+      typeof item.type !== "string" ||
+      !documentTypes.has(item.type as ProductDocument["type"])
+    ) {
+      return [];
+    }
+    return [
+      {
+        id: item.id,
+        type: item.type as ProductDocument["type"],
+        title: item.title,
+        sizeKb: item.sizeKb,
+      },
+    ];
+  });
+}
+
 function mapOption(row: ProductRow["productOptions"][number]["optionValue"]): OptionValue | null {
-  if (!optionGroupKeys.has(row.groupKey as OptionGroupKey)) return null;
+  if (!isOptionGroupKey(row.groupKey)) return null;
   return {
     id: row.id,
-    groupKey: row.groupKey as OptionGroupKey,
+    groupKey: row.groupKey,
     code: row.code,
     label: row.label,
     description: row.description ?? undefined,
     priceDelta: row.priceDelta,
     hex: row.hex ?? undefined,
+    swatch: row.swatch ?? undefined,
+    badge: row.badge ?? undefined,
+    requiresGroup:
+      row.requiresGroup && isOptionGroupKey(row.requiresGroup) ? row.requiresGroup : undefined,
     requires: row.requires ? jsonStrings(row.requires) : undefined,
     excludes: row.excludes ? jsonStrings(row.excludes) : undefined,
   };
 }
 
 function mapProduct(row: ProductRow): Product {
-  // Bazada hələ ayrıca media/specification cədvəlləri olmayan sahələr üçün
-  // mövcud seed metadatası yalnız təqdimat fallback-ı kimi saxlanılır. Siyahının
-  // özü, qiymət, stok, ölçü və konfiqurator qrupları həmişə bazadan gəlir.
-  const fallback = seedProducts.find((product) => product.slug === row.slug);
-  const groups = jsonStrings(row.optionGroups).filter((key): key is OptionGroupKey =>
-    optionGroupKeys.has(key as OptionGroupKey),
-  );
+  const groups = jsonStrings(row.optionGroups).filter(isOptionGroupKey);
   const panelHexes = jsonStrings(row.panelHexes);
   const material = materials.has(row.material as DoorMaterial)
     ? (row.material as DoorMaterial)
@@ -89,9 +170,8 @@ function mapProduct(row: ProductRow): Product {
   const securityClass = securityClasses.has(row.securityClass as SecurityClass)
     ? (row.securityClass as SecurityClass)
     : "—";
-  const style = surfaceStyles.has(row.style as SurfaceStyle)
-    ? (row.style as SurfaceStyle)
-    : "MODERN";
+  const style = surfaceStyles.has(row.style as SurfaceStyle) ? (row.style as SurfaceStyle) : "MODERN";
+  const enabled = row.productOptions.filter((option) => option.enabled);
 
   return {
     id: row.id,
@@ -101,8 +181,8 @@ function mapProduct(row: ProductRow): Product {
     categorySlug: row.category.slug,
     brandSlug: row.brand.slug,
     collection: row.collection,
-    shortDescription: fallback?.shortDescription ?? "",
-    description: fallback?.description ?? "",
+    shortDescription: row.shortDescription,
+    description: row.description,
     basePrice: row.basePrice,
     oldPrice: row.oldPrice ?? undefined,
     currency: "AZN",
@@ -111,7 +191,7 @@ function mapProduct(row: ProductRow): Product {
     material,
     securityClass,
     soundInsulationDb: row.soundInsulationDb,
-    thermalW: fallback?.thermalW ?? 0,
+    thermalW: row.thermalW,
     fireRating: row.fireRating,
     warrantyYears: row.warrantyYears,
     defaultWidth: row.defaultWidth,
@@ -121,24 +201,23 @@ function mapProduct(row: ProductRow): Product {
     minHeight: row.minHeight,
     maxHeight: row.maxHeight,
     style,
-    hasGlass: fallback?.hasGlass ?? groups.includes("GLASS"),
-    smartLockReady: fallback?.smartLockReady ?? groups.includes("SMART_LOCK"),
-    customSizeAvailable: fallback?.customSizeAvailable ?? true,
-    installationAvailable: fallback?.installationAvailable ?? groups.includes("INSTALLATION"),
-    madeToOrder: fallback?.madeToOrder ?? !row.inStock,
+    hasGlass: row.hasGlass,
+    smartLockReady: row.smartLockReady,
+    customSizeAvailable: row.customSizeAvailable,
+    installationAvailable: row.installationAvailable,
+    madeToOrder: row.madeToOrder,
     inStock: row.inStock,
     isNew: row.isNew,
     isBestseller: row.isBestseller,
     onSale: row.onSale,
     deliveryDays: [row.deliveryDaysMin, row.deliveryDaysMax],
-    panelHexes: panelHexes.length > 0 ? panelHexes : (fallback?.panelHexes ?? ["#383e42"]),
-    images: fallback?.images ?? [],
-    specs: fallback?.specs ?? [],
-    documents: fallback?.documents ?? [],
-    optionGroups: groups.length > 0 ? groups : (fallback?.optionGroups ?? ["SIZE"]),
-    optionValueIds: row.productOptions.filter((option) => option.enabled).map((option) => option.optionValueId),
-    optionValues: row.productOptions
-      .filter((option) => option.enabled)
+    panelHexes: panelHexes.length > 0 ? panelHexes : ["#383e42"],
+    images: parseImages(row.images),
+    specs: parseSpecs(row.specs),
+    documents: parseDocuments(row.documents),
+    optionGroups: groups,
+    optionValueIds: enabled.map((option) => option.optionValueId),
+    optionValues: enabled
       .map((option) => mapOption(option.optionValue))
       .filter((option): option is OptionValue => option !== null),
   };
@@ -146,19 +225,26 @@ function mapProduct(row: ProductRow): Product {
 
 export async function catalogProducts(): Promise<Product[]> {
   const rows = await db.product.findMany({
-    where: { archivedAt: null, status: "PUBLISHED" },
-    include: { category: true, brand: true, productOptions: { include: { optionValue: true } } },
+    where: visible,
+    include: productInclude,
     orderBy: [{ isBestseller: "desc" }, { rating: "desc" }, { name: "asc" }],
   });
   return rows.map(mapProduct);
 }
 
 export async function catalogProduct(slug: string): Promise<Product | null> {
-  const row = await db.product.findFirst({
-    where: { slug, archivedAt: null, status: "PUBLISHED" },
-    include: { category: true, brand: true, productOptions: { include: { optionValue: true } } },
-  });
+  const row = await db.product.findFirst({ where: { slug, ...visible }, include: productInclude });
   return row ? mapProduct(row) : null;
+}
+
+/** Səbət, favorit və müqayisə siyahıları id-lərlə gəlir. */
+export async function catalogProductsByIds(ids: string[]): Promise<Product[]> {
+  if (ids.length === 0) return [];
+  const rows = await db.product.findMany({
+    where: { id: { in: ids }, ...visible },
+    include: productInclude,
+  });
+  return rows.map(mapProduct);
 }
 
 export async function featuredCatalogProducts(limit = 8): Promise<Product[]> {
@@ -167,8 +253,8 @@ export async function featuredCatalogProducts(limit = 8): Promise<Product[]> {
 
 export async function relatedCatalogProducts(product: Product, limit = 4): Promise<Product[]> {
   const rows = await db.product.findMany({
-    where: { category: { slug: product.categorySlug }, id: { not: product.id }, archivedAt: null, status: "PUBLISHED" },
-    include: { category: true, brand: true, productOptions: { include: { optionValue: true } } },
+    where: { category: { slug: product.categorySlug }, id: { not: product.id }, ...visible },
+    include: productInclude,
     orderBy: [{ isBestseller: "desc" }, { rating: "desc" }],
     take: limit,
   });
@@ -177,22 +263,19 @@ export async function relatedCatalogProducts(product: Product, limit = 4): Promi
 
 export async function catalogCategories(): Promise<Category[]> {
   const rows = await db.category.findMany({
-    include: { _count: { select: { products: { where: { archivedAt: null, status: "PUBLISHED" } } } } },
+    include: { _count: { select: { products: { where: visible } } } },
     orderBy: { name: "asc" },
   });
-  return rows.map((row) => {
-    const fallback = seedCategories.find((category) => category.slug === row.slug);
-    return {
-      id: row.id,
-      slug: row.slug,
-      name: row.name,
-      shortName: fallback?.shortName ?? row.name,
-      description: fallback?.description ?? "",
-      productCount: row._count.products,
-      featured: fallback?.featured ?? row._count.products > 0,
-      accent: fallback?.accent ?? "var(--color-graphite)",
-    };
-  });
+  return rows.map((row) => ({
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    shortName: row.shortName || row.name,
+    description: row.description,
+    productCount: row._count.products,
+    featured: row.featured,
+    accent: row.accent,
+  }));
 }
 
 export async function catalogCategory(slug: string): Promise<Category | null> {
@@ -201,23 +284,55 @@ export async function catalogCategory(slug: string): Promise<Category | null> {
 
 export async function catalogBrands(): Promise<Brand[]> {
   const rows = await db.brand.findMany({
-    include: { _count: { select: { products: { where: { archivedAt: null, status: "PUBLISHED" } } } } },
+    include: { _count: { select: { products: { where: visible } } } },
     orderBy: { name: "asc" },
   });
-  return rows.map((row) => {
-    const fallback = seedBrands.find((brand) => brand.slug === row.slug);
-    return {
-      id: row.id,
-      slug: row.slug,
-      name: row.name,
-      country: row.country,
-      founded: row.founded,
-      description: fallback?.description ?? "",
-      productCount: row._count.products,
-    };
-  });
+  return rows.map((row) => ({
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    country: row.country,
+    founded: row.founded,
+    description: row.description,
+    productCount: row._count.products,
+  }));
 }
 
 export async function catalogBrand(slug: string): Promise<Brand | null> {
   return (await catalogBrands()).find((brand) => brand.slug === slug) ?? null;
+}
+
+/**
+ * Konfiqurator addımlarının metadatası. Dəyərlər məhsula bağlıdır və
+ * `Product.optionValues` ilə gəlir — burada yalnız başlıq, məcburilik və
+ * çoxseçim qaydası saxlanılır.
+ */
+export async function catalogOptionGroups(): Promise<Record<OptionGroupKey, OptionGroupMeta>> {
+  const rows = await db.optionGroup.findMany({ orderBy: { sortOrder: "asc" } });
+  const groups = {} as Record<OptionGroupKey, OptionGroupMeta>;
+  for (const row of rows) {
+    if (!isOptionGroupKey(row.key)) continue;
+    groups[row.key] = {
+      key: row.key,
+      title: row.title,
+      hint: row.hint ?? "",
+      required: row.required,
+      multi: row.multi,
+    };
+  }
+  return groups;
+}
+
+/** Qrup açarına görə bütün aktiv option dəyərləri (məsələn çatdırılma və quraşdırma). */
+export async function catalogOptionValues(groupKeys: OptionGroupKey[]): Promise<OptionValue[]> {
+  const rows = await db.optionValue.findMany({
+    where: { groupKey: { in: groupKeys } },
+    orderBy: { priceDelta: "asc" },
+  });
+  return rows.map(mapOption).filter((value): value is OptionValue => value !== null);
+}
+
+export async function catalogSizePresets(): Promise<SizePreset[]> {
+  const rows = await db.sizePreset.findMany({ orderBy: { sortOrder: "asc" } });
+  return rows.map((row) => ({ label: row.label, width: row.width, height: row.height }));
 }

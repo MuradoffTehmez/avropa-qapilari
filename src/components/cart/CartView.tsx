@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import type { Dictionary } from "@/i18n";
-import type { Locale } from "@/types";
+import type { Locale, Product } from "@/types";
 import { routes } from "@/lib/routes";
 import { snapshotLine } from "@/mock/options.i18n";
 import { formatPrice } from "@/lib/utils";
@@ -11,11 +11,18 @@ import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card, EmptyState, Notice, Skeleton } from "@/components/ui/primitives";
 import { DoorVisual } from "@/components/product/DoorVisual";
 import { ProductMedia } from "@/components/product/ProductMedia";
-import { products } from "@/mock/products";
 import { cartSubtotal, useCart } from "@/store/cart";
 import { useHydrated } from "@/lib/hooks";
 
-export function CartView({ locale, dict }: { locale: Locale; dict: Dictionary }) {
+export function CartView({
+  locale,
+  dict,
+  products,
+}: {
+  locale: Locale;
+  dict: Dictionary;
+  products: Product[];
+}) {
   const r = routes(locale);
   const hydrated = useHydrated();
 
@@ -54,6 +61,12 @@ export function CartView({ locale, dict }: { locale: Locale; dict: Dictionary })
       </div>
     );
   }
+
+  // Snapshot sətirləri yalnız option id-si daşıyır; adları kataloqdan alırıq.
+  const optionsById = new Map(
+    products.flatMap((p) => (p.optionValues ?? []).map((value) => [value.id, value] as const)),
+  );
+  const resolveOption = (id: string) => optionsById.get(id);
 
   const subtotal = cartSubtotal(items);
 
@@ -96,7 +109,7 @@ export function CartView({ locale, dict }: { locale: Locale; dict: Dictionary })
               {/* konfiqurasiya snapshot-u */}
               <ul className="mt-2.5 flex flex-wrap gap-x-4 gap-y-0.5 text-[12px] text-graphite">
                 {item.snapshot.lines
-                  .map((line) => snapshotLine(line, locale, dict))
+                  .map((line) => snapshotLine(line, locale, dict, resolveOption))
                   .map((line) => (
                     <li key={line.group}>
                       <span className="text-stone">{line.group}:</span> {line.value}
