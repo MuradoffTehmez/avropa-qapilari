@@ -2,6 +2,7 @@ import { requireStaff } from "@/server/auth";
 import { changeDetail, recordAudit } from "@/server/audit";
 import { db } from "@/server/db";
 import { fail, handle, ok } from "@/server/http";
+import { isQuoteStatus, QuoteError, setQuoteStatus } from "@/server/quotes";
 import { requestUpdateSchema } from "@/server/validation";
 
 const KINDS = ["repair", "measurement", "quote"] as const;
@@ -86,21 +87,17 @@ export async function PATCH(
       return ok({ number: updated.number, status: updated.status });
     }
 
-    const row = await db.quoteRequest.findUnique({ where: { number } });
-    if (!row) return fail("NOT_FOUND", "Müraciət tapılmadı", 404);
+    // Təklifin statusu sərbəst yazılmır — icazə verilən keçidlərdən keçir
+    // və tarixçəyə düşür (src/server/quotes.ts).
+    if (!input.status) return fail("STATUS_REQUIRED", "Status göstərilməlidir", 422);
+    if (!isQuoteStatus(input.status)) return fail("INVALID_STATUS", "Belə status yoxdur", 422);
 
-    const updated = await db.quoteRequest.update({
-      where: { number },
-      data: { status: input.status ?? row.status },
-    });
-
-    await recordAudit(
-      actor,
-      "quote.update",
-      number,
-      changeDetail({ status: [row.status, updated.status] }),
-    );
-
-    return ok({ number: updated.number, status: updated.status });
+    try {
+      const quote = await setQuoteStatus(actor, number, input.status);
+      return ok({ number: quote.number, status: quote.status });
+    } catch (error) {
+      if (error instanceof QuoteError) return fail(error.code, error.message, error.status);
+      throw error;
+    }
   });
 }

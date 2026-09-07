@@ -148,6 +148,7 @@ model Product {
   productOptions ProductOption[]
   favorites      Favorite[]
   cartItems      CartItem[]
+  quotes         QuoteRequest[]
 
   @@index([categoryId])
   @@index([brandId])
@@ -308,6 +309,7 @@ model Order {
   history    OrderStatusHistory[]
   payments   Payment[]
   warranties Warranty[]
+  quote      QuoteRequest?
 
   @@index([userId])
   @@index([status])
@@ -413,14 +415,40 @@ model QuoteRequest {
   width     Int?
   height    Int?
   message   String
+  // NEW | REVIEWING | PRICED | SENT | ACCEPTED | REJECTED | EXPIRED | CONVERTED
   status    String   @default("NEW")
+  // Hazırlanmış təklif: fərdi ölçü avtomatik qiymətləndirmədən keçmir,
+  // məbləği admin qoyur və müştəriyə göndərir (PRD §67).
+  amount      Int?
+  validUntil  String?
+  adminNote   String?
+  sentAt      DateTime?
+  respondedAt DateTime?
+  // Qəbul edilən təklifdən yaranan sifariş
+  orderId     String?  @unique
   archivedAt DateTime?
   createdAt DateTime @default(now())
 
-  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user    User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
+  product Product?             @relation(fields: [productId], references: [id], onDelete: SetNull)
+  order   Order?               @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  history QuoteStatusHistory[]
 
   @@index([status])
   @@index([archivedAt])
+}
+
+// Təklifin status keçidləri — kim nə vaxt nəyi dəyişdi (PRD §128).
+model QuoteStatusHistory {
+  id        String   @id @default(cuid())
+  quoteId   String
+  status    String
+  note      String?
+  createdAt DateTime @default(now())
+
+  quote QuoteRequest @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  @@index([quoteId])
 }
 
 /* ------------------------------- Nömrələr ------------------------------ */

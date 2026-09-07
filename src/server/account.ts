@@ -215,6 +215,7 @@ export async function userQuotes(userId: string): Promise<Quote[]> {
     status: q.status as Quote["status"],
     customerName: q.name,
     subject: q.message.length > 80 ? `${q.message.slice(0, 80)}…` : q.message,
+    amount: q.amount ?? undefined,
   }));
 }
 

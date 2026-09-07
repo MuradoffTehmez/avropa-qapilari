@@ -213,6 +213,40 @@ export const orderStatusSchema = z
     message: "Dəyişdiriləcək sahə göstərilməyib",
   });
 
+/* ------------------------- Qiymət təklifi axını ------------------------ */
+
+const isoDate = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Tarix YYYY-MM-DD formatında olmalıdır");
+
+/** Təklifin hazırlanması: məbləğ və etibarlılıq tarixi. */
+export const quotePriceSchema = z.object({
+  amount: z.number().int().min(1, "Məbləğ göstərilməlidir").max(10_000_000),
+  validUntil: isoDate.optional(),
+  adminNote: z.string().trim().max(500).optional(),
+});
+
+export const quoteStatusSchema = z.object({
+  status: z.enum(
+    ["NEW", "REVIEWING", "PRICED", "SENT", "ACCEPTED", "REJECTED", "EXPIRED", "CONVERTED"],
+    "Belə status yoxdur",
+  ),
+  note: z.string().trim().max(500).optional(),
+});
+
+/** Təklifin sifarişə çevrilməsi — çatdırılma məlumatı tələb olunur. */
+export const quoteConvertSchema = z.object({
+  customerName: z.string().trim().min(2, "Ad ən azı 2 simvol olmalıdır").optional(),
+  customerPhone: phone.optional(),
+  customerEmail: z.email("E-poçt düzgün deyil").optional(),
+  address: z.string().trim().min(5, "Ünvan çox qısadır"),
+});
+
+/** Müştərinin cavabı. */
+export const quoteRespondSchema = z.object({
+  decision: z.enum(["ACCEPTED", "REJECTED"], "Cavab yalnız qəbul və ya rədd ola bilər"),
+});
+
 export const requestUpdateSchema = z.object({
   status: z.enum(REQUEST_STATUSES, "Belə status yoxdur").optional(),
   technicianId: z.string().nullable().optional(),

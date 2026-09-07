@@ -11,6 +11,7 @@ import type {
   SurfaceStyle,
 } from "@/types";
 import { db } from "@/server/db";
+import { expireDueQuotes } from "@/server/quotes";
 
 /**
  * Admin panelinin oxu qatı.
@@ -282,11 +283,19 @@ export interface AdminQuoteRow {
   customerName: string;
   subject: string;
   status: string;
+  amount: number | null;
+  validUntil: string | null;
+  orderNumber: string | null;
 }
 
 export async function adminQuotes(): Promise<AdminQuoteRow[]> {
+  // Etibarlılıq tarixi keçmiş təkliflər siyahı oxunanda bağlanır —
+  // ayrıca planlayıcı tələb olunmur.
+  await expireDueQuotes();
+
   const rows = await db.quoteRequest.findMany({
     where: { archivedAt: null },
+    include: { order: { select: { number: true } } },
     orderBy: { createdAt: "desc" },
   });
 
@@ -297,6 +306,9 @@ export async function adminQuotes(): Promise<AdminQuoteRow[]> {
     customerName: q.name,
     subject: q.message.length > 70 ? `${q.message.slice(0, 70)}…` : q.message,
     status: q.status,
+    amount: q.amount,
+    validUntil: q.validUntil,
+    orderNumber: q.order?.number ?? null,
   }));
 }
 
