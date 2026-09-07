@@ -10,6 +10,17 @@ import { constructionLayers } from "@/mock/construction";
 import { resolveProductOption } from "@/features/configurator/product-options";
 import { materialName } from "@/lib/i18n-format";
 
+type LayerTextKey = keyof Dictionary["configurator"]["constructionLayers"];
+
+/**
+ * Qat adı və rolu sözlükdən gəlir; `construction.ts`-dəki mətn yalnız
+ * sözlükdə açarı olmayan yeni qat üçün ehtiyatdır.
+ */
+function layerText(layer: ConstructionLayer, dict: Dictionary): { name: string; role: string } {
+  const table = dict.configurator.constructionLayers;
+  return layer.id in table ? table[layer.id as LayerTextKey] : { name: layer.name, role: layer.role };
+}
+
 /** Preview-də görünən vizual qatlar (PRD §50). */
 export interface VisualLayer {
   key: OptionGroupKey | "BASE";
@@ -211,8 +222,8 @@ function CrossSection({
             key={layer.id}
             type="button"
             onClick={() => setActive(active === layer.id ? null : layer.id)}
-            aria-label={`${layer.name} — ${layer.thicknessMm} mm`}
-            title={`${layer.name} · ${layer.thicknessMm} mm`}
+            aria-label={`${layerText(layer, dict).name} — ${layer.thicknessMm} mm`}
+            title={`${layerText(layer, dict).name} · ${layer.thicknessMm} mm`}
             className={cn(
               "relative h-full border-r border-black/10 transition-[filter] last:border-r-0",
               active && active !== layer.id && "brightness-[0.82] saturate-50",
@@ -278,9 +289,11 @@ function CrossSection({
               />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[12.5px] font-medium text-ink">
-                  {layer.name}
+                  {layerText(layer, dict).name}
                 </span>
-                <span className="block truncate text-[11.5px] text-stone">{layer.role}</span>
+                <span className="block truncate text-[11.5px] text-stone">
+                  {layerText(layer, dict).role}
+                </span>
               </span>
               <span className="shrink-0 text-[12px] tabular-nums text-graphite">
                 {layer.thicknessMm} mm

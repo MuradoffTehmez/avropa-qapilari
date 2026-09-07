@@ -477,11 +477,20 @@ export function buildPreview(
   const cylinder = value("CYLINDER");
   const threshold = value("THRESHOLD");
   const opening = value("OPENING_DIRECTION");
-  const accessories = Array.isArray(selection.choices.ACCESSORY)
-    ? (selection.choices.ACCESSORY as string[])
-    : [];
 
   const off = (key: string) => hidden.has(key);
+
+  // Aksesuar vizualı option koduna bağlıdır — id-yə yox; belə olduqda
+  // adminin yaratdığı dəyər də düzgün qatı işə salır.
+  const accessoryIds = Array.isArray(selection.choices.ACCESSORY)
+    ? (selection.choices.ACCESSORY as string[])
+    : [];
+  const accessoryCodes = new Set(
+    accessoryIds
+      .map((id) => resolveProductOption(product, id)?.code)
+      .filter((code): code is string => Boolean(code)),
+  );
+  const hasAccessory = (code: string) => !off("ACCESSORY") && accessoryCodes.has(code);
   const textureOf = (code?: string): SurfaceTexture => {
     if (!code) return "SOLID";
     if (/OAK|WALNUT|WENGE|WOOD/.test(code)) return "WOOD";
@@ -519,14 +528,14 @@ export function buildPreview(
     showThreshold: !off("THRESHOLD"),
     showOpeningGuide: !off("OPENING_DIRECTION"),
     smartLock: !off("SMART_LOCK") && Boolean(smartLock && smartLock.code !== "NONE"),
-    viewer: !off("ACCESSORY") && accessories.some((a) => a.startsWith("ac-viewer")),
-    houseNumber: !off("ACCESSORY") && accessories.includes("ac-number"),
-    closer: !off("ACCESSORY") && accessories.includes("ac-closer"),
-    chain: !off("ACCESSORY") && accessories.includes("ac-chain"),
-    letterbox: !off("ACCESSORY") && accessories.includes("ac-letterbox"),
-    kickplate: !off("ACCESSORY") && accessories.includes("ac-kickplate"),
-    bell: !off("ACCESSORY") && accessories.includes("ac-bell"),
-    camera: !off("ACCESSORY") && accessories.includes("ac-camera"),
+    viewer: !off("ACCESSORY") && [...accessoryCodes].some((code) => code.startsWith("VIEWER")),
+    houseNumber: hasAccessory("NUMBER"),
+    closer: hasAccessory("CLOSER"),
+    chain: hasAccessory("CHAIN"),
+    letterbox: hasAccessory("LETTERBOX"),
+    kickplate: hasAccessory("KICKPLATE"),
+    bell: hasAccessory("BELL"),
+    camera: hasAccessory("CAMERA"),
     widthMm: selection.width,
     heightMm: selection.height,
   };
