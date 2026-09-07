@@ -1,64 +1,41 @@
 import { requireStaff } from "@/server/auth";
-import { db } from "@/server/db";
 import { fail, handle, ok } from "@/server/http";
+import { isRepairStatus, jobEvents, JobError, updateRepairJob } from "@/server/jobs";
 import { technicianJobSchema } from "@/server/validation";
+
+/** GET /api/technician/jobs/:number — işin status tarixçəsi. */
+export async function GET(_request: Request, { params }: { params: Promise<{ number: string }> }) {
+  return handle(async () => {
+    await requireStaff("TECHNICIAN");
+    const { number } = await params;
+    return ok(await jobEvents("REPAIR", number));
+  });
+}
 
 /**
  * PATCH /api/technician/jobs/:number
  *
- * Usta yalnız ona təyin edilmiş müraciəti yeniləyə bilər; ADMIN
- * istənilənini (PRD §93). "Tamamlandı" statusu servis qeydi tələb edir.
+ * Usta yalnız ona təyin edilmiş müraciəti yeniləyir (PRD §93) və yalnız
+ * cari mərhələdən icazə verilən mərhələyə keçir — "yoldadır" olmadan
+ * birbaşa "tamamlandı"ya keçmək mümkün deyil. "Tamamlandı" servis qeydi
+ * tələb edir.
  */
-export async function PATCH(
-  request: Request,
-  { params }: { params: Promise<{ number: string }> },
-) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ number: string }> }) {
   return handle(async () => {
     const user = await requireStaff("TECHNICIAN");
     const { number } = await params;
-    const input = technicianJobSchema.parse(await request.json());
-
-    const job = await db.repairRequest.findFirst({
-      where: { number, archivedAt: null },
-      include: { technician: true },
-    });
-    if (!job) return fail("NOT_FOUND", "Müraciət tapılmadı", 404);
-
-    if (job.technician?.userId !== user.id) {
-      return fail("FORBIDDEN", "Bu müraciət sizə təyin edilməyib", 403);
+    const { status, ...rest } = technicianJobSchema.parse(await request.json());
+    if (status && !isRepairStatus(status)) {
+      return fail("INVALID_STATUS", "Təmir müraciəti üçün belə status yoxdur", 422);
     }
 
-    const status = input.status ?? job.status;
-    const resolution = input.resolution ?? job.resolution;
-
-    if (status === "COMPLETED" && !resolution) {
-      return fail("RESOLUTION_REQUIRED", "Servis qeydi olmadan bağlamaq olmaz", 422, {
-        resolution: "Görülən işi yazın",
-      });
-    }
-
-    const closing = status === "COMPLETED" && job.status !== "COMPLETED";
-
-    await db.$transaction(async (tx) => {
-      await tx.repairRequest.update({
-        where: { number },
-        data: {
-          status,
-          resolution,
-          usedParts: input.usedParts ?? job.usedParts,
-          completedAt: closing ? new Date() : job.completedAt,
-        },
-      });
-
-      // Tamamlanmış iş sayğacı ustanın profilində göstərilir.
-      if (closing && job.technicianId) {
-        await tx.technician.update({
-          where: { id: job.technicianId },
-          data: { completedJobs: { increment: 1 } },
-        });
+    try {
+      return ok(await updateRepairJob(number, { ...rest, status }, user.id, user.id));
+    } catch (error) {
+      if (error instanceof JobError) {
+        return fail(error.code, error.message, error.status, error.details);
       }
-    });
-
-    return ok({ number, status });
+      throw error;
+    }
   });
 }

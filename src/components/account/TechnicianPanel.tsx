@@ -16,6 +16,7 @@ import { useStaffSession } from "@/store/session";
 import { ApiRequestError, apiFetch } from "@/lib/api";
 import { useDict } from "@/i18n/provider";
 import type { TechnicianWorkspace } from "@/server/technician";
+import { REPAIR_TRANSITIONS } from "@/features/service/transitions";
 
 /**
  * Usta kabineti — yalnız ustaya təyin edilmiş müraciətlər.
@@ -203,7 +204,10 @@ function JobCard({ job }: { job: TechnicianWorkspace["jobs"][number] }) {
     }
   }
 
-  const closed = job.status === "COMPLETED" || job.status === "CANCELLED";
+  // Server keçidləri məcbur edir; panel yalnız icazə verilənləri göstərir
+  // ki, istifadəçiyə rədd ediləcək düymə təklif olunmasın.
+  const allowed = REPAIR_TRANSITIONS[job.status] ?? [];
+  const closed = allowed.length === 0;
 
   return (
     <Card className="p-4 sm:p-5">
@@ -239,7 +243,7 @@ function JobCard({ job }: { job: TechnicianWorkspace["jobs"][number] }) {
 
       {!closed && (
         <div className="mt-4 flex flex-wrap gap-2">
-          {job.status !== "ON_THE_WAY" && (
+          {allowed.includes("ON_THE_WAY") && (
             <Button
               size="sm"
               variant="secondary"
@@ -249,7 +253,7 @@ function JobCard({ job }: { job: TechnicianWorkspace["jobs"][number] }) {
               {dict.repairStatus.ON_THE_WAY}
             </Button>
           )}
-          {job.status !== "IN_PROGRESS" && (
+          {allowed.includes("IN_PROGRESS") && (
             <Button
               size="sm"
               variant="secondary"
@@ -259,9 +263,11 @@ function JobCard({ job }: { job: TechnicianWorkspace["jobs"][number] }) {
               {dict.repairStatus.IN_PROGRESS}
             </Button>
           )}
-          <Button size="sm" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
-            <CheckCircle2 size={15} /> {dict.accountUi.jobCompletion}
-          </Button>
+          {allowed.includes("COMPLETED") && (
+            <Button size="sm" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
+              <CheckCircle2 size={15} /> {dict.accountUi.jobCompletion}
+            </Button>
+          )}
         </div>
       )}
 

@@ -365,9 +365,16 @@ model RepairRequest {
   estimatedCost Int?
   technicianId  String?
   // Usta panelindən doldurulan servis qeydi
-  resolution  String?
-  usedParts   String?
-  completedAt DateTime?
+  diagnosis    String?
+  resolution   String?
+  usedParts    String?
+  partsCost    Int?
+  labourCost   Int?
+  // Müştərinin təhvil zamanı qeydi və təsdiqi
+  customerNote String?
+  handoverAt   DateTime?
+  startedAt    DateTime?
+  completedAt  DateTime?
   createdAt   DateTime @default(now())
   archivedAt  DateTime?
 
@@ -393,6 +400,13 @@ model MeasurementRequest {
   note         String?
   status       String   @default("NEW")
   technicianId String?
+  // Ustanın yerində götürdüyü ölçü nəticəsi
+  resultWidth      Int?
+  resultHeight     Int?
+  frameDepth       Int?
+  openingDirection String?
+  resultNote       String?
+  measuredAt       DateTime?
   archivedAt   DateTime?
   createdAt    DateTime @default(now())
 
@@ -533,6 +547,8 @@ model Appointment {
   endTime      String
   address      String
   status       String   @default("SCHEDULED") // SCHEDULED | CONFIRMED | DONE | CANCELLED
+  // Usta görüşü rədd edərsə səbəbi qeyd olunur
+  declineReason String?
   userId       String?
   technicianId String?
   archivedAt   DateTime?
@@ -545,6 +561,23 @@ model Appointment {
   @@index([technicianId])
   @@index([date])
   @@index([archivedAt])
+}
+
+// İş axınının izi: təmir, ölçü və görüşün status keçidləri.
+// Müraciətin public nömrəsi ilə bağlanır — həm ustaya, həm müştəriyə
+// göstərilir (admin izi ayrıca `AuditLog`-dadır).
+model JobEvent {
+  id        String   @id @default(cuid())
+  // REPAIR | MEASUREMENT | APPOINTMENT
+  kind      String
+  reference String
+  status    String
+  note      String?
+  actorId   String?
+  createdAt DateTime @default(now())
+
+  @@index([kind, reference])
+  @@index([createdAt])
 }
 
 /* ------------------------------ Zəmanət -------------------------------- */

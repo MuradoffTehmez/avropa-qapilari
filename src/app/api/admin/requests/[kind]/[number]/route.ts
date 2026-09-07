@@ -2,6 +2,13 @@ import { requireStaff } from "@/server/auth";
 import { changeDetail, recordAudit } from "@/server/audit";
 import { db } from "@/server/db";
 import { fail, handle, ok } from "@/server/http";
+import {
+  isMeasurementStatus,
+  isRepairStatus,
+  JobError,
+  updateMeasurementJob,
+  updateRepairJob,
+} from "@/server/jobs";
 import { isQuoteStatus, QuoteError, setQuoteStatus } from "@/server/quotes";
 import { requestUpdateSchema } from "@/server/validation";
 
@@ -39,52 +46,82 @@ export async function PATCH(
       const row = await db.repairRequest.findFirst({ where: { number, archivedAt: null } });
       if (!row) return fail("NOT_FOUND", "Müraciət tapılmadı", 404);
 
+      // Təyinat və planlaşdırma sahələri sərbəst yenilənir, status isə
+      // usta paneli ilə eyni keçid qaydalarından keçir (src/server/jobs.ts).
       const updated = await db.repairRequest.update({
         where: { number },
         data: {
-          status: input.status ?? row.status,
           technicianId: input.technicianId === undefined ? row.technicianId : input.technicianId,
           scheduledAt: input.scheduledAt ?? row.scheduledAt,
           estimatedCost: input.estimatedCost ?? row.estimatedCost,
         },
       });
 
+      let status = updated.status;
+      if (input.status && input.status !== row.status) {
+        if (!isRepairStatus(input.status)) {
+          return fail("INVALID_STATUS", "Təmir müraciəti üçün belə status yoxdur", 422);
+        }
+        try {
+          status = (await updateRepairJob(number, { status: input.status }, actor.id, null)).status;
+        } catch (error) {
+          if (error instanceof JobError) {
+            return fail(error.code, error.message, error.status, error.details);
+          }
+          throw error;
+        }
+      }
+
       await recordAudit(
         actor,
         input.technicianId !== undefined ? "repair.assign" : "repair.update",
         number,
         changeDetail({
-          status: [row.status, updated.status],
+          status: [row.status, status],
           technicianId: [row.technicianId ?? "—", updated.technicianId ?? "—"],
         }),
       );
 
-      return ok({ number: updated.number, status: updated.status });
+      return ok({ number: updated.number, status });
     }
 
     if (kind === "measurement") {
-      const row = await db.measurementRequest.findUnique({ where: { number } });
+      const row = await db.measurementRequest.findFirst({ where: { number, archivedAt: null } });
       if (!row) return fail("NOT_FOUND", "Müraciət tapılmadı", 404);
 
       const updated = await db.measurementRequest.update({
         where: { number },
         data: {
-          status: input.status ?? row.status,
           technicianId: input.technicianId === undefined ? row.technicianId : input.technicianId,
         },
       });
+
+      let status = updated.status;
+      if (input.status && input.status !== row.status) {
+        if (!isMeasurementStatus(input.status)) {
+          return fail("INVALID_STATUS", "Ölçü müraciəti üçün belə status yoxdur", 422);
+        }
+        try {
+          status = (await updateMeasurementJob(number, { status: input.status }, actor.id, null)).status;
+        } catch (error) {
+          if (error instanceof JobError) {
+            return fail(error.code, error.message, error.status, error.details);
+          }
+          throw error;
+        }
+      }
 
       await recordAudit(
         actor,
         input.technicianId !== undefined ? "measurement.assign" : "measurement.update",
         number,
         changeDetail({
-          status: [row.status, updated.status],
+          status: [row.status, status],
           technicianId: [row.technicianId ?? "—", updated.technicianId ?? "—"],
         }),
       );
 
-      return ok({ number: updated.number, status: updated.status });
+      return ok({ number: updated.number, status });
     }
 
     // Təklifin statusu sərbəst yazılmır — icazə verilən keçidlərdən keçir

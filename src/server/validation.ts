@@ -254,10 +254,49 @@ export const requestUpdateSchema = z.object({
   estimatedCost: z.number().int().min(0).optional(),
 });
 
+/* ---------------------------- Usta iş axını ---------------------------- */
+
+// HH:MM — regex əvəzinə sadə yoxlama, mətn təkrarı olmasın deyə ayrıca.
+const isoTime = z.string().refine((value) => {
+  const parts = value.split(":");
+  if (parts.length !== 2 || value.length !== 5) return false;
+  const hour = Number(parts[0]);
+  const minute = Number(parts[1]);
+  return Number.isInteger(hour) && Number.isInteger(minute) && hour >= 0 && hour < 24 && minute >= 0 && minute < 60;
+}, "Saat HH:MM formatında olmalıdır");
+
 export const technicianJobSchema = z.object({
   status: z.enum(REQUEST_STATUSES, "Belə status yoxdur").optional(),
+  diagnosis: z.string().trim().max(1000).optional(),
   resolution: z.string().trim().min(10, "Ən azı 10 simvol yazın").optional(),
   usedParts: z.string().trim().max(500).optional(),
+  partsCost: z.number().int().min(0).max(1_000_000).optional(),
+  labourCost: z.number().int().min(0).max(1_000_000).optional(),
+  customerNote: z.string().trim().max(500).optional(),
+  handover: z.boolean().optional(),
+});
+
+/** Ustanın yerində götürdüyü ölçü nəticəsi. */
+export const measurementResultSchema = z.object({
+  status: z
+    .enum(["NEW", "CONFIRMED", "TECHNICIAN_ASSIGNED", "SCHEDULED", "COMPLETED", "CANCELLED"], "Belə status yoxdur")
+    .optional(),
+  resultWidth: z.number().int().min(200, "En çox kiçikdir").max(5000, "En çox böyükdür").optional(),
+  resultHeight: z.number().int().min(500, "Hündürlük çox kiçikdir").max(5000, "Hündürlük çox böyükdür").optional(),
+  frameDepth: z.number().int().min(20).max(600).optional(),
+  openingDirection: z
+    .enum(["LEFT_INWARD", "RIGHT_INWARD", "LEFT_OUTWARD", "RIGHT_OUTWARD"], "Açılma istiqaməti düzgün deyil")
+    .optional(),
+  resultNote: z.string().trim().max(1000).optional(),
+});
+
+/** Görüşün qəbulu, rəddi və yenidən planlaşdırılması. */
+export const appointmentActionSchema = z.object({
+  status: z.enum(["SCHEDULED", "CONFIRMED", "DONE", "CANCELLED"], "Belə status yoxdur").optional(),
+  reason: z.string().trim().max(300).optional(),
+  date: isoDate.optional(),
+  startTime: isoTime.optional(),
+  endTime: isoTime.optional(),
 });
 
 export const discountSchema = z.object({
