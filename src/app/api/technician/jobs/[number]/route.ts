@@ -18,8 +18,8 @@ export async function PATCH(
     const { number } = await params;
     const input = technicianJobSchema.parse(await request.json());
 
-    const job = await db.repairRequest.findUnique({
-      where: { number },
+    const job = await db.repairRequest.findFirst({
+      where: { number, archivedAt: null },
       include: { technician: true },
     });
     if (!job) return fail("NOT_FOUND", "Müraciət tapılmadı", 404);

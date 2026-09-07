@@ -35,7 +35,7 @@ export async function PATCH(
     }
 
     if (kind === "repair") {
-      const row = await db.repairRequest.findUnique({ where: { number } });
+      const row = await db.repairRequest.findFirst({ where: { number, archivedAt: null } });
       if (!row) return fail("NOT_FOUND", "Müraciət tapılmadı", 404);
 
       const updated = await db.repairRequest.update({

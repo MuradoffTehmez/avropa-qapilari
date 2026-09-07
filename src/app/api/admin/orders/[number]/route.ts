@@ -19,7 +19,7 @@ export async function PATCH(
     const { number } = await params;
     const input = orderStatusSchema.parse(await request.json());
 
-    const order = await db.order.findUnique({ where: { number } });
+    const order = await db.order.findFirst({ where: { number, archivedAt: null } });
     if (!order) return fail("NOT_FOUND", "Sifariş tapılmadı", 404);
 
     const status = input.status ?? order.status;

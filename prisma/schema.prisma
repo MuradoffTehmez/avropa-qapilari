@@ -107,6 +107,9 @@ model Product {
   // Konfiquratorda göstərilən option qrupları, JSON massiv
   optionGroups     String
   panelHexes       String
+  // Admin arxivləməsi kataloq və konfiquratordan gizlədir, əlaqəli
+  // sifariş və konfiqurasiya tarixçəsini isə saxlayır (PRD §95, §160).
+  archivedAt       DateTime?
 
   categoryId String
   brandId    String
@@ -121,6 +124,7 @@ model Product {
   @@index([categoryId])
   @@index([brandId])
   @@index([basePrice])
+  @@index([archivedAt])
 }
 
 /* ------------------------------ Konfiqurator --------------------------- */
@@ -200,7 +204,8 @@ model Order {
   // Təkrar göndərişin qarşısını alır (PRD §137)
   idempotencyKey String? @unique
 
-  createdAt DateTime @default(now())
+  createdAt  DateTime  @default(now())
+  archivedAt DateTime?
 
   user       User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
   items      OrderItem[]
@@ -211,6 +216,7 @@ model Order {
   @@index([userId])
   @@index([status])
   @@index([createdAt])
+  @@index([archivedAt])
 }
 
 model OrderItem {
@@ -265,12 +271,14 @@ model RepairRequest {
   usedParts   String?
   completedAt DateTime?
   createdAt   DateTime @default(now())
+  archivedAt  DateTime?
 
   user       User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
   technician Technician? @relation(fields: [technicianId], references: [id], onDelete: SetNull)
 
   @@index([status])
   @@index([technicianId])
+  @@index([archivedAt])
 }
 
 model MeasurementRequest {
@@ -419,12 +427,14 @@ model Warranty {
   endDate          String
   coverage         String?
   status           String  @default("ACTIVE") // ACTIVE | EXPIRED | VOID
+  archivedAt       DateTime?
 
   order Order? @relation(fields: [orderId], references: [id], onDelete: SetNull)
   user  User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([orderId])
+  @@index([archivedAt])
 }
 
 /* ------------------------------- Ödəniş -------------------------------- */

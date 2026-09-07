@@ -67,7 +67,7 @@ function panelHexOf(choices: Record<string, string | string[]>, fallback: string
 
 export async function userOrders(userId: string): Promise<Order[]> {
   const rows = await db.order.findMany({
-    where: { userId },
+    where: { userId, archivedAt: null },
     include: { items: { include: { product: true } }, history: true },
     orderBy: { createdAt: "desc" },
   });
@@ -133,7 +133,7 @@ export async function userConfigurations(userId: string): Promise<SavedConfigura
 
 export async function userRepairs(userId: string): Promise<RepairRequest[]> {
   const rows = await db.repairRequest.findMany({
-    where: { userId },
+    where: { userId, archivedAt: null },
     include: { technician: true },
     orderBy: { createdAt: "desc" },
   });
@@ -193,7 +193,7 @@ export type WarrantyRow = Warranty & { orderNumber: string };
 
 export async function userWarranties(userId: string): Promise<WarrantyRow[]> {
   const rows = await db.warranty.findMany({
-    where: { userId },
+    where: { userId, archivedAt: null },
     include: { order: true },
     orderBy: { startDate: "desc" },
   });
@@ -271,9 +271,9 @@ export async function accountSummary(userId: string) {
   const closed = ["COMPLETED", "CANCELLED"];
 
   const [orders, repairs, warranties, appointments] = await Promise.all([
-    db.order.findMany({ where: { userId }, select: { status: true } }),
-    db.repairRequest.findMany({ where: { userId }, select: { status: true } }),
-    db.warranty.count({ where: { userId, status: "ACTIVE" } }),
+    db.order.findMany({ where: { userId, archivedAt: null }, select: { status: true } }),
+    db.repairRequest.findMany({ where: { userId, archivedAt: null }, select: { status: true } }),
+    db.warranty.count({ where: { userId, status: "ACTIVE", archivedAt: null } }),
     db.appointment.count({ where: { userId, status: { in: ["SCHEDULED", "CONFIRMED"] } } }),
   ]);
 

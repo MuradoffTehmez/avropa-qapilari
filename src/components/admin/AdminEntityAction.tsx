@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Archive, Pencil, Plus, Trash2 } from "lucide-react";
 
 import type { CrudField } from "@/components/admin/AdminCrud";
 import { Button } from "@/components/ui/Button";
@@ -21,6 +21,7 @@ export function AdminEntityAction({
   values: rawValues = {},
   createLabel,
   deleteOnly = false,
+  archive = false,
 }: {
   entity: string;
   id?: string;
@@ -28,6 +29,8 @@ export function AdminEntityAction({
   values?: object;
   createLabel?: string;
   deleteOnly?: boolean;
+  /** Əlaqəli biznes tarixçəsini qorumaq üçün qeydi fiziki silmək əvəzinə arxivlə. */
+  archive?: boolean;
 }) {
   const dict = useDict();
   const values = rawValues as Values;
@@ -89,14 +92,14 @@ export function AdminEntityAction({
 
   async function remove() {
     if (!id) return;
-    if (!window.confirm(dict.adminUi.deleteConfirm)) return;
+    if (!window.confirm(archive ? dict.adminUi.archiveConfirm : dict.adminUi.deleteConfirm)) return;
     try {
       await apiFetch(`/api/admin/entities/${entity}/${id}`, {
         method: "DELETE",
         headers: { "Idempotency-Key": crypto.randomUUID() },
       });
       router.refresh();
-      toast(dict.adminUi.deleted);
+      toast(archive ? dict.adminUi.archived : dict.adminUi.deleted);
     } catch (error) {
       if (error instanceof ApiRequestError) toast(error.error.message);
     }
@@ -111,8 +114,8 @@ export function AdminEntityAction({
               <Pencil size={15} />
             </button>
           )}
-          <button type="button" onClick={() => void remove()} aria-label={dict.actions.remove} className="flex size-11 items-center justify-center text-stone hover:text-danger sm:size-9">
-            <Trash2 size={15} />
+          <button type="button" onClick={() => void remove()} aria-label={archive ? dict.adminUi.archive : dict.actions.remove} className="flex size-11 items-center justify-center text-stone hover:text-danger sm:size-9">
+            {archive ? <Archive size={15} /> : <Trash2 size={15} />}
           </button>
         </span>
       ) : (
@@ -149,6 +152,6 @@ export function AdminEntityAction({
   );
 }
 
-export function AdminDeleteAction({ entity, id }: { entity: string; id: string }) {
-  return <AdminEntityAction entity={entity} id={id} fields={[]} deleteOnly />;
+export function AdminDeleteAction({ entity, id, archive = false }: { entity: string; id: string; archive?: boolean }) {
+  return <AdminEntityAction entity={entity} id={id} fields={[]} deleteOnly archive={archive} />;
 }

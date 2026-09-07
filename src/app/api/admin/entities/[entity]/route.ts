@@ -88,7 +88,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ ent
       }
       case "warranties": {
         const input = warrantySchema.parse(raw);
-        const order = input.orderNumber ? await db.order.findUnique({ where: { number: input.orderNumber } }) : null;
+        const order = input.orderNumber ? await db.order.findFirst({ where: { number: input.orderNumber, archivedAt: null } }) : null;
         if (input.orderNumber && !order) return fail("ORDER_NOT_FOUND", "Sifariş tapılmadı", 422);
         await db.warranty.create({ data: { number: input.number, serialNumber: input.serialNumber, productName: input.productName, orderId: order?.id ?? null, userId: order?.userId ?? null, installationDate: input.installationDate, startDate: input.startDate, endDate: input.endDate, status: input.status } });
         target = input.number;

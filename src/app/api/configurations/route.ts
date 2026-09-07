@@ -28,7 +28,9 @@ export async function POST(request: Request) {
       throw error;
     }
 
-    const product = await db.product.findUnique({ where: { slug: input.productSlug } });
+    const product = await db.product.findFirst({
+      where: { slug: input.productSlug, archivedAt: null },
+    });
     if (!product) return fail("PRODUCT_NOT_FOUND", "Məhsul tapılmadı", 404);
 
     const configuration = await db.$transaction(async (tx) => {

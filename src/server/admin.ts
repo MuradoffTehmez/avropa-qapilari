@@ -33,6 +33,7 @@ export interface AdminProductRow {
 
 export async function adminProducts(): Promise<AdminProductRow[]> {
   const rows = await db.product.findMany({
+    where: { archivedAt: null },
     include: { category: true, brand: true },
     orderBy: { name: "asc" },
   });
@@ -150,6 +151,7 @@ export interface AdminOrderRow {
 
 export async function adminOrders(): Promise<AdminOrderRow[]> {
   const rows = await db.order.findMany({
+    where: { archivedAt: null },
     include: { items: true },
     orderBy: { createdAt: "desc" },
   });
@@ -204,6 +206,7 @@ export interface AdminRepairRow {
 
 export async function adminRepairs(): Promise<AdminRepairRow[]> {
   const rows = await db.repairRequest.findMany({
+    where: { archivedAt: null },
     include: { technician: true },
     orderBy: { createdAt: "desc" },
   });
@@ -335,7 +338,7 @@ export interface AdminCustomerRow {
 
 export async function adminCustomers(): Promise<AdminCustomerRow[]> {
   const rows = await db.user.findMany({
-    include: { orders: { select: { total: true } } },
+    include: { orders: { where: { archivedAt: null }, select: { total: true } } },
     orderBy: { createdAt: "desc" },
   });
 
@@ -365,6 +368,7 @@ export interface AdminWarrantyRow {
 
 export async function adminWarranties(): Promise<AdminWarrantyRow[]> {
   const rows = await db.warranty.findMany({
+    where: { archivedAt: null },
     include: { order: true },
     orderBy: { startDate: "desc" },
   });
@@ -386,13 +390,13 @@ export async function adminWarranties(): Promise<AdminWarrantyRow[]> {
 export async function adminStats() {
   const [products, orders, users, openRepairs, openMeasurements, openQuotes, revenue] =
     await Promise.all([
-      db.product.count(),
-      db.order.count(),
+      db.product.count({ where: { archivedAt: null } }),
+      db.order.count({ where: { archivedAt: null } }),
       db.user.count(),
-      db.repairRequest.count({ where: { status: { notIn: ["COMPLETED", "CANCELLED"] } } }),
+      db.repairRequest.count({ where: { status: { notIn: ["COMPLETED", "CANCELLED"] }, archivedAt: null } }),
       db.measurementRequest.count({ where: { status: { notIn: ["COMPLETED", "CANCELLED"] } } }),
       db.quoteRequest.count({ where: { status: { notIn: ["ACCEPTED", "REJECTED", "EXPIRED"] } } }),
-      db.order.aggregate({ _sum: { total: true } }),
+      db.order.aggregate({ _sum: { total: true }, where: { archivedAt: null } }),
     ]);
 
   return {
@@ -419,21 +423,21 @@ export async function adminDashboard() {
 
   const [day, month, prevMonth, allTime, pendingOrders, newRepairs, activeRepairs, todayAppointments] =
     await Promise.all([
-      db.order.aggregate({ _sum: { total: true }, where: { createdAt: { gte: dayStart } } }),
+      db.order.aggregate({ _sum: { total: true }, where: { createdAt: { gte: dayStart }, archivedAt: null } }),
       db.order.aggregate({
         _sum: { total: true },
         _count: true,
-        where: { createdAt: { gte: monthStart } },
+        where: { createdAt: { gte: monthStart }, archivedAt: null },
       }),
       db.order.aggregate({
         _sum: { total: true },
-        where: { createdAt: { gte: prevMonthStart, lt: monthStart } },
+        where: { createdAt: { gte: prevMonthStart, lt: monthStart }, archivedAt: null },
       }),
-      db.order.aggregate({ _sum: { total: true }, _count: true }),
-      db.order.count({ where: { status: { in: ["CONFIRMED", "PAID"] } } }),
-      db.repairRequest.count({ where: { status: "NEW" } }),
+      db.order.aggregate({ _sum: { total: true }, _count: true, where: { archivedAt: null } }),
+      db.order.count({ where: { status: { in: ["CONFIRMED", "PAID"] }, archivedAt: null } }),
+      db.repairRequest.count({ where: { status: "NEW", archivedAt: null } }),
       db.repairRequest.count({
-        where: { status: { in: ["TECHNICIAN_ASSIGNED", "SCHEDULED", "IN_PROGRESS"] } },
+        where: { status: { in: ["TECHNICIAN_ASSIGNED", "SCHEDULED", "IN_PROGRESS"] }, archivedAt: null },
       }),
       db.appointment.count({ where: { date: today } }),
     ]);
@@ -461,6 +465,7 @@ export async function adminDashboard() {
 export async function adminTopProducts(limit = 5) {
   const grouped = await db.orderItem.groupBy({
     by: ["productId"],
+    where: { order: { archivedAt: null } },
     _sum: { quantity: true },
     orderBy: { _sum: { quantity: "desc" } },
     take: limit,
@@ -481,7 +486,10 @@ export async function adminTopProducts(limit = 5) {
 
 /** Sifarişlərdə ən çox seçilən option dəyərləri (rəng, kilid və s.). */
 export async function adminTopOptions(groupKey: string, limit = 5) {
-  const items = await db.orderItem.findMany({ select: { snapshot: true, quantity: true } });
+  const items = await db.orderItem.findMany({
+    where: { order: { archivedAt: null } },
+    select: { snapshot: true, quantity: true },
+  });
 
   const counts = new Map<string, number>();
   for (const item of items) {
@@ -684,10 +692,10 @@ export async function adminAnalytics() {
   const [configurations, quotes, orders, repairs, measurements, monthly] = await Promise.all([
     db.configuration.count(),
     db.quoteRequest.count(),
-    db.order.count(),
-    db.repairRequest.count(),
+    db.order.count({ where: { archivedAt: null } }),
+    db.repairRequest.count({ where: { archivedAt: null } }),
     db.measurementRequest.count(),
-    db.order.findMany({ select: { createdAt: true, total: true }, orderBy: { createdAt: "asc" } }),
+    db.order.findMany({ where: { archivedAt: null }, select: { createdAt: true, total: true }, orderBy: { createdAt: "asc" } }),
   ]);
 
   const byMonth = new Map<string, { orders: number; revenue: number }>();

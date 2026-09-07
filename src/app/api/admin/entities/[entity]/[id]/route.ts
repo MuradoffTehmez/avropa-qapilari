@@ -54,7 +54,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ en
       case "users": { const input = userSchema.parse(raw); await db.user.update({ where: { id }, data: { ...input, email: input.email.toLowerCase(), phone: input.phone || null } }); break; }
       case "warranties": {
         const input = warrantySchema.parse(raw);
-        const order = input.orderNumber ? await db.order.findUnique({ where: { number: input.orderNumber } }) : null;
+        const order = input.orderNumber ? await db.order.findFirst({ where: { number: input.orderNumber, archivedAt: null } }) : null;
         if (input.orderNumber && !order) return fail("ORDER_NOT_FOUND", "Sifariş tapılmadı", 422);
         await db.warranty.update({ where: { id }, data: { number: input.number, serialNumber: input.serialNumber, productName: input.productName, orderId: order?.id ?? null, userId: order?.userId ?? null, installationDate: input.installationDate, startDate: input.startDate, endDate: input.endDate, status: input.status } });
         break;
@@ -78,7 +78,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     switch (entity) {
       case "categories": await db.category.delete({ where: { id } }); break;
       case "brands": await db.brand.delete({ where: { id } }); break;
-      case "products": await db.product.delete({ where: { id } }); break;
+      case "products": await db.product.update({ where: { id }, data: { archivedAt: new Date() } }); break;
       case "options": await db.optionValue.delete({ where: { id } }); break;
       case "appointments": await db.appointment.delete({ where: { id } }); break;
       case "technicians": {
@@ -91,16 +91,17 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
         break;
       }
       case "users": await db.user.delete({ where: { id } }); break;
-      case "warranties": await db.warranty.delete({ where: { id } }); break;
-      case "orders": await db.order.delete({ where: { id } }); break;
+      case "warranties": await db.warranty.update({ where: { id }, data: { archivedAt: new Date() } }); break;
+      case "orders": await db.order.update({ where: { id }, data: { archivedAt: new Date() } }); break;
       case "quotes": await db.quoteRequest.delete({ where: { id } }); break;
-      case "repairs": await db.repairRequest.delete({ where: { id } }); break;
+      case "repairs": await db.repairRequest.update({ where: { id }, data: { archivedAt: new Date() } }); break;
       case "measurements": await db.measurementRequest.delete({ where: { id } }); break;
       case "reviews": await db.review.delete({ where: { id } }); break;
       default: return fail("NOT_FOUND", "Belə idarəetmə bölməsi yoxdur", 404);
     }
 
-    await recordAudit(actor, `${entity}.delete`, id);
+    const action = ["products", "orders", "repairs", "warranties"].includes(entity) ? "archive" : "delete";
+    await recordAudit(actor, `${entity}.${action}`, id);
     revalidatePath("/", "layout");
     return ok({ ok: true });
   });

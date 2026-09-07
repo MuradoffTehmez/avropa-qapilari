@@ -62,12 +62,12 @@ export async function technicianWorkspace(userId: string): Promise<TechnicianWor
     db.technician.findUnique({
       where: { userId },
       include: {
-        repairs: { orderBy: { createdAt: "desc" } },
+        repairs: { where: { archivedAt: null }, orderBy: { createdAt: "desc" } },
         measurements: { orderBy: { createdAt: "desc" } },
         appointments: { orderBy: [{ date: "asc" }, { startTime: "asc" }] },
       },
     }),
-    db.order.findMany({ where: { userId }, orderBy: { createdAt: "desc" } }),
+    db.order.findMany({ where: { userId, archivedAt: null }, orderBy: { createdAt: "desc" } }),
   ]);
 
   if (!technician) return null;

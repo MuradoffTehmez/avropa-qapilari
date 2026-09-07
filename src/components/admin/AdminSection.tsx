@@ -219,7 +219,7 @@ export function AdminSection({
             {
               key: "actions",
               header: ui.operation,
-              render: (p) => <AdminEntityAction entity="products" id={p.id} fields={productFields} values={p} />,
+              render: (p) => <AdminEntityAction entity="products" id={p.id} fields={productFields} values={p} archive />,
             },
           ]}
         />
@@ -382,7 +382,7 @@ export function AdminSection({
               align: "right",
               render: (o) => <span className="font-medium tabular-nums text-ink">{formatPrice(o.total)}</span>,
             },
-            { key: "actions", header: ui.operation, render: (o) => <AdminDeleteAction entity="orders" id={o.id} /> },
+            { key: "actions", header: ui.operation, render: (o) => <AdminDeleteAction entity="orders" id={o.id} archive /> },
           ]}
         />
       </>
@@ -445,7 +445,7 @@ export function AdminSection({
               header: label.status,
               render: (rp) => <RepairStatusControl number={rp.number} status={rp.status} />,
             },
-            { key: "actions", header: ui.operation, render: (rp) => <AdminDeleteAction entity="repairs" id={rp.id} /> },
+            { key: "actions", header: ui.operation, render: (rp) => <AdminDeleteAction entity="repairs" id={rp.id} archive /> },
           ]}
         />
       </>
@@ -712,7 +712,7 @@ export function AdminSection({
                   <Badge tone="neutral">{ui.toOrder}</Badge>
                 ),
             },
-            { key: "actions", header: ui.operation, render: (s) => <AdminEntityAction entity="products" id={s.product.id} fields={productFields} values={s.product} /> },
+            { key: "actions", header: ui.operation, render: (s) => <AdminEntityAction entity="products" id={s.product.id} fields={productFields} values={s.product} archive /> },
           ]}
         />
       </>
@@ -741,7 +741,7 @@ export function AdminSection({
               header: label.status,
               render: (w) => <Badge tone={w.status === "ACTIVE" ? "success" : "neutral"}>{w.status === "ACTIVE" ? dict.warranty.active : dict.warranty.expired}</Badge>,
             },
-            { key: "actions", header: ui.operation, render: (w) => <AdminEntityAction entity="warranties" id={w.id} fields={warrantyFields} values={w} /> },
+            { key: "actions", header: ui.operation, render: (w) => <AdminEntityAction entity="warranties" id={w.id} fields={warrantyFields} values={w} archive /> },
           ]}
         />
       </>

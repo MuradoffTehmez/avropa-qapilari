@@ -125,6 +125,7 @@ function mapProduct(row: ProductRow): Product {
 
 export async function catalogProducts(): Promise<Product[]> {
   const rows = await db.product.findMany({
+    where: { archivedAt: null },
     include: { category: true, brand: true },
     orderBy: [{ isBestseller: "desc" }, { rating: "desc" }, { name: "asc" }],
   });
@@ -132,8 +133,8 @@ export async function catalogProducts(): Promise<Product[]> {
 }
 
 export async function catalogProduct(slug: string): Promise<Product | null> {
-  const row = await db.product.findUnique({
-    where: { slug },
+  const row = await db.product.findFirst({
+    where: { slug, archivedAt: null },
     include: { category: true, brand: true },
   });
   return row ? mapProduct(row) : null;
@@ -145,7 +146,7 @@ export async function featuredCatalogProducts(limit = 8): Promise<Product[]> {
 
 export async function relatedCatalogProducts(product: Product, limit = 4): Promise<Product[]> {
   const rows = await db.product.findMany({
-    where: { category: { slug: product.categorySlug }, id: { not: product.id } },
+    where: { category: { slug: product.categorySlug }, id: { not: product.id }, archivedAt: null },
     include: { category: true, brand: true },
     orderBy: [{ isBestseller: "desc" }, { rating: "desc" }],
     take: limit,
@@ -155,7 +156,7 @@ export async function relatedCatalogProducts(product: Product, limit = 4): Promi
 
 export async function catalogCategories(): Promise<Category[]> {
   const rows = await db.category.findMany({
-    include: { _count: { select: { products: true } } },
+    include: { _count: { select: { products: { where: { archivedAt: null } } } } },
     orderBy: { name: "asc" },
   });
   return rows.map((row) => {
@@ -179,7 +180,7 @@ export async function catalogCategory(slug: string): Promise<Category | null> {
 
 export async function catalogBrands(): Promise<Brand[]> {
   const rows = await db.brand.findMany({
-    include: { _count: { select: { products: true } } },
+    include: { _count: { select: { products: { where: { archivedAt: null } } } } },
     orderBy: { name: "asc" },
   });
   return rows.map((row) => {

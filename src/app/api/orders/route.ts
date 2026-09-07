@@ -150,7 +150,7 @@ export async function GET() {
     if (!user) return fail("UNAUTHENTICATED", "Giriş tələb olunur", 401);
 
     const orders = await db.order.findMany({
-      where: { userId: user.id },
+      where: { userId: user.id, archivedAt: null },
       include: { items: { include: { product: true } }, history: true },
       orderBy: { createdAt: "desc" },
     });
